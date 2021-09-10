@@ -12,14 +12,29 @@ const MSGTYPE = {
 
 const sendMsg = (socket, msg_type, ...args)=>{
     data = args.join('\0')
-    socket.write(String.fromCharCode((msg_type & 0xff), (msg_type >> 8) & 0xff, ((data.length & 0xFFF) & 0xff), ((data.length & 0xFFF) >> 8) & 0xff) + data)
+    // Some issues with this
+    // data += '\0'
+    console.log(data)
+    socket.write(String.fromCharCode(
+        (msg_type & 0xff), 
+        (msg_type >> 8) & 0xff, 
+        ((data.length & 0xFFF) & 0xff), 
+        ((data.length & 0xFFF) >> 8) & 0xff) + data
+    )
 }
 
 server.on("connection", socket=>{
-    console.log("New client connected")
+    // Implement a tcp heartbeat with timeout
+
+    socket.setKeepAlive(true, 100)
     socket.setEncoding("binary")
+
+
     let token = String()
+
     socket.on("data", buff=>{
+        socket.setKeepAlive(true, 3000);
+
         while(true){
             if(buff.length < 1) 
                 break;
@@ -29,19 +44,22 @@ server.on("connection", socket=>{
             switch (msgType) {
                 case MSGTYPE.MSG_AUTH:
                     console.log("MSG_AUTH")
+                    console.log(msg)
                     if (msg === "123"){
                         token = msg
                         if (msg in clients) {
                             clients[msg].push(socket)
-                            auth = msg;
+                            console.log(clients[token].length)
 
                         } else {
                             clients[msg] = [socket]
+                            console.log(clients[token].length)
                         }
-                        sendMsg(socket, MSGTYPE.MSG_AUTH, "OK")
+                        sendMsg(socket, MSGTYPE.MSG_AUTH, "y")
+                        sendMsg(socket, MSGTYPE.MSG_RW, "nw", 0)
                     }
                     else{
-                        sendMsg(socket, MSGTYPE.MSG_AUTH), "FAIL"}
+                        sendMsg(socket, MSGTYPE.MSG_AUTH), "n"}
                     break;
 
                 case MSGTYPE.MSG_PING:
@@ -54,35 +72,31 @@ server.on("connection", socket=>{
             buff = buff.slice(4 + len, buff.length)
         }
     })
-    socket.on("close", ()=>{
-        if (auth in clients) {
-            if (clients[auth].length == 1) {
-                delete clients[auth]
+
+    const onClose = ()=>{
+        console.log("Client Disconnected")
+        if (token in clients) {
+            if (clients[token].length == 1) {
+                delete clients[token]
 
             } else {
-                let index = clients[auth].indexOf(socket)
+                let index = clients[token].indexOf(socket)
                 if (index > -1) {
-                    clients[auth].splice(index, 1);
+                    clients[token].splice(index, 1);
                 }
             }
         }
-    })
-    socket.on("error", err=>{
-        if (auth in clients) {
-            if (clients[auth].length == 1) {
-                delete clients[auth]
+        socket.destroy()
+    }
+    
+    socket.on("close", onClose)
+    socket.on("end", onClose)
+    socket.on("error", onClose)
+    
 
-            } else {
-                let index = clients[auth].indexOf(socket)
-                if (index > -1) {
-                    clients[auth].splice(index, 1);
-                }
-            }
-        }
-    })
 
 })
 
-server.listen(3000, ()=>{
+server.listen(3000, "192.168.100.12", ()=>{
     console.log("server is running")
 })

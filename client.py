@@ -94,7 +94,13 @@ class HomeAtion:
             if msg:
                 self.process(*self.parse_resonse(msg))
     
-new = HomeAtion("123")
+new = HomeAtion("123", "192.168.100.12")
 
-while True:
-    new.run()
+def sendmsg(msgtype, *args):
+    data = ('\0'.join([str(curr_arg) for curr_arg in args])).encode('utf-8')
+    return data
+
+print(sendmsg(MSG_RW, 12, 12))
+
+# while True:
+#     new.run()
