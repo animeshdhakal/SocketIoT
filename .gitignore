@@ -1,1 +1,4 @@
-./temp.txt
+server/node_modules
+.vscode
+build/esp8266
+build/makeEspArduino

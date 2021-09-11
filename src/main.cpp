@@ -1,18 +1,22 @@
 #include <ESP8266WiFi.h>
 #include "HomeAtion.h"
 
+HomeAtion_Connected(){
+  Serial.println("Connected to Server");
+}
 
-// HomeAtion_Connected(){
-//   Serial.println("Connected to Server");
-// }
-
-// HomeAtion_Disconnected(){
-//   Serial.println("Disconnected from Server");
-// }
+HomeAtion_Disconnected(){
+  Serial.println("Disconnected from Server");
+}
 
 HomeAtion_Write(0){
   Serial.println("Write 0");
-  Serial.println(msg);
+  Serial.println(header.msg_len);
+}
+
+HomeAtion_Write(3){
+  Serial.println("Write 3");
+   Serial.println(data.asInt());
 }
 
 void setup(){

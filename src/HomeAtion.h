@@ -1,6 +1,11 @@
-#pragma once
+#ifndef HomeAtion_H
+#define HomeAtion_H
+
 #include <ESP8266WiFi.h>
 #include <string.h>
+#include <stdlib.h>
+
+#define HA_DEBUG(x) Serial.println(x)
 
 struct HomeAtionHeader
 {
@@ -8,21 +13,18 @@ struct HomeAtionHeader
     uint16_t msg_len;
 };
 
-typedef void (*HomeAtionCallback)(HomeAtionHeader &, const String &);
-
-static HomeAtionCallback HomeAtionHandlers[20] = {NULL};
-
-uint8_t registerHomeAtionHandler(uint8_t pin, HomeAtionCallback cb)
-{
-    Serial.printf("Pin is %d \n", pin);
-    HomeAtionHandlers[pin] = cb;
-    return 0;
-}
 
 #define HomeAtionWrite(PIN) \
-    void HomeAtion_Write_##PIN(HomeAtionHeader &header, const String &msg); \
-    uint8_t temp##PIN = registerHomeAtionHandler(PIN, HomeAtion_Write_##PIN); \
-    void HomeAtion_Write_##PIN(HomeAtionHeader &header, const String &msg)
+    void HomeAtion_Write_##PIN(HomeAtionHeader &header, HomeAtionData &data); \
+    uint8_t tempW##PIN = registerHomeAtionHandler(PIN, HomeAtion_Write_##PIN); \
+    void HomeAtion_Write_##PIN(HomeAtionHeader &header, HomeAtionData &data)
+
+#define HomeAtion_Connected() \
+    void HomeAtionOnConnected()
+
+#define HomeAtion_Disconnected() \
+    void HomeAtionOnDisconnected()
+
 
 #define HomeAtion_Write(PIN) HomeAtionWrite(PIN)
 
@@ -40,6 +42,72 @@ enum
     MSG_DISCONNECT = 5
 };
 
+
+class HomeAtionDataIterator{
+    const char* begin;
+    const char* end;
+    public:
+    HomeAtionDataIterator(const char* begin, const char* end):begin(begin),end(end){}
+    bool isValid() const { return begin != NULL && begin < end; }
+    operator const char* () const   { return asStr(); }
+    operator int () const           { return asInt(); }
+    const char* asStr() const       { return begin; }
+    const char* asString() const    { return begin; }
+    int asInt() const { if(!isValid()) return 0; return atoi(begin); }
+    long asLong() const { if(!isValid()) return 0; return atol(begin); }
+
+    HomeAtionDataIterator& operator++() { 
+        if (isValid()){
+            begin += strlen(begin) + 1;
+        }
+        return *this;
+    }
+
+    HomeAtionDataIterator& operator--() { 
+        if (isValid()){
+            begin -= strlen(begin) - 1;
+        }
+        return *this;
+    }
+
+
+    bool operator <  (const HomeAtionDataIterator& it) const { return begin < it.begin; }
+    bool operator >= (const HomeAtionDataIterator& it) const { return begin >= it.begin; }
+};
+
+
+class HomeAtionData{
+    char* buffer;
+    size_t len;
+    size_t buffer_size;
+
+    public:
+    using iterator = HomeAtionDataIterator;
+    HomeAtionData(const void* addr, size_t length):
+        buffer((char*)addr), len(length){}
+
+    HomeAtionData(const void* addr, size_t length, size_t buffer_size):
+        buffer((char*)addr), len(length), buffer_size(buffer_size){}
+
+    const char* asStr() {return buffer;}
+    int asInt() {return atoi(buffer);}
+    float asFloat() {return atof(buffer);}
+
+    void add(){
+
+    }
+
+    iterator begin() const { return iterator(buffer, buffer + len); }
+    iterator end() const { return iterator(buffer + len, buffer + len); }
+};
+
+
+typedef void (*HomeAtionCallback)(HomeAtionHeader &, HomeAtionData &);
+
+static HomeAtionCallback HomeAtionHandlers[20] = {NULL};
+
+uint8_t registerHomeAtionHandler(uint8_t pin, HomeAtionCallback cb);
+
 class HomeAtion
 {
     const char *_token;
@@ -48,97 +116,17 @@ class HomeAtion
     WiFiClient client;
 
 public:
-    void begin(const char *token, const char *server, const uint16_t &port)
-    {
-        this->_token = token;
-        this->_host = server;
-        this->_port = port;
-        this->connect();
-    }
+    void begin(const char *token, const char *server, const uint16_t &port);
 
-    void authenticate()
-    {
-        uint16_t msg_type = 1;
-        uint16_t msg_len = strlen(this->_token);
-        char msg[msg_len + 4];
-        memcpy(msg, &msg_type, 2);
-        memcpy(msg + 2, &msg_len, 2);
-        memcpy(msg + 4, this->_token, msg_len);
-        client.write(msg, msg_len + 4);
-    }
+    void authenticate();
 
-    void processCmd(HomeAtionHeader& header, char* buff)
-    {
-        const uint8_t pin = atoi(buff + strlen(buff) + 1);
-        uint16_t cmd;
-        memcpy(&cmd, buff, 2);
+    void processCmd(HomeAtionHeader& header, char* buff);
 
-        switch(cmd){
-            case NW_16:
-                Serial.println("Normal Write");
-                if(HomeAtionHandlers[pin]){
-                    buff += strlen(buff) + 1;
-                    HomeAtionHandlers[pin](header, String(buff));
-                }
-                break;
-            case NR_16:
-                Serial.println("Normal Read");
-                break;
-            default:
-                Serial.println("Unknown command");
-        }
-    }
+    void connect();
 
-    void connect()
-    {
-        client.stop();
-        while (!client.connect(this->_host, this->_port))
-        {
-            delay(1000);
-        }
-        Serial.println("Connected");
-        authenticate();
-    }
-
-    void run()
-    {
-        if (client.connected())
-        {
-            HomeAtionHeader buffer;
-            int rlen = client.read((uint8_t *)&buffer, 4);
-            if (rlen == sizeof(HomeAtionHeader))
-            {
-                char msg[buffer.msg_len];
-                client.read(msg, buffer.msg_len);
-
-                switch (buffer.msg_type)
-                {
-                case MSG_AUTH:
-                    if (msg[0] == 'y'){
-                        Serial.println("Authenticated");
-                    }else if(msg[0] == 'n'){
-                        Serial.println("Authentication failed");
-                    }
-                    break;
-                case MSG_RW:
-                    processCmd(buffer, msg);
-                    break;
-                default:
-                    Serial.printf("Unknown message type is %d \n", buffer.msg_type);
-                    break;
-                }
-            }
-            // Disconnect from server
-            // client.stop();
-        }
-        else
-        {
-            Serial.println("Disconnected");
-            connect();
-        }
-        yield();
-    }
+    void run();
 };
 
-HomeAtion homeAtion;
 extern HomeAtion homeAtion;
+
+#endif

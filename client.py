@@ -74,7 +74,7 @@ class HomeAtion:
         msg = self.recvmsg(4)
         if msg:
             msg_type, msg_args = self.parse_resonse(msg)
-            if msg_args[0] == "OK":
+            if msg_args[0] == "y":
                 self._authenticated = True
             else:
                 raise HomeAtionError("Authentication failed")
@@ -95,12 +95,5 @@ class HomeAtion:
                 self.process(*self.parse_resonse(msg))
     
 new = HomeAtion("123", "192.168.100.12")
-
-def sendmsg(msgtype, *args):
-    data = ('\0'.join([str(curr_arg) for curr_arg in args])).encode('utf-8')
-    return data
-
-print(sendmsg(MSG_RW, 12, 12))
-
-# while True:
-#     new.run()
+while True:
+    new.run()
