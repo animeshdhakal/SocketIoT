@@ -1,10 +1,10 @@
 const { WebSocketServer, WebSocket } = require("ws");
 
-const port = 3222;
+const port = process.env.WEBSOCKET_PORT || 3222;
 
 const wss = new WebSocketServer({ port });
 
-console.log(`WebSocket server started on port ${port}`);
+console.log(`WebSocket Server Running on PORT ${port}`);
 
 const { processMsg, removeSocket } = require("../core/core");
 
@@ -13,9 +13,11 @@ WebSocket.prototype.write = function write(message) {
 };
 
 wss.on("connection", function connection(ws) {
-    let values = { token: "" };
+    console.log("Client Connected (WS)");
 
-    ws.on("message", (message) => processMsg(ws, message, values));
+    ws.token = "";
 
-    ws.on("close", () => removeSocket(ws, values.token));
+    ws.on("message", (message) => processMsg(ws, message));
+
+    ws.on("close", () => removeSocket(ws));
 });

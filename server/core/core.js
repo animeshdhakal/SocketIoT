@@ -1,8 +1,7 @@
 const { Clients, MsgType, HEADER_SIZE } = require("../config/config");
 const { createUser, getUser, updateUser } = require("../db/db");
 
-const processMsg = (socket, data, values) => {
-    console.log("User Connected");
+const processMsg = (socket, data) => {
     while (true) {
         if (data.length < HEADER_SIZE) break;
 
@@ -11,31 +10,36 @@ const processMsg = (socket, data, values) => {
 
         let msg = data.slice(HEADER_SIZE, msgLen + HEADER_SIZE).toString();
 
+        let { token } = socket;
+
         switch (msgType) {
             case MsgType.AUTH:
                 getUser(msg, (err, user) => {
                     if (user) {
-                        values.token = msg;
-                        addSocket(socket, values.token);
+                        socket.token = msg;
+                        addSocket(socket);
                         sendMsg(socket, MsgType.AUTH, 1);
+                        console.log(`Authenticated`);
                     } else {
                         sendMsg(socket, MsgType.AUTH, 0);
+                        console.log("Authentication Failed");
+                        console.log(msg);
                     }
                 });
                 break;
 
             case MsgType.WRITE:
-                if (values.token in Clients) {
-                    getUser(values.token, (err, user) => {
+                if (token in Clients) {
+                    getUser(token, (err, user) => {
                         if (user) {
                             let parsedJSON = JSON.parse(user.json);
                             let parsedMsg = parseMsg(msg);
 
                             if (msg.length > 1) {
-                                if (parsedMsg[0] in parsedJSON) {
-                                    parsedJSON[parsedMsg[0]] = parsedMsg[1];
+                                if (token in parsedJSON) {
+                                    parsedJSON[token] = parsedMsg[1];
                                     updateUser(
-                                        values.token,
+                                        token,
                                         JSON.stringify(parsedJSON)
                                     );
                                 }
@@ -47,7 +51,7 @@ const processMsg = (socket, data, values) => {
                         0,
                         HEADER_SIZE + msgLen
                     );
-                    Clients[values.token].forEach((s) => {
+                    Clients[token].forEach((s) => {
                         if (socket != s) {
                             s.write(forwardingMessage);
                         }
@@ -64,7 +68,8 @@ const processMsg = (socket, data, values) => {
     }
 };
 
-const removeSocket = (socket, token) => {
+const removeSocket = (socket) => {
+    let { token } = socket;
     if (token in Clients) {
         if (Clients[token].length == 1) {
             delete Clients[token];
@@ -89,11 +94,11 @@ const parseMsg = (data) => {
     return data.split("\0");
 };
 
-const addSocket = (socket, token) => {
-    if (token in Clients) {
-        Clients[token].push(socket);
+const addSocket = (socket) => {
+    if (socket.token in Clients) {
+        Clients[socket.token].push(socket);
     } else {
-        Clients[token] = [socket];
+        Clients[socket.token] = [socket];
     }
 };
 

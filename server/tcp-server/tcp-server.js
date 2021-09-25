@@ -4,19 +4,19 @@ const server = net.createServer();
 const { processMsg, removeSocket } = require("../core/core");
 
 server.on("connection", (socket) => {
-    console.log("Client Connected");
+    console.log("Client Connected (TCP)");
 
-    let values = { token: "" };
+    socket.token = "";
 
-    socket.on("data", (data) => processMsg(socket, data, values));
+    socket.on("data", (data) => processMsg(socket, data));
 
-    socket.on("end", () => removeSocket(socket, values));
+    socket.on("end", () => removeSocket(socket));
 
     socket.on("error", () => {});
 });
 
-const port = process.env.PORT || 3030;
+const port = process.env.TCP_PORT || 3030;
 
-server.listen(port, () => {
+server.listen(port, "0.0.0.0", () => {
     console.log(`TCP Server Running on PORT ${port}`);
 });
