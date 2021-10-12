@@ -1,4 +1,4 @@
-const socket = new WebSocket("ws://localhost:3222");
+const socket = new WebSocket("ws://" + location.hostname + ":8080/websocket");
 
 socket.binaryType = "arraybuffer";
 
@@ -43,21 +43,25 @@ const processMsg = (msg) => {
         case MsgType.AUTH:
             if (parseInt(decodedMsg) == 1) {
                 console.log("Auth Success");
+                sendMsg(socket, 4);
             } else {
                 console.log("Auth Failed");
             }
             break;
+
         case MsgType.WRITE:
-            console.log("Write Success");
             console.log(parsedMsg);
+            changeOnOffButton(parsedMsg[0], parsedMsg[1]);
             break;
+
         default:
             console.log("Unrecognized Type " + msg_type);
+            console.log(parsedMsg);
     }
 };
 
 socket.onopen = () => {
-    sendMsg(socket, 1, "ktv5oyfgnajn8hmouib");
+    sendMsg(socket, 1, "animesh");
 };
 
 socket.onmessage = (event) => {
@@ -68,11 +72,36 @@ socket.onmessage = (event) => {
     }
 };
 
-const onBtnClick = (e) => {
-    const btn = document.getElementById(e.target.id);
-    btn.className = btn.className === "on" ? "off" : "on";
-    btn.innerHTML = btn.className === "on" ? "ON" : "OFF";
-    sendMsg(socket, MsgType.WRITE, btn.id, btn.className === "on" ? 1 : 0);
-};
+const mainDiv = document.querySelector(".main");
+const onoffbuttons = {};
 
-document.querySelector("button").addEventListener("click", onBtnClick);
+function changeOnOffButton(id, value) {
+    onoffbuttons[id].innerText = value == "1" ? "ON" : "OFF";
+    onoffbuttons[id].classList =
+        value == "1" ? "onoff stateoff" : "onoff stateon";
+    onoffbuttons[id].state = value;
+}
+
+function OnOffBtnToggle(e) {
+    e.target.innerText = e.target.state == "1" ? "ON" : "OFF";
+    e.target.classList =
+        e.target.state == "1" ? "onoff stateoff" : "onoff stateon";
+    sendMsg(socket, 2, e.target.uid, e.target.state);
+    e.target.state = 1 - e.target.state;
+}
+
+function createOnOffButton(num) {
+    for (let i = 0; i < num; i++) {
+        let newBtn = document.createElement("button");
+        newBtn.innerText = "ON";
+        newBtn.state = "0";
+        newBtn.uid = i.toLocaleString();
+        newBtn.classList.add("onoff");
+        newBtn.classList.add("stateoff");
+        newBtn.addEventListener("click", OnOffBtnToggle);
+        mainDiv.appendChild(newBtn);
+        onoffbuttons[i.toLocaleString()] = newBtn;
+    }
+}
+
+createOnOffButton(2);

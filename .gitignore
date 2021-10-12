@@ -1,2 +1,10 @@
 server/node_modules
 server/socketiot.sqlite
+hardware/build/*
+!hardware/build/get.py
+.vscode
+target*
+dependency-reduced-pom.xml
+.project
+.settings*
+.classpath
