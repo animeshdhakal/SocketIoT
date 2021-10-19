@@ -15,9 +15,7 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.util.SelfSignedCertificate;
+import io.netty.handler.ssl.SslHandler;
 
 class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
     @Override
@@ -34,18 +32,15 @@ class WebSocketServerInitializer extends ChannelInitializer<SocketChannel> {
 
     private static final String WEBSOCKET_PATH = "/websocket";
 
-    private final SslContext sslCtx;
-
-    public WebSocketServerInitializer(SslContext sslCtx) {
-        this.sslCtx = sslCtx;
-    }
-
     @Override
     public void initChannel(SocketChannel ch) throws Exception {
         ChannelPipeline pipeline = ch.pipeline();
-        if (sslCtx != null) {
-            pipeline.addLast(sslCtx.newHandler(ch.alloc()));
+        SslHandler sslHandler = SSLHandlerProvider.getSslHandler();
+
+        if (sslHandler != null) {
+            pipeline.addLast(sslHandler);
         }
+
         pipeline.addLast(new HttpServerCodec());
         pipeline.addLast(new HttpObjectAggregator(65536));
         pipeline.addLast(new WebSocketServerCompressionHandler());
@@ -59,23 +54,14 @@ class WebSocketServerInitializer extends ChannelInitializer<SocketChannel> {
 
 public final class WebSocketServer {
 
-    static final boolean SSL = System.getProperty("ssl") != null;
-    static final int PORT = Integer.parseInt(System.getProperty("port", SSL ? "8443" : "8080"));
+    static final int PORT = SSLHandlerProvider.serverSSLContext != null ? 8443 : 8080;
 
     public static ChannelFuture start(EventLoopGroup bossGroup, EventLoopGroup workerGroup) throws Exception {
-        // Configure SSL.
-        final SslContext sslCtx;
-        if (SSL) {
-            SelfSignedCertificate ssc = new SelfSignedCertificate();
-            sslCtx = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey()).build();
-        } else {
-            sslCtx = null;
-        }
 
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                 // .handler(new LoggingHandler(LogLevel.INFO))
-                .childHandler(new WebSocketServerInitializer(sslCtx));
+                .childHandler(new WebSocketServerInitializer());
 
         ChannelFuture f = b.bind(PORT).sync();
 

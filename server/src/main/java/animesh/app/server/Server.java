@@ -7,6 +7,10 @@ import io.netty.channel.nio.NioEventLoopGroup;
 public class Server {
     public static void main(String[] args) {
 
+        if (true || System.getProperty("ssl") != null) {
+            SSLHandlerProvider.init();
+        }
+
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
