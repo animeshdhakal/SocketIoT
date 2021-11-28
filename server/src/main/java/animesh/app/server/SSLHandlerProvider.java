@@ -12,10 +12,10 @@ import javax.net.ssl.TrustManager;
 import io.netty.handler.ssl.SslHandler;
 
 public class SSLHandlerProvider {
-    static String keystorePath = "/ssl/keystore.jks";
-    static String keystoretype = "JKS";
+    static String keystorePath = "/ssl/keystore.p12";
+    static String keystoretype = "PKCS12";
     static String protocol = "TLS";
-    static String keystorePass = "animesh123";
+    static String keystorePass = "changeit";
     static String algorithm = "SunX509";
     static SSLContext serverSSLContext = null;
 
@@ -33,28 +33,14 @@ public class SSLHandlerProvider {
     }
 
     static void init() {
-        KeyStore ks = null;
-        InputStream keystorestream = Server.class.getResourceAsStream(keystorePath);
         try {
-            ks = KeyStore.getInstance(keystoretype);
-            ks.load(keystorestream, keystorePass.toCharArray());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
-            kmf.init(ks, keystorePass.toCharArray());
-            KeyManager[] keyManagers = kmf.getKeyManagers();
-            TrustManager[] trustManagers = null;
-
             serverSSLContext = SSLContext.getInstance(protocol);
-            serverSSLContext.init(keyManagers, trustManagers, null);
-
-        } catch (
-
-        Exception e) {
+            KeyStore keystore = KeyStore.getInstance(keystoretype);
+            keystore.load(SSLHandlerProvider.class.getResourceAsStream(keystorePath), keystorePass.toCharArray());
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
+            kmf.init(keystore, keystorePass.toCharArray());
+            serverSSLContext.init(kmf.getKeyManagers(), null, null);
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
