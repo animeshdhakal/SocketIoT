@@ -1,13 +1,16 @@
 package animesh.app.server;
 
+import java.util.Arrays;
+import java.util.List;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 
 public class Server {
     public static void main(String[] args) {
+        List<String> arguments = Arrays.asList(args);
 
-        if (true || System.getProperty("ssl") != null) {
+        if (arguments.contains("-ssl")) {
             SSLHandlerProvider.init();
         }
 

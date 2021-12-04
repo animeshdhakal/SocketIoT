@@ -54,7 +54,7 @@ class WebSocketServerInitializer extends ChannelInitializer<SocketChannel> {
 
 public final class WebSocketServer {
 
-    static final int PORT = SSLHandlerProvider.serverSSLContext != null ? 8443 : 8080;
+    static final int PORT = SSLHandlerProvider.sslContext != null ? 8443 : 8080;
 
     public static ChannelFuture start(EventLoopGroup bossGroup, EventLoopGroup workerGroup) throws Exception {
 
