@@ -1,26 +1,27 @@
 package animesh.app.server;
 
-import java.util.Arrays;
-import java.util.List;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 
 public class Server {
     public static void main(String[] args) {
-        List<String> arguments = Arrays.asList(args);
+        ArgParser argParser = new ArgParser(args);
 
-        if (arguments.contains("-ssl")) {
+        if (argParser.hasArg("-ssl")) {
             SSLHandlerProvider.init();
         }
+
+        int tcpPort = argParser.getInt("-tcp", 8080);
+        int httpPort = argParser.getInt("-http", 8081);
 
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
         try {
             ChannelFuture f;
-            f = TcpServer.start(bossGroup, workerGroup);
-            f = WebSocketServer.start(bossGroup, workerGroup);
+            f = TcpServer.start(bossGroup, workerGroup, tcpPort);
+            f = WebSocketServer.start(bossGroup, workerGroup, httpPort);
             f.channel().closeFuture().sync();
 
         } catch (Exception e) {

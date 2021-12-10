@@ -54,9 +54,7 @@ class WebSocketServerInitializer extends ChannelInitializer<SocketChannel> {
 
 public final class WebSocketServer {
 
-    static final int PORT = SSLHandlerProvider.sslContext != null ? 8443 : 8080;
-
-    public static ChannelFuture start(EventLoopGroup bossGroup, EventLoopGroup workerGroup) throws Exception {
+    public static ChannelFuture start(EventLoopGroup bossGroup, EventLoopGroup workerGroup, int PORT) throws Exception {
 
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
@@ -68,6 +66,5 @@ public final class WebSocketServer {
         System.out.println("WebSocket and HTTP Server started on port " + PORT);
 
         return f;
-
     }
 }
