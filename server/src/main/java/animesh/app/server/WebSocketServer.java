@@ -15,7 +15,6 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
-import io.netty.handler.ssl.SslHandler;
 
 class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
     @Override
@@ -35,10 +34,9 @@ class WebSocketServerInitializer extends ChannelInitializer<SocketChannel> {
     @Override
     public void initChannel(SocketChannel ch) throws Exception {
         ChannelPipeline pipeline = ch.pipeline();
-        SslHandler sslHandler = SSLHandlerProvider.getSslHandler();
 
-        if (sslHandler != null) {
-            pipeline.addLast(sslHandler);
+        if (SSLHandlerProvider.sslCtx != null) {
+            pipeline.addLast(SSLHandlerProvider.sslCtx.newHandler(ch.alloc()));
         }
 
         pipeline.addLast(new HttpServerCodec());
@@ -66,5 +64,6 @@ public final class WebSocketServer {
         System.out.println("WebSocket and HTTP Server started on port " + PORT);
 
         return f;
+
     }
 }

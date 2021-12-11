@@ -1,4 +1,4 @@
-const socket = new WebSocket("ws://" + location.hostname + ":8080/websocket");
+const socket = new WebSocket("ws://" + location.hostname + ":8081/websocket");
 
 socket.binaryType = "arraybuffer";
 

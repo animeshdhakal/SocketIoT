@@ -1,53 +1,76 @@
 package animesh.app.server;
 
 import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.SecureRandom;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.TrustManagerFactory;
+import java.security.cert.CertificateException;
 
-import io.netty.handler.ssl.SslHandler;
+import javax.net.ssl.SSLException;
+import io.netty.handler.ssl.OpenSsl;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslProvider;
+import io.netty.handler.ssl.util.SelfSignedCertificate;
+import io.netty.util.internal.PlatformDependent;
+import java.io.File;
 
 public class SSLHandlerProvider {
-    private static final String jksFileName = "ssl/server.jks";
-    private static final String STOREPASS = "animesh";
-    private static final String KEYSTORETYPE = "jks";
-    private static final String PROTOCOL = "TLS";
-    public static SSLContext sslContext = null;
 
-    static SslHandler getSslHandler() {
-        if (sslContext != null) {
-            SSLEngine engine = sslContext.createSSLEngine();
-            engine.setUseClientMode(false);
-            return new SslHandler(engine);
-        }
-        return null;
+    public static volatile SslContext sslCtx = null;
+
+    static boolean isOpenSslAvailable() {
+        return PlatformDependent.bitMode() != 32 && OpenSsl.isAvailable();
     }
 
-    static void init() {
+    private static SslProvider fetchSslProvider() {
+        return isOpenSslAvailable() ? SslProvider.OPENSSL : SslProvider.JDK;
+    }
+
+    public static SslContext build(File serverCert, File serverKey,
+            String serverPass, SslProvider sslProvider) throws SSLException {
+        SslContextBuilder sslContextBuilder;
+        if (serverPass == null || serverPass.isEmpty()) {
+            sslContextBuilder = SslContextBuilder.forServer(serverCert, serverKey)
+                    .sslProvider(sslProvider);
+        } else {
+            sslContextBuilder = SslContextBuilder.forServer(serverCert, serverKey, serverPass)
+                    .sslProvider(sslProvider);
+        }
+        sslContextBuilder.protocols("TLSv1.3", "TLSv1.2");
+        return sslContextBuilder.build();
+    }
+
+    public static SslContext build(InputStream serverCert, InputStream serverKey,
+            String serverPass, SslProvider sslProvider) throws SSLException {
+        SslContextBuilder sslContextBuilder;
+        if (serverPass == null || serverPass.isEmpty()) {
+            sslContextBuilder = SslContextBuilder.forServer(serverCert, serverKey)
+                    .sslProvider(sslProvider);
+        } else {
+            sslContextBuilder = SslContextBuilder.forServer(serverCert, serverKey, serverPass)
+                    .sslProvider(sslProvider);
+        }
+        sslContextBuilder.protocols("TLSv1.3", "TLSv1.2");
+        return sslContextBuilder.build();
+    }
+
+    public static SslContext build(SslProvider sslProvider) throws CertificateException, SSLException {
+        SelfSignedCertificate ssc = new SelfSignedCertificate();
+        return SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey())
+                .sslProvider(sslProvider)
+                .build();
+    }
+
+    public static void init(String serverCertPath, String serverKeyPath, String serverPass) {
         try {
-
-            final ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-            final InputStream inputStream = classloader.getResourceAsStream(jksFileName);
-
-            final KeyStore trustStore = KeyStore.getInstance(KEYSTORETYPE);
-            trustStore.load(inputStream, STOREPASS.toCharArray());
-
-            final KeyManagerFactory keyManagerFactory = KeyManagerFactory
-                    .getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            keyManagerFactory.init(trustStore, STOREPASS.toCharArray());
-
-            final TrustManagerFactory trustManagerFactory = TrustManagerFactory
-                    .getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            trustManagerFactory.init(trustStore);
-
-            sslContext = SSLContext.getInstance(PROTOCOL);
-            sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(),
-                    new SecureRandom());
+            File serverCert = new File(serverCertPath);
+            File serverKey = new File(serverKeyPath);
+            if (!serverCert.exists() || !serverKey.exists()) {
+                sslCtx = build(fetchSslProvider());
+            } else {
+                sslCtx = build(serverCert, serverKey, serverPass, fetchSslProvider());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 }

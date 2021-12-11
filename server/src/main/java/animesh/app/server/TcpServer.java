@@ -12,7 +12,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 import java.util.concurrent.TimeUnit;
 
-import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 
 public class TcpServer extends ChannelInboundHandlerAdapter {
@@ -26,8 +25,9 @@ public class TcpServer extends ChannelInboundHandlerAdapter {
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline pipeline = ch.pipeline();
-                        SslHandler sslHandler = SSLHandlerProvider.getSslHandler();
-                        pipeline.addLast(sslHandler);
+                        if (SSLHandlerProvider.sslCtx != null) {
+                            pipeline.addLast(SSLHandlerProvider.sslCtx.newHandler(ch.alloc()));
+                        }
                         pipeline.addLast(new IdleStateHandler(10, 0, 0, TimeUnit.SECONDS));
                         pipeline.addLast(new ClientHandler(false));
                     }
