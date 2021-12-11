@@ -12,6 +12,8 @@ public class Server {
         ArgParser argParser = new ArgParser(args);
         Properties props = new Properties();
 
+        LoggerUtil.logger.info("Starting server...");
+
         try {
             FileReader fileReader = new FileReader("server.properties");
             props.load(fileReader);
@@ -33,10 +35,11 @@ public class Server {
             ChannelFuture f;
             f = TcpServer.start(bossGroup, workerGroup, tcpPort);
             f = WebSocketServer.start(bossGroup, workerGroup, httpPort);
+            System.out.println("Server started");
             f.channel().closeFuture().sync();
 
         } catch (Exception e) {
-            System.out.println("Exception from Server Main: " + e);
+            LoggerUtil.logger.error("Exception from Server Main: " + e);
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();

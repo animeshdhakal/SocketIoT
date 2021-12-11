@@ -14,11 +14,9 @@ import static io.netty.handler.codec.http.HttpResponseStatus.*;
 
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
-
 import java.io.InputStream;
 
 class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
@@ -73,7 +71,7 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
+        LoggerUtil.logger.error(cause.getMessage());
         ctx.close();
     }
 

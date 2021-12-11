@@ -187,12 +187,13 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("Client Connected");
+        LoggerUtil.logger.debug("Client Connected");
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("Client Disconnected");
+        LoggerUtil.logger.debug("Client Disconnected");
+
         String token = ctx.channel().attr(tokenKey).get();
         if (token != null) {
             ChannelGroup group = groups.get(token);
@@ -208,8 +209,8 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
-
+        LoggerUtil.logger.error(cause);
+        ctx.close();
     }
 
 }

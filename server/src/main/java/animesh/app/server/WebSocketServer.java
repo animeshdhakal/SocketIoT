@@ -61,7 +61,7 @@ public final class WebSocketServer {
 
         ChannelFuture f = b.bind(PORT).sync();
 
-        System.out.println("WebSocket and HTTP Server started on port " + PORT);
+        LoggerUtil.logger.info("WebSocket and HTTP Server started on port " + PORT);
 
         return f;
 
