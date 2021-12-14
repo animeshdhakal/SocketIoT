@@ -57,7 +57,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
         return auth.equals("animesh");
     }
 
-    public void broadCastMessage(ChannelHandlerContext ctx, ByteBuf buff, String token) {
+    public static void broadCastMessage(ChannelHandlerContext ctx, ByteBuf buff, String token) {
         Channel incoming = ctx.channel();
         ChannelGroup webSocketGroup = webSocketGroups.get(token);
         ChannelGroup tcpGroup = tcpGroups.get(token);
@@ -88,13 +88,21 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    public ByteBuf createMessage(short msg_type, String... args) {
+    public static ByteBuf createMessage(short msg_type, String... args) {
         String msg = String.join("\0", args);
         ByteBuf buff = Unpooled.buffer(HEADER_SIZE + msg.length());
         buff.writeShort(msg_type);
         buff.writeShort(msg.length());
         buff.writeBytes(msg.getBytes());
         return buff;
+    }
+
+    public static String getPinVal(String token, String pin) {
+        JsonModel jsonData = jsonDatas.get(token);
+        if (jsonData != null) {
+            return jsonData.pins.get(pin);
+        }
+        return null;
     }
 
     @Override

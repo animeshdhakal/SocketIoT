@@ -7,6 +7,8 @@ import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpUtil;
+import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.util.CharsetUtil;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.*;
 import static io.netty.handler.codec.http.HttpMethod.*;
@@ -30,11 +32,38 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             return;
         }
 
-        // Allow only GET methods.
-        if (!GET.equals(req.method())) {
-            sendHttpResponse(ctx, req,
-                    new DefaultFullHttpResponse(req.protocolVersion(), FORBIDDEN, ctx.alloc().buffer(0)));
-            return;
+        QueryStringDecoder queryStringDecoder = new QueryStringDecoder(req.uri());
+
+        String[] path = queryStringDecoder.path().split("/");
+
+        if (path.length > 3 && GET.equals(req.method())) {
+            if ("set".equals(path[1])) {
+                String token = path[2];
+                String pin = path[3];
+                String value = queryStringDecoder.parameters().get("value").get(0);
+                if (ClientHandler.checkAuth(token)) {
+                    ClientHandler.broadCastMessage(ctx, ClientHandler.createMessage(MsgType.WRITE, pin, value), token);
+                    FullHttpResponse res = new DefaultFullHttpResponse(req.protocolVersion(), OK,
+                            Unpooled.copiedBuffer("Success", CharsetUtil.US_ASCII));
+                    sendHttpResponse(ctx, req, res);
+                }
+
+            } else if ("get".equals(path[1])) {
+                String token = path[2];
+                String pin = path[3];
+                if (ClientHandler.checkAuth(token)) {
+                    String pinVal = ClientHandler.getPinVal(token, pin);
+                    if (pinVal != null) {
+                        FullHttpResponse res = new DefaultFullHttpResponse(req.protocolVersion(), OK,
+                                Unpooled.copiedBuffer(pinVal, CharsetUtil.US_ASCII));
+                        sendHttpResponse(ctx, req, res);
+                    } else {
+                        FullHttpResponse res = new DefaultFullHttpResponse(req.protocolVersion(), NOT_FOUND,
+                                Unpooled.copiedBuffer("Pin not found", CharsetUtil.US_ASCII));
+                        sendHttpResponse(ctx, req, res);
+                    }
+                }
+            }
         }
 
         if (req.uri().contains("/static/")) {

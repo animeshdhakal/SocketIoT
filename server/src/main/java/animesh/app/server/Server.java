@@ -12,7 +12,7 @@ public class Server {
         ArgParser argParser = new ArgParser(args);
         Properties props = new Properties();
 
-        LoggerUtil.logger.info("Starting server...");
+        LoggerUtil.logger.info("Starting Server...");
 
         try {
             FileReader fileReader = new FileReader("server.properties");
@@ -21,6 +21,7 @@ public class Server {
         }
 
         if (argParser.hasArg("-ssl")) {
+            LoggerUtil.logger.info("Initing SSL...");
             SSLHandlerProvider.init(props.getProperty("ssl.cert", ""), props.getProperty("ssl.key", ""),
                     props.getProperty("ssl.key.pass", ""));
         }
