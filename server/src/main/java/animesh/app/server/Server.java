@@ -1,6 +1,7 @@
 package animesh.app.server;
 
 import java.util.Properties;
+import animesh.app.server.db.MainDB;
 import java.io.FileReader;
 import java.io.IOException;
 import io.netty.channel.ChannelFuture;
@@ -13,6 +14,8 @@ public class Server {
         Properties props = new Properties();
 
         LoggerUtil.logger.info("Starting Server...");
+
+        MainDB.init("animeshdhakal", "animeshdhakal", "animeshdhakal");
 
         try {
             FileReader fileReader = new FileReader("server.properties");

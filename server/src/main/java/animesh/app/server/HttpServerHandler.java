@@ -14,12 +14,13 @@ import static io.netty.handler.codec.http.HttpHeaderNames.*;
 import static io.netty.handler.codec.http.HttpMethod.*;
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
 
+import java.io.InputStream;
+
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
-import java.io.InputStream;
 
 class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
@@ -46,6 +47,7 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                     FullHttpResponse res = new DefaultFullHttpResponse(req.protocolVersion(), OK,
                             Unpooled.copiedBuffer("Success", CharsetUtil.US_ASCII));
                     sendHttpResponse(ctx, req, res);
+                    return;
                 }
 
             } else if ("get".equals(path[1])) {
@@ -57,10 +59,12 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                         FullHttpResponse res = new DefaultFullHttpResponse(req.protocolVersion(), OK,
                                 Unpooled.copiedBuffer(pinVal, CharsetUtil.US_ASCII));
                         sendHttpResponse(ctx, req, res);
+                        return;
                     } else {
                         FullHttpResponse res = new DefaultFullHttpResponse(req.protocolVersion(), NOT_FOUND,
                                 Unpooled.copiedBuffer("Pin not found", CharsetUtil.US_ASCII));
                         sendHttpResponse(ctx, req, res);
+                        return;
                     }
                 }
             }
@@ -100,7 +104,8 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        LoggerUtil.logger.error(cause.getMessage());
+        // LoggerUtil.logger.error(cause.getMessage());
+        cause.printStackTrace();
         ctx.close();
     }
 
