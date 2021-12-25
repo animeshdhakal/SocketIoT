@@ -13,7 +13,9 @@ public class Server {
         ArgParser argParser = new ArgParser(args);
         Properties props = new Properties();
 
-        LoggerUtil.logger.info("Starting Server...");
+        Logger.init("./");
+
+        Logger.info("Starting Server...");
 
         MainDB.init("animeshdhakal", "animeshdhakal", "animeshdhakal");
 
@@ -24,7 +26,7 @@ public class Server {
         }
 
         if (argParser.hasArg("-ssl")) {
-            LoggerUtil.logger.info("Initing SSL...");
+            Logger.info("Initing SSL...");
             SSLHandlerProvider.init(props.getProperty("ssl.cert", ""), props.getProperty("ssl.key", ""),
                     props.getProperty("ssl.key.pass", ""));
         }
@@ -43,7 +45,7 @@ public class Server {
             f.channel().closeFuture().sync();
 
         } catch (Exception e) {
-            LoggerUtil.logger.error("Exception from Server Main: " + e);
+            Logger.error("Exception from Server Main: " + e);
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();

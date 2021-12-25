@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
-import animesh.app.server.LoggerUtil;
+import animesh.app.server.Logger;
 
 public class MainDB {
     public static Connection conn = null;
@@ -30,7 +30,7 @@ public class MainDB {
             conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/" + dbName, user,
                     password);
 
-            LoggerUtil.logger.info("Connected to DB");
+            Logger.info("Connected to DB");
 
             Statement stmt = conn.createStatement();
             stmt.executeUpdate(createTableQuery);

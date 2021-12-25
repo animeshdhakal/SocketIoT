@@ -35,7 +35,7 @@ public class TcpServer extends ChannelInboundHandlerAdapter {
 
         ChannelFuture f = b.bind(PORT).sync();
 
-        LoggerUtil.logger.info("TCP Server Started at PORT " + PORT);
+        Logger.info("TCP Server Started at PORT " + PORT);
 
         return f;
 

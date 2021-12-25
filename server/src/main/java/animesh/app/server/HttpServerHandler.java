@@ -16,13 +16,20 @@ import static io.netty.handler.codec.http.HttpResponseStatus.*;
 
 import java.io.InputStream;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import animesh.app.server.db.dao.UserDao;
+import animesh.app.server.db.model.StatusMsg;
+import animesh.app.server.db.model.User;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 
 class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+
+    private static ObjectMapper mapper = new ObjectMapper();
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest req) throws Exception {
@@ -43,7 +50,8 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                 String pin = path[3];
                 String value = queryStringDecoder.parameters().get("value").get(0);
                 if (ClientHandler.checkAuth(token)) {
-                    ClientHandler.broadCastMessage(ctx, ClientHandler.createMessage(MsgType.WRITE, pin, value), token);
+                    ClientHandler.broadCastMessage(ctx,
+                            ClientHandler.createMessage(MsgType.WRITE, pin, value), token);
                     FullHttpResponse res = new DefaultFullHttpResponse(req.protocolVersion(), OK,
                             Unpooled.copiedBuffer("Success", CharsetUtil.US_ASCII));
                     sendHttpResponse(ctx, req, res);
@@ -61,7 +69,8 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                         sendHttpResponse(ctx, req, res);
                         return;
                     } else {
-                        FullHttpResponse res = new DefaultFullHttpResponse(req.protocolVersion(), NOT_FOUND,
+                        FullHttpResponse res = new DefaultFullHttpResponse(req.protocolVersion(),
+                                NOT_FOUND,
                                 Unpooled.copiedBuffer("Pin not found", CharsetUtil.US_ASCII));
                         sendHttpResponse(ctx, req, res);
                         return;
@@ -70,7 +79,7 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             }
         }
 
-        if (req.uri().contains("/static/")) {
+        if (queryStringDecoder.path().contains("/static/") && GET.equals(req.method())) {
             ByteBuf content = getResourceFile(req.uri());
             if (content == null) {
                 sendHttpResponse(ctx, req,
@@ -84,21 +93,34 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                 sendHttpResponse(ctx, req, res);
             }
 
-        }
+        } else if ("/register".equals(queryStringDecoder.path()) && POST.equals(req.method())) {
 
-        if ("/".equals(req.uri())) {
+            User user = mapper.readValue(req.content().toString(CharsetUtil.US_ASCII), User.class);
+            user.hashPass();
+            if (user.email != null && user.password != null) {
+                if (UserDao.createUser(user)) {
+                    sendHttpResponse(ctx, req, new StatusMsg(false, "User Registered Successfully"), OK);
+                } else {
+                    sendHttpResponse(ctx, req, new StatusMsg(true, "User Already Exists"), BAD_REQUEST);
+                }
+            } else {
+                sendHttpResponse(ctx, req, new StatusMsg(true, "Incomplete Fields"), BAD_REQUEST);
+            }
+
+        } else if ("/".equals(queryStringDecoder.path())) {
 
             ByteBuf content = getResourceFile("/html/index.html");
 
             FullHttpResponse res = new DefaultFullHttpResponse(req.protocolVersion(), OK, content);
 
             res.headers().set(CONTENT_TYPE, "text/html; charset=UTF-8");
-            HttpUtil.setContentLength(res, content.readableBytes());
 
             sendHttpResponse(ctx, req, res);
+
         } else {
             sendHttpResponse(ctx, req,
-                    new DefaultFullHttpResponse(req.protocolVersion(), NOT_FOUND, ctx.alloc().buffer(0)));
+                    new DefaultFullHttpResponse(req.protocolVersion(), NOT_FOUND,
+                            Unpooled.copiedBuffer("Not Found", CharsetUtil.US_ASCII)));
         }
     }
 
@@ -111,19 +133,24 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private static void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {
         // Generate an error page if response getStatus code is not OK (200).
-        HttpResponseStatus responseStatus = res.status();
-        if (responseStatus.code() != 200) {
-            ByteBufUtil.writeUtf8(res.content(), responseStatus.toString());
-            HttpUtil.setContentLength(res, res.content().readableBytes());
-        }
-        // Send the response and close the connection if necessary.
-        boolean keepAlive = HttpUtil.isKeepAlive(req) && responseStatus.code() == 200;
-        HttpUtil.setKeepAlive(res, keepAlive);
+        HttpUtil.setContentLength(res, res.content().readableBytes());
 
-        ChannelFuture future = ctx.writeAndFlush(res);
+        // Send the response and close the connection if necessary.
+        boolean keepAlive = HttpUtil.isKeepAlive(req);
+        ChannelFuture f = ctx.writeAndFlush(res);
         if (!keepAlive) {
-            future.addListener(ChannelFutureListener.CLOSE);
+            f.addListener(ChannelFutureListener.CLOSE);
         }
+
+    }
+
+    private static void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, StatusMsg msg,
+            HttpResponseStatus status)
+            throws JsonProcessingException {
+        FullHttpResponse resp = new DefaultFullHttpResponse(req.protocolVersion(), status,
+                Unpooled.copiedBuffer(mapper.writeValueAsString(msg), CharsetUtil.US_ASCII));
+        resp.headers().set(CONTENT_TYPE, "application/json; charset=UTF-8");
+        sendHttpResponse(ctx, req, resp);
     }
 
     public static ByteBuf getResourceFile(String path) {

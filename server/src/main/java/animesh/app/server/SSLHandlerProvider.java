@@ -69,7 +69,7 @@ public class SSLHandlerProvider {
                 sslCtx = build(serverCert, serverKey, serverPass, fetchSslProvider());
             }
         } catch (Exception e) {
-            LoggerUtil.logger.error("SSL Init Failed - " + e.getMessage());
+            Logger.error("SSL Init Failed - " + e.getMessage());
         }
 
     }

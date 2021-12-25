@@ -16,7 +16,7 @@ import io.netty.handler.timeout.IdleStateEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ClientHandler extends ChannelInboundHandlerAdapter {
-    static ObjectMapper objMapper = new ObjectMapper();
+    public static ObjectMapper objMapper = new ObjectMapper();
 
     boolean isWebSocket;
     static int HEADER_SIZE = 4;
@@ -195,12 +195,12 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        LoggerUtil.logger.debug("Client Connected");
+        Logger.debug("Client Connected");
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        LoggerUtil.logger.debug("Client Disconnected");
+        Logger.debug("Client Disconnected");
 
         String token = ctx.channel().attr(tokenKey).get();
         if (token != null) {
@@ -217,7 +217,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        LoggerUtil.logger.error(cause);
+        Logger.error(cause.getMessage());
         ctx.close();
     }
 
