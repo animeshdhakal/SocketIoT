@@ -7,11 +7,11 @@ import animesh.app.server.db.MainDB;
 import animesh.app.server.db.model.User;
 
 public class UserDao {
-    public static User getUser(String email, String password) {
+    public User getUser(String email, String password) {
         return new User(email, password);
     }
 
-    public static boolean createUser(User user) {
+    public boolean createUser(User user) {
         PreparedStatement stmt = null;
         if (MainDB.available()) {
             try {
@@ -27,7 +27,7 @@ public class UserDao {
         return false;
     }
 
-    public static User getUser(String email) {
+    public User getUser(String email) {
         // get user from db
         PreparedStatement stmt = null;
         if (MainDB.available()) {
@@ -48,7 +48,7 @@ public class UserDao {
         return null;
     }
 
-    public static boolean deleteUser(String email) {
+    public boolean deleteUser(String email) {
         PreparedStatement stmt = null;
         if (MainDB.available()) {
             try {

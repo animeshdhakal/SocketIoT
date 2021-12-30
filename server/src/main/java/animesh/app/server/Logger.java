@@ -49,6 +49,7 @@ public class Logger {
 
     public static void debug(String msg) {
         // log("DEBUG", msg);
+        // System.out.println(msg);
     }
 
     public static void warn(String msg) {

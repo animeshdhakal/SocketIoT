@@ -2,6 +2,9 @@ package animesh.app.server;
 
 import java.util.Properties;
 import animesh.app.server.db.MainDB;
+import animesh.app.server.db.dao.DeviceDao;
+import animesh.app.server.db.model.Device;
+
 import java.io.FileReader;
 import java.io.IOException;
 import io.netty.channel.ChannelFuture;
@@ -16,6 +19,11 @@ public class Server {
         Logger.init("./");
 
         Logger.info("Starting Server...");
+
+        Device device = new Device("test", "test", "test", 1);
+
+        DeviceDao deviceDao = new DeviceDao();
+        deviceDao.addDevice(device);
 
         MainDB.init("animeshdhakal", "animeshdhakal", "animeshdhakal");
 

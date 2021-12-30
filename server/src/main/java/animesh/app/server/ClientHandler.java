@@ -18,15 +18,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ClientHandler extends ChannelInboundHandlerAdapter {
     public static ObjectMapper objMapper = new ObjectMapper();
 
-    boolean isWebSocket;
-    static int HEADER_SIZE = 4;
-    int loss_time = 0;
+    private boolean isWebSocket;
+    private static int HEADER_SIZE = 4;
+    private int loss_time = 0;
 
-    final static AttributeKey<String> tokenKey = AttributeKey.valueOf("token");
-
-    static ConcurrentHashMap<String, ChannelGroup> tcpGroups = new ConcurrentHashMap<>();
-    static ConcurrentHashMap<String, ChannelGroup> webSocketGroups = new ConcurrentHashMap<>();
-    static ConcurrentHashMap<String, JsonModel> jsonDatas = new ConcurrentHashMap<>();
+    private final static AttributeKey<String> tokenKey = AttributeKey.valueOf("token");
+    private static ConcurrentHashMap<String, ChannelGroup> tcpGroups = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, ChannelGroup> webSocketGroups = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, JsonModel> jsonDatas = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, ChannelGroup> groups;
 
     ClientHandler(boolean isWebSocket) {
@@ -194,14 +193,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        Logger.debug("Client Connected");
-    }
-
-    @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        Logger.debug("Client Disconnected");
-
         String token = ctx.channel().attr(tokenKey).get();
         if (token != null) {
             ChannelGroup group = groups.get(token);
@@ -217,8 +209,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        Logger.error(cause.getMessage());
-        ctx.close();
+        ExceptionHandler.handleException(ctx, cause);
     }
 
 }

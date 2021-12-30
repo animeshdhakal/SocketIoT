@@ -40,15 +40,15 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             return;
         }
 
-        QueryStringDecoder queryStringDecoder = new QueryStringDecoder(req.uri());
+        QueryStringDecoder router = new QueryStringDecoder(req.uri());
 
-        String[] path = queryStringDecoder.path().split("/");
+        String[] path = router.path().split("/");
 
         if (path.length > 3 && GET.equals(req.method())) {
             if ("set".equals(path[1])) {
                 String token = path[2];
                 String pin = path[3];
-                String value = queryStringDecoder.parameters().get("value").get(0);
+                String value = router.parameters().get("value").get(0);
                 if (ClientHandler.checkAuth(token)) {
                     ClientHandler.broadCastMessage(ctx,
                             ClientHandler.createMessage(MsgType.WRITE, pin, value), token);
@@ -79,7 +79,7 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             }
         }
 
-        if (queryStringDecoder.path().contains("/static/") && GET.equals(req.method())) {
+        if (router.path().contains("/static/") && GET.equals(req.method())) {
             ByteBuf content = getResourceFile(req.uri());
             if (content == null) {
                 sendHttpResponse(ctx, req,
@@ -93,21 +93,39 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                 sendHttpResponse(ctx, req, res);
             }
 
-        } else if ("/register".equals(queryStringDecoder.path()) && POST.equals(req.method())) {
+        } else if ("/register".equals(router.path()) && POST.equals(req.method())) {
 
             User user = mapper.readValue(req.content().toString(CharsetUtil.US_ASCII), User.class);
             user.hashPass();
             if (user.email != null && user.password != null) {
-                if (UserDao.createUser(user)) {
+                UserDao userDao = new UserDao();
+                if (userDao.getUser(user.email) == null && userDao.createUser(user)) {
                     sendHttpResponse(ctx, req, new StatusMsg(false, "User Registered Successfully"), OK);
                 } else {
                     sendHttpResponse(ctx, req, new StatusMsg(true, "User Already Exists"), BAD_REQUEST);
+                }
+
+            } else {
+                sendHttpResponse(ctx, req, new StatusMsg(true, "Incomplete Fields"), BAD_REQUEST);
+            }
+
+        } else if ("/login".equals(router.path()) && POST.equals(req.method())) {
+            User user0 = mapper.readValue(req.content().toString(CharsetUtil.US_ASCII), User.class);
+
+            if (user0.email != null && user0.password != null) {
+                user0.hashPass();
+                UserDao userDao = new UserDao();
+                User user = userDao.getUser(user0.email);
+                if (user != null && user.password.equals(user0.password)) {
+                    sendHttpResponse(ctx, req, new StatusMsg(false, "Logged IN"), OK);
+                } else {
+                    sendHttpResponse(ctx, req, new StatusMsg(true, "Invalid Credentials"), BAD_REQUEST);
                 }
             } else {
                 sendHttpResponse(ctx, req, new StatusMsg(true, "Incomplete Fields"), BAD_REQUEST);
             }
 
-        } else if ("/".equals(queryStringDecoder.path())) {
+        } else if ("/".equals(router.path())) {
 
             ByteBuf content = getResourceFile("/html/index.html");
 
@@ -126,9 +144,7 @@ class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        // LoggerUtil.logger.error(cause.getMessage());
-        cause.printStackTrace();
-        ctx.close();
+        ExceptionHandler.handleException(ctx, cause);
     }
 
     private static void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {
