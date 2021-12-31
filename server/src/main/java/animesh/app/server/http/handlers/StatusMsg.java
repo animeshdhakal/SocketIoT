@@ -1,6 +1,7 @@
 package animesh.app.server.http.handlers;
 
 import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.CharsetUtil;
 
@@ -22,7 +23,16 @@ public class StatusMsg extends HttpRes {
         try {
             this.buff = Unpooled.copiedBuffer(mapper.writeValueAsString(msg), CharsetUtil.US_ASCII);
             this.status = responseStatus;
+            headers.set(HttpHeaderNames.CONTENT_TYPE, "application/json");
         } catch (Exception e) {
         }
+    }
+
+    public static StatusMsg ok(String message) {
+        return new StatusMsg(false, message, HttpResponseStatus.OK);
+    }
+
+    public static StatusMsg badRequest(String message) {
+        return new StatusMsg(true, message, HttpResponseStatus.BAD_REQUEST);
     }
 }

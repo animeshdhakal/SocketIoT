@@ -15,6 +15,6 @@ public class User {
     }
 
     public void hashPass() {
-        this.password = SHA256Util.makeHash(this.password, this.email);
+        this.password = SHA256Util.createHash(this.password, this.email);
     }
 }
