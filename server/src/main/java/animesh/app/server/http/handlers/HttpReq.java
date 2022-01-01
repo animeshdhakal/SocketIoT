@@ -1,5 +1,8 @@
 package animesh.app.server.http.handlers;
 
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -40,8 +43,16 @@ public class HttpReq {
         }
     }
 
+    public Map<String, List<String>> getAllQueryParam() {
+        return querydecoder.parameters();
+    }
+
     public String getQueryParam(String key) {
-        return querydecoder.parameters().get(key).get(0);
+        List<String> list = querydecoder.parameters().get(key);
+        if (list != null) {
+            return list.get(0);
+        }
+        return null;
     }
 
     public String getCookie(String key) {
@@ -56,6 +67,6 @@ public class HttpReq {
                 }
             }
         }
-        return "";
+        return null;
     }
 }

@@ -15,9 +15,10 @@ public class UserDao {
         PreparedStatement stmt = null;
         if (MainDB.available()) {
             try {
-                stmt = MainDB.conn.prepareStatement("INSERT INTO users (email, password) VALUES (?, ?)");
+                stmt = MainDB.conn.prepareStatement("INSERT INTO users (email, password, token) VALUES (?, ?, ?)");
                 stmt.setString(1, user.email);
                 stmt.setString(2, user.password);
+                stmt.setString(3, user.token);
                 stmt.executeUpdate();
                 return true;
             } catch (Exception e) {
@@ -36,7 +37,9 @@ public class UserDao {
                 stmt.setString(1, email);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        return new User(rs.getString("email"), rs.getString("password"));
+                        User user = new User(rs.getString("email"), rs.getString("password"));
+                        user.token = rs.getString("token");
+                        return user;
                     } else {
                         return null;
                     }
@@ -46,6 +49,22 @@ public class UserDao {
             }
         }
         return null;
+    }
+
+    public boolean updateUser(User user) {
+        PreparedStatement stmt = null;
+        if (MainDB.available()) {
+            try {
+                stmt = MainDB.conn.prepareStatement("UPDATE users SET token = ? WHERE email = ?");
+                stmt.setString(1, user.token);
+                stmt.setString(2, user.email);
+                stmt.executeUpdate();
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return false;
     }
 
     public boolean deleteUser(String email) {

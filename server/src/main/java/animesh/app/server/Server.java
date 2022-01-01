@@ -2,9 +2,6 @@ package animesh.app.server;
 
 import java.util.Properties;
 import animesh.app.server.db.MainDB;
-import animesh.app.server.db.dao.DeviceDao;
-import animesh.app.server.db.model.Device;
-
 import java.io.FileReader;
 import java.io.IOException;
 import io.netty.channel.ChannelFuture;
@@ -20,23 +17,19 @@ public class Server {
 
         Logger.info("Starting Server...");
 
-        Device device = new Device("test", "test", "test", 1);
-
-        DeviceDao deviceDao = new DeviceDao();
-        deviceDao.addDevice(device);
-
-        MainDB.init("animeshdhakal", "animeshdhakal", "animeshdhakal");
-
         try {
             FileReader fileReader = new FileReader("server.properties");
             props.load(fileReader);
         } catch (IOException e) {
         }
 
+        MainDB.init(props.getProperty("db.name"), props.getProperty("db.username"), props.getProperty("db.password"),
+                Integer.parseInt(props.getProperty("db.port", "5432")));
+
         if (argParser.hasArg("-ssl")) {
             Logger.info("Initing SSL...");
             SSLHandlerProvider.init(props.getProperty("ssl.cert", ""), props.getProperty("ssl.key", ""),
-                    props.getProperty("ssl.key.pass", ""));
+                    props.getProperty("ssl.key.password", ""));
         }
 
         int tcpPort = Integer.parseInt(props.getProperty("tcp.port", "8080"));

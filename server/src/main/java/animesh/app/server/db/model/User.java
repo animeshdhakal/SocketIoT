@@ -5,6 +5,7 @@ import animesh.app.server.utils.SHA256Util;
 public class User {
     public String email;
     public String password;
+    public String token = "";
 
     public User() {
     }

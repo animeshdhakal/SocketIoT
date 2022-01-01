@@ -4,16 +4,17 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>animesh.app</groupId>
    <artifactId>animeshapp</artifactId>
-   <version>1.0-SNAPSHOT</version>
+   <version>1.0</version>
    <name>animeshapp</name>
 
    <packaging>pom</packaging>
-   
+
    <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <maven.compiler.source>1.7</maven.compiler.source>
       <maven.compiler.target>1.7</maven.compiler.target>
       <netty.version>4.1.72.Final</netty.version>
+      <app.version>1.0</app.version>
    </properties>
    <dependencies>
       <dependency>
@@ -26,12 +27,22 @@
          <artifactId>jackson-databind</artifactId>
          <version>2.13.0</version>
       </dependency>
-         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.3.1</version>
-         </dependency>
-
+      <dependency>
+         <groupId>org.postgresql</groupId>
+         <artifactId>postgresql</artifactId>
+         <version>42.3.1</version>
+      </dependency>
+      <dependency>
+         <groupId>io.jsonwebtoken</groupId>
+         <artifactId>jjwt-api</artifactId>
+         <version>0.11.2</version>
+      </dependency>
+      <dependency>
+         <groupId>io.jsonwebtoken</groupId>
+         <artifactId>jjwt-impl</artifactId>
+         <version>0.11.2</version>
+         <scope>runtime</scope>
+      </dependency>
    </dependencies>
    <build>
       <pluginManagement>
@@ -91,7 +102,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-shade-plugin</artifactId>
-                <configuration>
+               <configuration>
                   <artifactSet>
                      <excludes>
                         <exclude>module-info.java</exclude>
@@ -107,15 +118,14 @@
                         <goal>shade</goal>
                      </goals>
                      <configuration>
-                            <transformers>
-                                <transformer
-                                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>animesh.app.server.Server</mainClass>
-                                </transformer>
-                            </transformers>
-                        </configuration>
+                        <transformers>
+                           <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                              <mainClass>animesh.app.server.Server</mainClass>
+                           </transformer>
+                        </transformers>
+                     </configuration>
                   </execution>
-                  
+
                </executions>
             </plugin>
          </plugins>
