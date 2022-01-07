@@ -35,4 +35,9 @@ public class MainDB {
     public static boolean available() {
         return conn != null;
     }
+
+    public static Connection getConnection() {
+        return conn;
+    }
+
 }

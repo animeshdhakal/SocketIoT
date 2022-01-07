@@ -2,7 +2,6 @@ package animesh.app.server;
 
 import java.security.SecureRandom;
 
-import animesh.app.server.db.dao.UserDao;
 import animesh.app.server.db.model.User;
 import animesh.app.server.http.BaseHttpHandler;
 import animesh.app.server.http.annotations.GET;
@@ -72,13 +71,11 @@ public class HttpServerHandler extends BaseHttpHandler {
         }
         user.hashPass();
 
-        UserDao userDao = new UserDao();
-
-        if (userDao.getUser(user.email) != null) {
+        if (user.exists()) {
             return StatusMsg.badRequest("User already exists");
         }
 
-        if (!userDao.createUser(user)) {
+        if (!user.save()) {
             return StatusMsg.badRequest("Server Error");
         }
 
@@ -93,13 +90,11 @@ public class HttpServerHandler extends BaseHttpHandler {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        UserDao userDao = new UserDao();
-
-        User dbUser = userDao.getUser(user.email);
-
         user.hashPass();
 
-        if (dbUser == null || !dbUser.password.equals(user.password)) {
+        User dbUser = new User();
+
+        if (!dbUser.get(user.email) || !dbUser.password.equals(user.password)) {
             return StatusMsg.badRequest("Invalid Credentials");
         }
 
@@ -111,7 +106,7 @@ public class HttpServerHandler extends BaseHttpHandler {
             random.nextBytes(bytes);
             String token = SHA256Util.createHash(new String(bytes), user.email);
             dbUser.token = token;
-            if (!userDao.updateUser(dbUser)) {
+            if (!dbUser.update()) {
                 return StatusMsg.badRequest("Server Error");
             }
         }

@@ -2,10 +2,11 @@ package animesh.app.server.db.model;
 
 import animesh.app.server.utils.RandomUtil;
 
-public class Device {
+@Table("blueprints")
+public class Device extends BaseModel {
+    public String device_id;
     public String name;
     public String blueprint_id;
-    public String device_id;
     public String token;
     public String json;
     public int user_id;

@@ -2,7 +2,8 @@ package animesh.app.server.db.model;
 
 import animesh.app.server.utils.SHA256Util;
 
-public class User {
+@Table("users")
+public class User extends BaseModel {
     public String email;
     public String password;
     public String token = "";

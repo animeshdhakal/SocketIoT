@@ -13,14 +13,14 @@ import animesh.app.server.http.handlers.StaticFile;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.QueryStringDecoder;
 
-public class BaseHttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+public class BaseHttpHandler extends ChannelInboundHandlerAdapter {
     private static Method[] methods = null;
     private static Method notFoundMethod = null;
     private static String staticFolder = null;
@@ -37,8 +37,10 @@ public class BaseHttpHandler extends SimpleChannelInboundHandler<FullHttpRequest
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest req) throws Exception {
-        process(ctx, req);
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (msg instanceof FullHttpRequest) {
+            process(ctx, (FullHttpRequest) msg);
+        }
     }
 
     public void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse response) {

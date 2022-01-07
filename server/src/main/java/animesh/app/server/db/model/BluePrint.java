@@ -2,10 +2,10 @@ package animesh.app.server.db.model;
 
 import animesh.app.server.utils.RandomUtil;
 
-public class BluePrint {
+public class BluePrint extends BaseModel {
+    public String blueprint_id;
     public String name;
     public String json;
-    public String blueprint_id;
     public int user_id;
 
     public BluePrint(String name, String token, String json, int user_id) {
