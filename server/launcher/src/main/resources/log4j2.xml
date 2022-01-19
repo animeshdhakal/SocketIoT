@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <File name="File" fileName="out.log" append="false">
+            <PatternLayout pattern="[%d{ISO8601} %-5level] %logger{36} - %msg%n"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Logger name="com.zaxxer.hikari" level="OFF" additivity="false"/>
+
+        <Logger name="io.netty" level="INFO" additivity="false" />
+
+        <Root level="all">
+            <AppenderRef ref="File"/>
+        </Root>
+    </Loggers>
+</Configuration>

@@ -1,12 +1,12 @@
-run: build
-	java -jar "./server/target/server-1.0.jar"
 
+run: build
+	java -jar server/launcher/target/server-1.0.jar
 
 build:
-	mvn clean package shade:shade
+	mvn package
 
-test:
-	mvn clean test
+
+.PHONY: clean
 
 clean:
-	mvn clean -U
+	mvn clean
