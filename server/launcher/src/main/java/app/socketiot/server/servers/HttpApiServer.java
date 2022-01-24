@@ -14,7 +14,7 @@ public class HttpApiServer extends BaseServer {
     private final ChannelInitializer<SocketChannel> initializer;
 
     public HttpApiServer(final Holder holder) {
-        super(holder, 4444);
+        super(holder, null, 4444);
 
         this.initializer = new ChannelInitializer<SocketChannel>() {
             @Override

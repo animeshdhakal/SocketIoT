@@ -3,6 +3,7 @@ package app.socketiot.server.api;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.dao.UserDao;
 import app.socketiot.server.core.db.model.User;
+import app.socketiot.server.core.http.BaseHttpHandler;
 import app.socketiot.server.core.http.JwtHttpHandler;
 import app.socketiot.server.core.http.annotations.GET;
 import app.socketiot.server.core.http.annotations.Path;
@@ -13,20 +14,16 @@ import app.socketiot.server.utils.JwtUtil;
 
 @Path("/")
 @StaticFolder("/static")
-public class HttpApi extends JwtHttpHandler {
+public class HttpApi extends BaseHttpHandler {
     private UserDao userDao;
 
     public HttpApi(Holder holder) {
         this.userDao = holder.userDao;
     }
 
-    @GET
-    @Path("/animesh")
+    @GET()
+    @Path("/")
     public HttpRes index(HttpReq req) {
-
-        String token = req.getHeader("Authorization").split(" ")[1];
-        String email = JwtUtil.getEmail(token);
-        User user = userDao.getUser(email);
-        return new HttpRes(user.email);
+        return new HttpRes("Hello World");
     }
 }

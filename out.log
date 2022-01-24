@@ -1,0 +1,3 @@
+[2022-01-24T11:04:10,993 INFO ] app.socketiot.server.core.Holder - Using native epoll transport.
+[2022-01-24T11:04:11,107 ERROR] app.socketiot.server.core.db.DB - Unable to Connect to DB : dataSource or dataSourceClassName or jdbcUrl is required.
+[2022-01-24T11:04:11,307 INFO ] app.socketiot.server.servers.BaseServer - HttpApiServer started at port 4444

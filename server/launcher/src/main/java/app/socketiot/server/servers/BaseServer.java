@@ -1,5 +1,7 @@
 package app.socketiot.server.servers;
 
+import java.net.InetSocketAddress;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,12 +15,13 @@ public abstract class BaseServer {
     private static Logger log = LogManager.getLogger();
     private final int port;
     private final Holder holder;
+    private final String host;
     ChannelFuture cf;
 
-    public BaseServer(Holder holder, int port) {
+    public BaseServer(Holder holder, String host, int port) {
         this.port = port;
         this.holder = holder;
-
+        this.host = host;
     }
 
     public void start() throws Exception {
@@ -27,7 +30,8 @@ public abstract class BaseServer {
             bootstrap.group(holder.bossGroup, holder.workerGroup)
                     .channel(holder.channelClass)
                     .childHandler(getInitializer());
-            this.cf = bootstrap.bind(port).sync();
+            InetSocketAddress addr = (host == null || host.isEmpty()) ? new InetSocketAddress(port) : new InetSocketAddress(host, port);
+            this.cf = bootstrap.bind(addr).sync();
             log.info("{} started at port {}", getServerName(), port);
         } catch (Exception e) {
             log.error("Error initializing {} at Port {}", getServerName(), port);
