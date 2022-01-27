@@ -18,6 +18,7 @@ public class UserApiHandler extends BaseHttpHandler {
     private UserDao userDao;
 
     public UserApiHandler(Holder holder) {
+        super(holder);
         this.userDao = holder.userDao;
     }
 

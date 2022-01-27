@@ -33,39 +33,17 @@ public class UserDBDao {
         return users;
     }
 
-    public boolean saveUser(Connection connection, User user) {
-        try {
-            PreparedStatement stmt = connection
-                    .prepareStatement("INSERT INTO users (email, password) VALUES (?, ?, ?)");
-            stmt.setString(1, user.email);
-            stmt.setString(2, user.password);
-            stmt.executeUpdate();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-
-    }
-
-    public boolean updateUser(Connection connection, User user) {
-        try {
-            PreparedStatement stmt = connection
-                    .prepareStatement("UPDATE users SET password = ? WHERE email = ?");
-            stmt.setString(3, user.email);
-            stmt.setString(1, user.password);
-            stmt.executeUpdate();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
 
     public void saveAllUsers(ArrayList<User> users) {
-        try (Connection connection = holder.db.getConnection()) {
+        try(Connection connection = holder.db.getConnection()){
+            PreparedStatement stmt = connection.prepareStatement("INSERT INTO users (email, password) VALUES (?, ?) ON CONFLICT (email) DO UPDATE SET password = EXCLUDED.password");
             for (User user : users) {
-                saveUser(connection, user);
+                stmt.setString(1, user.email);
+                stmt.setString(2, user.password);
+                stmt.addBatch();
             }
-        } catch (Exception e) {
+            stmt.executeBatch();
+        }catch(Exception e){
 
         }
     }

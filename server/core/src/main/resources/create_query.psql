@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS blueprint;
-DROP TABLE IF EXISTS devices;
+-- DROP TABLE IF EXISTS users;
+-- DROP TABLE IF EXISTS blueprint;
+-- DROP TABLE IF EXISTS devices;
 
 
 CREATE TABLE IF NOT EXISTS users (
@@ -11,15 +11,15 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS blueprint (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    user_id INTEGER NOT NULL,
-    blueprint_id VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    blueprint_id VARCHAR(255) NOT NULL UNIQUE,
     json text 
 );
 CREATE TABLE IF NOT EXISTS devices (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    user_id INTEGER NOT NULL,
+    email VARCHAR(255) NOT NULL,
     blueprint_id VARCHAR(255) NOT NULL,
-    token VARCHAR(255) NOT NULL,
+    token VARCHAR(255) NOT NULL UNIQUE,
     json text
 );

@@ -3,6 +3,8 @@ package app.socketiot.server.core.http;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.regex.Matcher;
+
+import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.exceptions.ExceptionHandler;
 import app.socketiot.server.core.http.annotations.POST;
 import app.socketiot.server.core.http.annotations.Path;
@@ -23,9 +25,11 @@ public class BaseHttpHandler extends ChannelInboundHandlerAdapter {
     private Method[] methods = null;
     private String staticFolder = null;
     private String basePath = null;
+    protected final Holder holder;
 
-    public BaseHttpHandler() {
+    public BaseHttpHandler(Holder holder) {
         super();
+        this.holder = holder;
         methods = this.getClass().getDeclaredMethods();
         if (this.getClass().isAnnotationPresent(StaticFolder.class)) {
             StaticFolder path = this.getClass().getAnnotation(StaticFolder.class);

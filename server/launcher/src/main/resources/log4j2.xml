@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
     <Appenders>
-        <File name="File" fileName="out.log" append="false">
+        <File name="File" fileName="logs/server.log" append="false">
             <PatternLayout pattern="[%d{ISO8601} %-5level] %logger{36} - %msg%n"/>
         </File>
     </Appenders>

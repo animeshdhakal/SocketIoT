@@ -4,8 +4,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import app.socketiot.server.core.cli.ArgParser;
 import app.socketiot.server.core.cli.properties.ServerProperties;
+import app.socketiot.server.core.dao.BluePrintDao;
+import app.socketiot.server.core.dao.DeviceDao;
 import app.socketiot.server.core.dao.UserDao;
 import app.socketiot.server.core.db.DB;
+import app.socketiot.server.core.db.dao.BluePrintDBDao;
+import app.socketiot.server.core.db.dao.DeviceDBDao;
 import app.socketiot.server.core.db.dao.UserDBDao;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
@@ -26,6 +30,11 @@ public class Holder {
     public final DB db;
     public final UserDBDao userDBDao;
     public final UserDao userDao;
+    public final DeviceDBDao deviceDBDao;
+    public final DeviceDao deviceDao;
+    public final BluePrintDao bluePrintDao;
+    public final BluePrintDBDao bluePrintDBDao;
+    public final BlockingIOHandler blockingIOHandler;
 
     public Holder(ArgParser args) {
         this.args = args;
@@ -45,7 +54,12 @@ public class Holder {
         }
         this.db = new DB(this);
         this.userDBDao = new UserDBDao(this);
+        this.deviceDBDao = new DeviceDBDao(this);
+        this.bluePrintDBDao = new BluePrintDBDao(this);
         this.userDao = new UserDao(userDBDao.getAllUsers());
+        this.deviceDao = new DeviceDao(deviceDBDao.getAllDevices());
+        this.bluePrintDao = new BluePrintDao(bluePrintDBDao.getAllBluePrints());
+        this.blockingIOHandler = new BlockingIOHandler();
     }
 
     public void close() {

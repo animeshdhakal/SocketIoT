@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import app.socketiot.server.core.db.model.User;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -17,6 +19,8 @@ public class HttpReq {
     private FullHttpRequest req;
     private QueryStringDecoder querydecoder;
     private Map<String, String> pathParam;
+    private User user;
+
 
     public HttpReq(ChannelHandlerContext ctx, FullHttpRequest req, QueryStringDecoder querydecoder,
             Map<String, String> pathParam) {
@@ -24,6 +28,14 @@ public class HttpReq {
         this.req = req;
         this.querydecoder = querydecoder;
         this.pathParam = pathParam;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public User getUser() {
+        return user;
     }
 
     public HttpReq(ChannelHandlerContext ctx, FullHttpRequest req, QueryStringDecoder querydecoder) {

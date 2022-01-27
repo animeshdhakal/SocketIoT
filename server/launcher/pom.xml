@@ -63,6 +63,11 @@
       <artifactId>http-api</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>app.socketiot.server</groupId>
+      <artifactId>hardware</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
 </project>
