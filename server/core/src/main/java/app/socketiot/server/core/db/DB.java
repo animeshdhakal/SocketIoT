@@ -53,4 +53,9 @@ public class DB {
         holder.deviceDao.removeDevice(token);
         holder.blockingIOHandler.executeDB(()->holder.deviceDBDao.removeDevice(token));
     }
+
+    public void removeBluePrint(String id) {
+        holder.bluePrintDao.removeBluePrint(id);
+        holder.blockingIOHandler.executeDB(()->holder.bluePrintDBDao.deleteBluePrint(id));
+    }
 }

@@ -3,6 +3,7 @@ package app.socketiot.server.servers;
 import app.socketiot.server.api.BluePrintApiHandler;
 import app.socketiot.server.api.DeviceApiHandler;
 import app.socketiot.server.api.UserApiHandler;
+import app.socketiot.server.api.WidgetApiHandler;
 import app.socketiot.server.core.Holder;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -30,6 +31,7 @@ public class HttpApiServer extends BaseServer {
                 p.addLast(new UserApiHandler(holder));
                 p.addLast(new DeviceApiHandler(holder));
                 p.addLast(new BluePrintApiHandler(holder));
+                p.addLast(new WidgetApiHandler(holder));
             }
 
         };

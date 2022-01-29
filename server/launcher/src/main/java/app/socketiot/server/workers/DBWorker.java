@@ -18,7 +18,7 @@ public class DBWorker implements Runnable, Closeable {
     public void run() {
         ArrayList<User> users = holder.userDao.getAllUsers();
         ArrayList<Device> devices = holder.deviceDao.getAllDevices();
-        ArrayList<BluePrint> bluePrints = new ArrayList<>();
+        ArrayList<BluePrint> bluePrints = holder.bluePrintDao.getAllBluePrints();
         holder.userDBDao.saveAllUsers(users);
         holder.deviceDBDao.saveAllDevices(devices);
         holder.bluePrintDBDao.saveAllBluePrints(bluePrints);

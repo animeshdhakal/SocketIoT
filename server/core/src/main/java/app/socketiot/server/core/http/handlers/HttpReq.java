@@ -2,10 +2,8 @@ package app.socketiot.server.core.http.handlers;
 
 import java.util.List;
 import java.util.Map;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import app.socketiot.server.core.db.model.User;
+import app.socketiot.server.core.json.JsonParser;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -14,7 +12,6 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.util.CharsetUtil;
 
 public class HttpReq {
-    private static ObjectMapper mapper = new ObjectMapper();
     private ChannelHandlerContext ctx;
     private FullHttpRequest req;
     private QueryStringDecoder querydecoder;
@@ -55,11 +52,8 @@ public class HttpReq {
     }
 
     public <T> T getContentAs(Class<T> clazz) {
-        try {
-            return mapper.readValue(req.content().toString(CharsetUtil.US_ASCII), clazz);
-        } catch (Exception e) {
-            return null;
-        }
+        String content = req.content().toString(CharsetUtil.US_ASCII);
+        return JsonParser.parse(clazz, content);
     }
 
     public Map<String, List<String>> getAllQueryParam() {

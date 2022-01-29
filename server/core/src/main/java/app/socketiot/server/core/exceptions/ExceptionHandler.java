@@ -37,6 +37,7 @@ public class ExceptionHandler {
             } else {
                 log.error("Unexpected error! Handler class : {}. Name : {}. Reason : {}. Channel : {}.",
                         ctx.handler().getClass(), ctx.name(), message, ctx.channel());
+                cause.printStackTrace();
             }
 
         }

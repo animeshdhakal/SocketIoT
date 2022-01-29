@@ -23,11 +23,11 @@ public class UserDBDao {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     users.put(rs.getString("email"),
-                            new User(rs.getString("email"), rs.getString("password"), rs.getInt("id")));
+                            new User(rs.getString("email"), rs.getString("password")));
                 }
             }
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
 
         return users;
@@ -44,7 +44,7 @@ public class UserDBDao {
             }
             stmt.executeBatch();
         }catch(Exception e){
-
+            e.printStackTrace();
         }
     }
 

@@ -1,5 +1,6 @@
 package app.socketiot.server.core.http.handlers;
 
+import app.socketiot.server.core.json.JsonParser;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -21,7 +22,7 @@ public class StatusMsg extends HttpRes {
         super();
         Status msg = new Status(error, message);
         try {
-            this.buff = Unpooled.copiedBuffer(mapper.writeValueAsString(msg), CharsetUtil.US_ASCII);
+            this.buff = Unpooled.copiedBuffer(JsonParser.mapper.writeValueAsString(msg), CharsetUtil.US_ASCII);
             this.status = responseStatus;
             headers.set(HttpHeaderNames.CONTENT_TYPE, "application/json");
         } catch (Exception e) {

@@ -1,6 +1,6 @@
 package app.socketiot.server.core.http.handlers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import app.socketiot.server.core.json.JsonParser;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -13,7 +13,6 @@ import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.CharsetUtil;
 
 public class HttpRes {
-    static ObjectMapper mapper = new ObjectMapper();
     protected ByteBuf buff = null;
     protected HttpResponseStatus status = HttpResponseStatus.OK;
     protected HttpHeaders headers = new DefaultHttpHeaders();
@@ -33,7 +32,7 @@ public class HttpRes {
 
     public HttpRes(Object obj) {
         try {
-            buff = Unpooled.copiedBuffer(mapper.writeValueAsString(obj), CharsetUtil.US_ASCII);
+            buff = Unpooled.copiedBuffer(JsonParser.toString(obj), CharsetUtil.US_ASCII);
             this.status = HttpResponseStatus.OK;
         } catch (Exception e) {
             e.printStackTrace();

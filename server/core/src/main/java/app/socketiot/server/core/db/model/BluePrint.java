@@ -1,15 +1,22 @@
 package app.socketiot.server.core.db.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class BluePrint {
     public String name;
+    @JsonIgnore
     public String email;
-    public String blueprint_id;
+    public String id;
     public String json;
 
-    public BluePrint(String name, String email, String blueprint_id, String json) {
+    public BluePrint(String name, String email, String id, String json) {
         this.name = name;
         this.email = email;
-        this.blueprint_id = blueprint_id;
+        this.id = id;
         this.json = json;
+    }
+
+    public BluePrint() {
+
     }
 }
