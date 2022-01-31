@@ -1,5 +1,6 @@
 package app.socketiot.server.core.json;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -10,6 +11,7 @@ public class JsonParser {
 
     static {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.setSerializationInclusion(Include.NON_NULL);
     }
 
     public static BluePrintJson parseBluePrintJson(String json) {

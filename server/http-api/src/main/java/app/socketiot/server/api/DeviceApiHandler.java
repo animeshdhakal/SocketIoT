@@ -1,8 +1,6 @@
 package app.socketiot.server.api;
 
-
 import java.util.concurrent.ConcurrentHashMap;
-
 import app.socketiot.server.api.model.DevicesList;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.db.model.BluePrint;
@@ -71,7 +69,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
 
         holder.deviceDao.addDevice(device);
 
-        return StatusMsg.ok("Device Added Successfully");
+        return new HttpRes(new Device(device.token));
     }
 
     @POST

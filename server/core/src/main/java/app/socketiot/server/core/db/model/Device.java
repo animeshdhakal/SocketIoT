@@ -21,8 +21,8 @@ public class Device {
     }
 
 
-    public Device(String name, int user_id, String blueprint_id, String token) {
-        // this(name, user_id, blueprint_id, token, {});
+    public Device(String token) {
+        this.token = token;
     }
 
     public Device() {

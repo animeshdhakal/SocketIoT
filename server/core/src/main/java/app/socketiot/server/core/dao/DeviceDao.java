@@ -29,8 +29,11 @@ public class DeviceDao {
 
 
     public List<Device> getAllDevicesByEmail(String email){ 
-        return devices.values().stream().filter(device -> device.email.equals(email)).collect(Collectors.toList());
+        List<Device> devicesList = devices.values().stream().filter(device -> device.email.equals(email)).collect(Collectors.toList());
+        devicesList.forEach(device -> device.json = null);
+        return devicesList;
     }
+
 
     public void addDevice(Device device) {
         devices.put(device.token, device);

@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.cli.ArgParser;
 import app.socketiot.server.servers.BaseServer;
-import app.socketiot.server.servers.HardwareServer;
 import app.socketiot.server.servers.HttpApiServer;
 import app.socketiot.server.workers.DBWorker;
 
@@ -19,7 +18,6 @@ public class Launcher {
 
         BaseServer[] servers = new BaseServer[] {
                 new HttpApiServer(holder),
-                new HardwareServer(holder)
         };
 
         if (startServers(servers)) {

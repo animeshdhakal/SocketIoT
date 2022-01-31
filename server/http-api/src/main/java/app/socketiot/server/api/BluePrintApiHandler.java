@@ -9,6 +9,8 @@ import app.socketiot.server.core.http.annotations.Path;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
+import app.socketiot.server.core.json.JsonParser;
+import app.socketiot.server.core.json.model.BluePrintJson;
 import app.socketiot.server.utils.RandomUtil;
 
 
@@ -37,7 +39,7 @@ public class BluePrintApiHandler extends JwtHttpHandler {
 
         holder.bluePrintDao.addBluePrint(blueprint);
 
-        return StatusMsg.ok("BluePrint Added Successfully");
+        return new HttpRes(new BluePrint(blueprint.id));
     }
 
     @Path("/delete")
@@ -66,6 +68,30 @@ public class BluePrintApiHandler extends JwtHttpHandler {
     public HttpRes all(HttpReq req){
         BluePrintList bluePrintList = new BluePrintList(holder.bluePrintDao.getAllBluePrintsByEmail(req.getUser().email));
         return new HttpRes(bluePrintList);
+    }
+
+    @Path("/get")
+    @POST
+    public HttpRes get(HttpReq req) {
+        BluePrint bluePrint = req.getContentAs(BluePrint.class);
+
+        if (bluePrint == null || bluePrint.id == null) {
+            return StatusMsg.badRequest("Incomplete Fields");
+        }
+
+        bluePrint = holder.bluePrintDao.getBluePrint(bluePrint.id);
+
+        if (bluePrint == null) {
+            return StatusMsg.badRequest("BluePrint Not Found");
+        }
+
+        BluePrintJson bluePrintJson = JsonParser.parse(BluePrintJson.class, bluePrint.json);
+
+        if (bluePrintJson == null || bluePrintJson.widgets == null) {
+            return StatusMsg.badRequest("Invalid Blueprint");
+        }
+
+        return new HttpRes(bluePrintJson);
     }
 
 }
