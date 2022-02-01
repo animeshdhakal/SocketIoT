@@ -2,15 +2,22 @@ package app.socketiot.server.servers;
 
 import app.socketiot.server.api.BluePrintApiHandler;
 import app.socketiot.server.api.DeviceApiHandler;
+import app.socketiot.server.api.HttpApiHandler;
 import app.socketiot.server.api.UserApiHandler;
 import app.socketiot.server.api.WidgetApiHandler;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.hardware.HardwareHandler;
+import app.socketiot.server.hardware.WebSocketHandler;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.timeout.IdleStateHandler;
 
@@ -21,6 +28,44 @@ public class HttpApiServer extends BaseServer {
         super(holder, null, 4444);
 
         int hardwareIdleTimeout = 10;
+        String webSocketPath = "/websocket";;
+
+        WebSocketMerger webSocketMerger = new WebSocketMerger(){
+            @Override
+            public void channelRead(ChannelHandlerContext ctx, Object msg) {
+                if(msg instanceof WebSocketFrame || ((FullHttpRequest)msg).uri().startsWith(webSocketPath)){
+                    initWebSocketPipeline(ctx);
+                }else {
+                    initHttpPipeline(ctx);
+                }
+
+                ctx.fireChannelRead(msg);
+            }
+
+            public void initHttpPipeline(ChannelHandlerContext ctx){
+                ChannelPipeline pipeline = ctx.pipeline();
+                pipeline.addLast(new HttpApiHandler(holder));
+                pipeline.addLast(new UserApiHandler(holder));
+                pipeline.addLast(new DeviceApiHandler(holder));
+                pipeline.addLast(new BluePrintApiHandler(holder));
+                pipeline.addLast(new WidgetApiHandler(holder));
+                pipeline.addLast(this);
+            }
+
+
+            public void initWebSocketPipeline(ChannelHandlerContext ctx){
+                ChannelPipeline pipeline = ctx.pipeline();
+                pipeline.addLast(new IdleStateHandler(hardwareIdleTimeout, 0, 0));
+                pipeline.addLast(new WebSocketServerCompressionHandler());
+                pipeline.addLast(new WebSocketServerProtocolHandler(webSocketPath, null, true));
+                pipeline.addLast(new WebSocketHandler());
+                pipeline.addLast(new WSEncoder());
+                pipeline.addLast(new HardwareHandler(holder));
+                pipeline.remove(this);
+            }
+                
+
+        };
 
         this.initializer = new ChannelInitializer<SocketChannel>() {
             @Override
@@ -35,10 +80,7 @@ public class HttpApiServer extends BaseServer {
                     public ChannelPipeline buildHttpPipeline(ChannelPipeline p) {
                         p.addLast(new HttpServerCodec());
                         p.addLast(new HttpObjectAggregator(512 * 1024));
-                        p.addLast(new UserApiHandler(holder));
-                        p.addLast(new DeviceApiHandler(holder));
-                        p.addLast(new BluePrintApiHandler(holder));
-                        p.addLast(new WidgetApiHandler(holder));
+                        p.addLast(webSocketMerger);
                         return p;
                     }
 

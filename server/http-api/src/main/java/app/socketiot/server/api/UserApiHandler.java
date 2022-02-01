@@ -12,8 +12,10 @@ import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
 import app.socketiot.server.utils.JwtUtil;
 import app.socketiot.server.utils.Sha256Util;
+import io.netty.channel.ChannelHandler;
 
 @Path("/api/user")
+@ChannelHandler.Sharable
 public class UserApiHandler extends BaseHttpHandler {
     private UserDao userDao;
 

@@ -8,9 +8,10 @@ import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
 import app.socketiot.server.core.json.model.Widget;
-
+import io.netty.channel.ChannelHandler;
 
 @Path("/api/widget")
+@ChannelHandler.Sharable
 public class WidgetApiHandler extends JwtHttpHandler {
     public WidgetApiHandler(Holder holder) {
         super(holder);

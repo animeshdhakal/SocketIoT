@@ -12,9 +12,11 @@ import app.socketiot.server.core.http.handlers.StatusMsg;
 import app.socketiot.server.core.json.JsonParser;
 import app.socketiot.server.core.json.model.BluePrintJson;
 import app.socketiot.server.utils.RandomUtil;
+import io.netty.channel.ChannelHandler;
 
 
 @Path("/api/blueprint")
+@ChannelHandler.Sharable
 public class BluePrintApiHandler extends JwtHttpHandler {
     public BluePrintApiHandler(Holder holder){
         super(holder);

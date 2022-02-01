@@ -17,7 +17,9 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.AttributeKey;
+import io.netty.channel.ChannelHandler;
 
+@ChannelHandler.Sharable
 public class HardwareHandler extends ChannelInboundHandlerAdapter{
     private final Holder holder;
     private final static int HEADER_SIZE = 4;
@@ -59,12 +61,17 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter{
 
     public ByteBuf createMessage(short msg_type, String ...args){
         ByteBuf buf = PooledByteBufAllocator.DEFAULT.buffer();
+        
         buf.writeShort(HEADER_SIZE);
         buf.writeShort(msg_type);
-        for(String arg : args){
-            buf.writeBytes(arg.getBytes());
-            buf.writeByte(0);
+
+        for(int i = 0; i < args.length; i++){
+            buf.writeBytes(args[i].getBytes());
+            if (i != (args.length - 1)){
+                buf.writeByte(0);
+            }
         }
+
         return buf;
     }
 
@@ -77,7 +84,7 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter{
         if(group != null){
             for(Channel c : group){
                 if(!c.equals(ctx.channel())){
-                    c.writeAndFlush(msg);
+                    c.writeAndFlush(msg.retainedDuplicate());
                 }
             }
         }
@@ -125,24 +132,34 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter{
         }
     }
 
+
+    public void handleSync(ChannelHandlerContext ctx){
+
+    }
+
     public void process(ChannelHandlerContext ctx, int msg_type, String[] params){
         switch(msg_type){
             case MsgType.AUTH:
                 handleAuth(ctx, params[0]);
                 break;
             case MsgType.WRITE:
-                System.out.println("Writing");
                 handleWrite(ctx, params);
                 break;
-            case MsgType.PING:
-                break;
             case MsgType.SYNC:
+                handleSync(ctx);
+                break;
+            case MsgType.PING:
                 break;
             default:
                 break;
         }
     }
 
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx){
+        System.out.println("Connected");
+    }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {

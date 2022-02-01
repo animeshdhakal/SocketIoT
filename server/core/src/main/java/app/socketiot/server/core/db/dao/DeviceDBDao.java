@@ -39,7 +39,7 @@ public class DeviceDBDao {
                 stmt.setString(2, device.email);
                 stmt.setString(3, device.blueprint_id);
                 stmt.setString(4, device.token);
-                stmt.setString(5, device.json);
+                stmt.setString(5, device.json != null ? device.json : "{}");
                 stmt.addBatch();
             }
             stmt.executeBatch();

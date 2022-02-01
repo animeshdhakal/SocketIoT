@@ -17,8 +17,10 @@ import app.socketiot.server.core.json.model.BluePrintJson;
 import app.socketiot.server.core.json.model.DeviceJson;
 import app.socketiot.server.core.json.model.Widget;
 import app.socketiot.server.utils.RandomUtil;
+import io.netty.channel.ChannelHandler;
 
 @Path("/api/device")
+@ChannelHandler.Sharable
 public class DeviceApiHandler extends JwtHttpHandler {
     public DeviceApiHandler(Holder holder) {
         super(holder);
