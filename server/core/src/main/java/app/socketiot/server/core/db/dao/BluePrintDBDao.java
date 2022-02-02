@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.db.model.BluePrint;
+import app.socketiot.server.core.json.JsonParser;
+import app.socketiot.server.core.json.model.BluePrintJson;
 
 public class BluePrintDBDao {
     private final Holder holder;
@@ -23,7 +25,7 @@ public class BluePrintDBDao {
             try(ResultSet rs = stmt.executeQuery()){
                 while(rs.next()){
                     bluePrints.put(rs.getString("id"),
-                            new BluePrint(rs.getString("name"), rs.getString("email"), rs.getString("id"), rs.getString("json")));
+                            new BluePrint(rs.getString("name"), rs.getString("email"), rs.getString("id"), JsonParser.parse(BluePrintJson.class, rs.getString("json"))));
                 }
             }
         }catch(Exception e){
@@ -39,7 +41,7 @@ public class BluePrintDBDao {
                 stmt.setString(1, bluePrint.name);
                 stmt.setString(2, bluePrint.email);
                 stmt.setString(3, bluePrint.id);
-                stmt.setString(4, bluePrint.json != null ? bluePrint.json : "{}");
+                stmt.setString(4, bluePrint.json != null ? JsonParser.toString(bluePrint.json) : "{}");
                 stmt.addBatch();
             }
             stmt.executeBatch();

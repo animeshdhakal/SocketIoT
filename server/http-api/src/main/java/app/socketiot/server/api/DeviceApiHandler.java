@@ -12,8 +12,6 @@ import app.socketiot.server.core.http.annotations.Path;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
-import app.socketiot.server.core.json.JsonParser;
-import app.socketiot.server.core.json.model.BluePrintJson;
 import app.socketiot.server.core.json.model.DeviceJson;
 import app.socketiot.server.core.json.model.Widget;
 import app.socketiot.server.utils.RandomUtil;
@@ -53,9 +51,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("BluePrint Not Found");
         }
 
-        BluePrintJson bluePrintJson = JsonParser.parse(BluePrintJson.class, bluePrint.json);
-
-        if(bluePrintJson == null || bluePrintJson.widgets == null) {
+        if(bluePrint.json == null || bluePrint.json.widgets == null) {
             return StatusMsg.badRequest("Invalid Blueprint");
         }
 
@@ -63,15 +59,17 @@ public class DeviceApiHandler extends JwtHttpHandler {
 
         deviceJson.pins = new ConcurrentHashMap<>();
 
-        for(Widget widget : bluePrintJson.widgets) {
+        for(Widget widget : bluePrint.json.widgets) {
             deviceJson.pins.put(Integer.toString(widget.pin), "");
         }
 
-        device.json = JsonParser.toString(deviceJson);
-
         holder.deviceDao.addDevice(device);
 
-        return new HttpRes(new Device(device.token));
+        Device resDevice = new Device(device.token);
+        resDevice.online = null;
+
+
+        return new HttpRes(resDevice);
     }
 
     @POST

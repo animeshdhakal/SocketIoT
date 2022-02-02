@@ -1,26 +1,62 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Home from "./pages/Home";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import About from "./pages/About";
 import Login from "./pages/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthContextInterface, UserInterface } from "./interfaces";
+import { LogOut } from "./pages/LogOut";
+import Home from "./pages/dashboard/Home";
+import Dashboard from "./components/Dashboard";
+import { Devices } from "./pages/dashboard/Devices";
+import BluePrints from "./pages/dashboard/BluePrints";
 
-let token =
-  "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkaGFrYWxhbmltZXNoMzg1QGdtYWlsLmNvbSIsImV4cCI6MTY3NDM3NTg3Nn0.KaL0EMtyrFDbHTTHBqSvPSm1CPuahFQxtvEBx6IoMNYpqtONDp2pKJ9c3J4F9HntHvYyj1nAMHKWA6rql3a-Ew";
+export const UserContext = React.createContext<AuthContextInterface>(
+  {} as AuthContextInterface
+);
 
-axios.interceptors.request.use((method) => {
-  return method;
+axios.interceptors.request.use((config) => {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  if (user.token && config.headers) {
+    config.headers.Authorization = `Bearer ${user.token}`;
+  }
+  return config;
 });
 
 function App() {
+  const [user, setUser] = useState<UserInterface>({} as UserInterface);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const localUser = localStorage.getItem("user");
+    if (localUser) {
+      setUser(JSON.parse(localUser));
+    }
+    setLoading(false);
+  }, []);
+
+  if (loading) {
+    return <h1>Loading</h1>;
+  }
+
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/login" element={<Login />} />
-      </Routes>
-    </BrowserRouter>
+    <UserContext.Provider value={{ user, setUser }}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<h1>SocketIoT</h1>} />
+          <Route path="/login" element={<Login />} />
+          <Route element={<ProtectedRoute isLoggedIn={Boolean(user.email)} />}>
+            <Route path="/dashboard" element={<Dashboard />}>
+              <Route path="home" element={<Home />} />
+              <Route path="settings" element={<About />} />
+              <Route path="blueprints" element={<BluePrints />} />
+              <Route path="devices" element={<Devices />} />
+            </Route>
+            <Route path="/logout" element={<LogOut />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </UserContext.Provider>
   );
 }
 

@@ -4,8 +4,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.db.model.Device;
 import app.socketiot.server.core.exceptions.ExceptionHandler;
-import app.socketiot.server.core.json.JsonParser;
-import app.socketiot.server.core.json.model.DeviceJson;
 import app.socketiot.server.hardware.message.MsgType;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -97,7 +95,8 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter{
     }
 
     public void handleAuth(ChannelHandlerContext ctx, String token){
-        if(holder.deviceDao.getDeviceByToken(token) != null){
+        Device device = holder.deviceDao.getDeviceByToken(token);
+        if(device != null){
             ctx.channel().attr(tokenKey).set(token);
             ChannelGroup group = groups.get(token);
             if(group == null){
@@ -108,6 +107,8 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter{
             {
                 group.add(ctx.channel());
             }
+            device.online = true;
+            holder.deviceDao.updateDevice(device);
             sendMessage(ctx, createMessage(MsgType.AUTH, "1"));
         }else{
             sendMessage(ctx, createMessage(MsgType.AUTH, "0"));
@@ -121,13 +122,12 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter{
         if(token != null){
             Device device = holder.deviceDao.getDeviceByToken(token);
             if (device != null) {
-                DeviceJson deviceJson = JsonParser.parse(DeviceJson.class, device.json);
-                if (deviceJson != null && deviceJson.pins.get(params[0]) != null) {
-                    deviceJson.pins.put(params[0], params[1]);
-                    device.json = JsonParser.toString(deviceJson);
+                if (device.json != null && device.json.pins.get(params[0]) != null) {
+                    device.json.pins.put(params[0], params[1]);
                     holder.deviceDao.updateDevice(device);
                     broadCastMessage(ctx, createMessage(MsgType.WRITE, params[0], params[1]));
                 }
+                
             }
         }
     }
@@ -166,8 +166,17 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter{
         String token = ctx.channel().attr(tokenKey).get();
         if(token != null){
             ChannelGroup group = groups.get(token);
-            if(group != null){
-                group.remove(ctx.channel());
+            Device device = holder.deviceDao.getDeviceByToken(token);
+            if (group != null) {
+                if (group.size() == 1) {
+                    groups.remove(token);
+                } else {
+                    group.remove(ctx.channel());
+                }
+            }
+            if(device != null){
+                device.online = false;
+                holder.deviceDao.updateDevice(device);
             }
         }
     }

@@ -8,6 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.db.model.Device;
+import app.socketiot.server.core.json.JsonParser;
+import app.socketiot.server.core.json.model.DeviceJson;
 
 public class DeviceDBDao {
     private final Holder holder;
@@ -22,7 +24,7 @@ public class DeviceDBDao {
             PreparedStatement stmt = connection.prepareStatement("SELECT * FROM devices");
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                   devices.put(rs.getString("token"), new Device(rs.getString("name"), rs.getString("email"), rs.getString("blueprint_id"), rs.getString("token"), rs.getString("json")));
+                   devices.put(rs.getString("token"), new Device(rs.getString("name"), rs.getString("email"), rs.getString("blueprint_id"), rs.getString("token"), JsonParser.parse(DeviceJson.class, rs.getString("json"))));
                 }
             }
         } catch (Exception e) {
@@ -39,7 +41,7 @@ public class DeviceDBDao {
                 stmt.setString(2, device.email);
                 stmt.setString(3, device.blueprint_id);
                 stmt.setString(4, device.token);
-                stmt.setString(5, device.json != null ? device.json : "{}");
+                stmt.setString(5, device.json != null ? JsonParser.toString(device.json) : "{}");
                 stmt.addBatch();
             }
             stmt.executeBatch();

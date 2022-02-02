@@ -49,6 +49,7 @@ public class HttpApiServer extends BaseServer {
                 pipeline.addLast(new DeviceApiHandler(holder));
                 pipeline.addLast(new BluePrintApiHandler(holder));
                 pipeline.addLast(new WidgetApiHandler(holder));
+                pipeline.addLast(new NotFoundHandler());
                 pipeline.addLast(this);
             }
 
@@ -75,6 +76,7 @@ public class HttpApiServer extends BaseServer {
                 if (sslCtx != null) {
                     p.addLast(sslCtx.newHandler(ch.alloc()));
                 }
+                p.addLast(new IpFilter());
                 p.addLast(new ProtocolDetector(){
                     @Override
                     public ChannelPipeline buildHttpPipeline(ChannelPipeline p) {

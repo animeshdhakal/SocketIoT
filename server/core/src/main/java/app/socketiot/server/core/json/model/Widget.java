@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Widget{
     public String type;
-    public int x = -1;
-    public int y = -1;
+    public int x = 0;
+    public int y = 0;
     public int width = -1;
     public int height = -1;
     public int pin = -1;

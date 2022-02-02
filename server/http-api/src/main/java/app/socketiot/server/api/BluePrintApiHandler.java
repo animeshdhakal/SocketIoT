@@ -1,5 +1,6 @@
 package app.socketiot.server.api;
 
+import java.util.ArrayList;
 import app.socketiot.server.api.model.BluePrintList;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.db.model.BluePrint;
@@ -9,8 +10,8 @@ import app.socketiot.server.core.http.annotations.Path;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
-import app.socketiot.server.core.json.JsonParser;
 import app.socketiot.server.core.json.model.BluePrintJson;
+import app.socketiot.server.core.json.model.Widget;
 import app.socketiot.server.utils.RandomUtil;
 import io.netty.channel.ChannelHandler;
 
@@ -37,7 +38,7 @@ public class BluePrintApiHandler extends JwtHttpHandler {
 
         blueprint.id = RandomUtil.unique(8);
         blueprint.email = req.getUser().email;
-        blueprint.json = "{\"widgets\":[]}";
+        blueprint.json = new BluePrintJson(new ArrayList<Widget>());
 
         holder.bluePrintDao.addBluePrint(blueprint);
 
@@ -87,13 +88,11 @@ public class BluePrintApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("BluePrint Not Found");
         }
 
-        BluePrintJson bluePrintJson = JsonParser.parse(BluePrintJson.class, bluePrint.json);
-
-        if (bluePrintJson == null || bluePrintJson.widgets == null) {
+        if (bluePrint.json == null || bluePrint.json.widgets == null) {
             return StatusMsg.badRequest("Invalid Blueprint");
         }
 
-        return new HttpRes(bluePrintJson);
+        return new HttpRes(bluePrint.json);
     }
 
 }

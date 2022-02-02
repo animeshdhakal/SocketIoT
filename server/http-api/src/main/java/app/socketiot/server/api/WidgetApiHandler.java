@@ -22,7 +22,7 @@ public class WidgetApiHandler extends JwtHttpHandler {
     public HttpRes add(HttpReq req) {
         Widget widget = req.getContentAs(Widget.class);
 
-        if (widget == null || widget.blueprint_id == null || widget.type == null || widget.x == -1 || widget.y == -1 || widget.width == -1 || widget.height == -1 || widget.pin == -1) {
+        if (widget == null || widget.blueprint_id == null || widget.type == null  || widget.width == -1 || widget.height == -1 || widget.pin == -1) {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
