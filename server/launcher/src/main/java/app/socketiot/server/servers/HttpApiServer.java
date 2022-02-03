@@ -3,9 +3,11 @@ package app.socketiot.server.servers;
 import app.socketiot.server.api.BluePrintApiHandler;
 import app.socketiot.server.api.DeviceApiHandler;
 import app.socketiot.server.api.HttpApiHandler;
+import app.socketiot.server.api.ReactHandler;
 import app.socketiot.server.api.UserApiHandler;
 import app.socketiot.server.api.WidgetApiHandler;
 import app.socketiot.server.core.Holder;
+import app.socketiot.server.core.http.StaticFileHandler;
 import app.socketiot.server.hardware.HardwareHandler;
 import app.socketiot.server.hardware.WebSocketHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -17,7 +19,6 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
-import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.timeout.IdleStateHandler;
 
@@ -28,43 +29,42 @@ public class HttpApiServer extends BaseServer {
         super(holder, null, 4444);
 
         int hardwareIdleTimeout = 10;
-        String webSocketPath = "/websocket";;
+        String webSocketPath = "/websocket";
+        ;
 
-        WebSocketMerger webSocketMerger = new WebSocketMerger(){
+        WebSocketMerger webSocketMerger = new WebSocketMerger() {
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) {
-                if(msg instanceof WebSocketFrame || ((FullHttpRequest)msg).uri().startsWith(webSocketPath)){
+                if (msg instanceof WebSocketFrame || ((FullHttpRequest) msg).uri().startsWith(webSocketPath)) {
                     initWebSocketPipeline(ctx);
-                }else {
+                } else {
                     initHttpPipeline(ctx);
                 }
 
                 ctx.fireChannelRead(msg);
             }
 
-            public void initHttpPipeline(ChannelHandlerContext ctx){
+            public void initHttpPipeline(ChannelHandlerContext ctx) {
                 ChannelPipeline pipeline = ctx.pipeline();
+                pipeline.addLast(new StaticFileHandler(HttpApiHandler.class, "/static"));
                 pipeline.addLast(new HttpApiHandler(holder));
                 pipeline.addLast(new UserApiHandler(holder));
                 pipeline.addLast(new DeviceApiHandler(holder));
                 pipeline.addLast(new BluePrintApiHandler(holder));
                 pipeline.addLast(new WidgetApiHandler(holder));
-                pipeline.addLast(new NotFoundHandler());
+                pipeline.addLast(new ReactHandler(HttpApiHandler.class, "/index.html"));
                 pipeline.addLast(this);
             }
 
-
-            public void initWebSocketPipeline(ChannelHandlerContext ctx){
+            public void initWebSocketPipeline(ChannelHandlerContext ctx) {
                 ChannelPipeline pipeline = ctx.pipeline();
                 pipeline.addLast(new IdleStateHandler(hardwareIdleTimeout, 0, 0));
-                pipeline.addLast(new WebSocketServerCompressionHandler());
                 pipeline.addLast(new WebSocketServerProtocolHandler(webSocketPath, null, true));
                 pipeline.addLast(new WebSocketHandler());
                 pipeline.addLast(new WSEncoder());
                 pipeline.addLast(new HardwareHandler(holder));
                 pipeline.remove(this);
             }
-                
 
         };
 
@@ -76,8 +76,7 @@ public class HttpApiServer extends BaseServer {
                 if (sslCtx != null) {
                     p.addLast(sslCtx.newHandler(ch.alloc()));
                 }
-                p.addLast(new IpFilter());
-                p.addLast(new ProtocolDetector(){
+                p.addLast(new ProtocolDetector() {
                     @Override
                     public ChannelPipeline buildHttpPipeline(ChannelPipeline p) {
                         p.addLast(new HttpServerCodec());
@@ -88,13 +87,13 @@ public class HttpApiServer extends BaseServer {
 
                     @Override
                     public ChannelPipeline buildHardwarePipeline(ChannelPipeline p) {
-                        p.addLast(new IdleStateHandler(hardwareIdleTimeout,0, 0));
+                        p.addLast(new IdleStateHandler(hardwareIdleTimeout, 0, 0));
                         p.addLast(new HardwareHandler(holder));
                         return p;
                     }
 
                 });
-                
+
             }
 
         };

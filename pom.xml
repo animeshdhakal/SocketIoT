@@ -20,6 +20,8 @@
     <HikariCP.version>5.0.0</HikariCP.version>
     <postgres.version>42.3.1</postgres.version>
     <jjwt.version>0.11.2</jjwt.version>
+    <javax.mail.version>1.6.2</javax.mail.version>
+
   </properties>
   <dependencies>
     <dependency>
@@ -43,7 +45,7 @@
       <artifactId>log4j-slf4j-impl</artifactId>
       <version>${log4j2.version}</version>
     </dependency>
-    <dependency>
+     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-api</artifactId>
       <version>${jjwt.version}</version>
@@ -61,7 +63,7 @@
       <scope>runtime</scope>
     </dependency>
   </dependencies>
-
+  
   <modules>
     <module>server</module>
   </modules>

@@ -5,6 +5,7 @@ import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.db.model.Device;
 import app.socketiot.server.core.exceptions.ExceptionHandler;
 import app.socketiot.server.hardware.message.MsgType;
+import app.socketiot.server.utils.IPUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -108,7 +109,9 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter{
                 group.add(ctx.channel());
             }
             device.online = true;
+            device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
             holder.deviceDao.updateDevice(device);
+
             sendMessage(ctx, createMessage(MsgType.AUTH, "1"));
         }else{
             sendMessage(ctx, createMessage(MsgType.AUTH, "0"));

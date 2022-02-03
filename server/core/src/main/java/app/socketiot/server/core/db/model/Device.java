@@ -14,6 +14,7 @@ public class Device {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public DeviceJson json;
     public Boolean online = false;
+    public String lastIP;
 
     public Device(String name, String email, String blueprint_id, String token, DeviceJson json) {
         this.name = name;

@@ -45,6 +45,23 @@ public class StaticFile extends HttpRes {
 
     }
 
+    public StaticFile(Class<?> clazz, String path, HttpResponseStatus status) {
+        super();
+
+        this.status = status;
+
+        try {
+            InputStream fileStream = clazz.getResourceAsStream(path);
+
+            buff = Unpooled.copiedBuffer(fileStream.readAllBytes());
+
+            headers.set(HttpHeaderNames.CONTENT_TYPE, getContentType(path));
+
+        } catch (Exception e) {
+        }
+
+    }
+
     public StaticFile(String path) {
         this(path, HttpResponseStatus.OK);
     }

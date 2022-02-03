@@ -8,11 +8,8 @@ import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.exceptions.ExceptionHandler;
 import app.socketiot.server.core.http.annotations.POST;
 import app.socketiot.server.core.http.annotations.Path;
-import app.socketiot.server.core.http.annotations.StaticFolder;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
-import app.socketiot.server.core.http.handlers.HttpStatus;
-import app.socketiot.server.core.http.handlers.StaticFile;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -23,7 +20,6 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 
 public class BaseHttpHandler extends ChannelInboundHandlerAdapter {
     private Method[] methods = null;
-    private String staticFolder = null;
     private String basePath = null;
     protected final Holder holder;
 
@@ -31,10 +27,6 @@ public class BaseHttpHandler extends ChannelInboundHandlerAdapter {
         super();
         this.holder = holder;
         methods = this.getClass().getDeclaredMethods();
-        if (this.getClass().isAnnotationPresent(StaticFolder.class)) {
-            StaticFolder path = this.getClass().getAnnotation(StaticFolder.class);
-            staticFolder = path.value();
-        }
         Path path = this.getClass().getAnnotation(Path.class);
         if (path != null && !path.value().equals("/")) {
             basePath = path.value();
@@ -52,7 +44,7 @@ public class BaseHttpHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    public void sendHttpResponse(ChannelHandlerContext ctx, FullHttpResponse response) {
+    public static void sendHttpResponse(ChannelHandlerContext ctx, FullHttpResponse response) {
         HttpUtil.setContentLength(response, response.content().readableBytes());
         ctx.writeAndFlush(response);
     }
@@ -85,15 +77,6 @@ public class BaseHttpHandler extends ChannelInboundHandlerAdapter {
                     completeHttp(method,
                             new HttpReq(ctx, req, querydecoder, pathParam));
                     return true;
-                }
-            }
-        }
-
-        if (staticFolder != null) {
-            if (querydecoder.path().contains(staticFolder)) {
-                StaticFile file = new StaticFile(querydecoder.path(), HttpStatus.OK);
-                if (file.getContent() != null) {
-                    sendHttpResponse(ctx, file.getFullHttpResponse(req.protocolVersion()));
                 }
             }
         }

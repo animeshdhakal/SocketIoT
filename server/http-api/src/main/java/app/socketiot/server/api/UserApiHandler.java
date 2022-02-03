@@ -10,7 +10,6 @@ import app.socketiot.server.core.http.annotations.Path;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
-import app.socketiot.server.utils.JwtUtil;
 import app.socketiot.server.utils.Sha256Util;
 import io.netty.channel.ChannelHandler;
 
@@ -63,7 +62,7 @@ public class UserApiHandler extends BaseHttpHandler {
             return StatusMsg.badRequest("Incorrect Password");
         }
 
-        String token = JwtUtil.createToken(dbUser.email, 1 * 12 * 30 * 24 * 60 * 60);
+        String token = holder.jwtUtil.createToken(dbUser.email, 1 * 12 * 30 * 24 * 60 * 60);
 
         return new HttpRes(new JwtResponse(token));
     }

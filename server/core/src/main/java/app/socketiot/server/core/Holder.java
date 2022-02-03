@@ -11,6 +11,7 @@ import app.socketiot.server.core.db.DB;
 import app.socketiot.server.core.db.dao.BluePrintDBDao;
 import app.socketiot.server.core.db.dao.DeviceDBDao;
 import app.socketiot.server.core.db.dao.UserDBDao;
+import app.socketiot.server.utils.JwtUtil;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
@@ -35,6 +36,7 @@ public class Holder {
     public final BluePrintDao bluePrintDao;
     public final BluePrintDBDao bluePrintDBDao;
     public final BlockingIOHandler blockingIOHandler;
+    public final JwtUtil jwtUtil;
 
     public Holder(ArgParser args) {
         this.args = args;
@@ -60,6 +62,7 @@ public class Holder {
         this.deviceDao = new DeviceDao(deviceDBDao.getAllDevices());
         this.bluePrintDao = new BluePrintDao(bluePrintDBDao.getAllBluePrints());
         this.blockingIOHandler = new BlockingIOHandler();
+        this.jwtUtil = new JwtUtil(props.getProperty("server.jwt.secret"));
     }
 
     public void close() {
