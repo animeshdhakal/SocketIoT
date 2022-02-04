@@ -22,12 +22,12 @@ public class WidgetApiHandler extends JwtHttpHandler {
     public HttpRes add(HttpReq req) {
         Widget widget = req.getContentAs(Widget.class);
 
-        if (widget == null || widget.blueprint_id == null || widget.type == null  || widget.width == -1 || widget.height == -1 || widget.pin == -1) {
+        if (widget == null || widget.blueprint_id == null || widget.width == -1 || widget.height == -1
+                || widget.pin == -1) {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        
-        if(!holder.bluePrintDao.addWidget(req.getUser().email, widget.blueprint_id, widget)){
+        if (!holder.bluePrintDao.addWidget(req.getUser().email, widget.blueprint_id, widget)) {
             return StatusMsg.badRequest("BluePrint Not Found");
         }
 
@@ -43,7 +43,7 @@ public class WidgetApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        if(!holder.bluePrintDao.removeWidget(req.getUser().email, widget.blueprint_id, widget.id)){
+        if (!holder.bluePrintDao.removeWidget(req.getUser().email, widget.blueprint_id, widget.id)) {
             return StatusMsg.badRequest("Widget Not Found");
         }
 

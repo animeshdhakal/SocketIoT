@@ -15,26 +15,25 @@ import app.socketiot.server.core.json.model.Widget;
 import app.socketiot.server.utils.RandomUtil;
 import io.netty.channel.ChannelHandler;
 
-
 @Path("/api/blueprint")
 @ChannelHandler.Sharable
 public class BluePrintApiHandler extends JwtHttpHandler {
-    public BluePrintApiHandler(Holder holder){
+    public BluePrintApiHandler(Holder holder) {
         super(holder);
     }
 
     @Path("/create")
     @POST
-    public HttpRes add(HttpReq req){
+    public HttpRes add(HttpReq req) {
         BluePrint blueprint = req.getContentAs(BluePrint.class);
 
-        if(blueprint == null || blueprint.name == null){
+        if (blueprint == null || blueprint.name == null) {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        if(holder.bluePrintDao.getBluePrintByName(blueprint.name) != null){
+        if (holder.bluePrintDao.getBluePrintByName(blueprint.name) != null) {
             return StatusMsg.badRequest("Name should be unique");
-        }    
+        }
 
         blueprint.id = RandomUtil.unique(8);
         blueprint.email = req.getUser().email;
@@ -47,16 +46,16 @@ public class BluePrintApiHandler extends JwtHttpHandler {
 
     @Path("/delete")
     @POST
-    public HttpRes delete(HttpReq req){
+    public HttpRes delete(HttpReq req) {
         BluePrint blueprint = req.getContentAs(BluePrint.class);
 
-        if(blueprint == null || blueprint.id == null){
+        if (blueprint == null || blueprint.id == null) {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
         BluePrint dbBluePrint = holder.bluePrintDao.getBluePrint(blueprint.id);
 
-        if(dbBluePrint == null){
+        if (dbBluePrint == null) {
             return StatusMsg.badRequest("BluePrint Not Found");
         }
 
@@ -65,11 +64,11 @@ public class BluePrintApiHandler extends JwtHttpHandler {
         return StatusMsg.ok("BluePrint Deleted Successfully");
     }
 
-
     @Path("/all")
     @POST
-    public HttpRes all(HttpReq req){
-        BluePrintList bluePrintList = new BluePrintList(holder.bluePrintDao.getAllBluePrintsByEmail(req.getUser().email));
+    public HttpRes all(HttpReq req) {
+        BluePrintList bluePrintList = new BluePrintList(
+                holder.bluePrintDao.getAllBluePrintsByEmail(req.getUser().email));
         return new HttpRes(bluePrintList);
     }
 
@@ -88,7 +87,7 @@ public class BluePrintApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("BluePrint Not Found");
         }
 
-        if (bluePrint.json == null || bluePrint.json.widgets == null) {
+        if (bluePrint.json == null) {
             return StatusMsg.badRequest("Invalid Blueprint");
         }
 

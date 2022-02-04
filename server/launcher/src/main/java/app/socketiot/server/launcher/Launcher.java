@@ -8,13 +8,10 @@ import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.cli.ArgParser;
 import app.socketiot.server.servers.BaseServer;
 import app.socketiot.server.servers.HttpApiServer;
-import app.socketiot.server.workers.DBWorker;
-import io.netty.util.internal.ReflectionUtil;
+import app.socketiot.server.workers.DBWorker;;
 
 public class Launcher {
     public static void main(String[] args) {
-        System.setProperty("io.netty.tryReflectionSetAccessible", "false");
-
         ArgParser argParser = new ArgParser(args);
 
         Holder holder = new Holder(argParser);

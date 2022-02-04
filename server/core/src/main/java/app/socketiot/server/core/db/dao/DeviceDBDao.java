@@ -24,7 +24,9 @@ public class DeviceDBDao {
             PreparedStatement stmt = connection.prepareStatement("SELECT * FROM devices");
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                   devices.put(rs.getString("token"), new Device(rs.getString("name"), rs.getString("email"), rs.getString("blueprint_id"), rs.getString("token"), JsonParser.parse(DeviceJson.class, rs.getString("json"))));
+                    devices.put(rs.getString("token"),
+                            new Device(rs.getString("name"), rs.getString("email"), rs.getString("blueprint_id"),
+                                    rs.getString("token"), JsonParser.parse(DeviceJson.class, rs.getString("json"))));
                 }
             }
         } catch (Exception e) {
@@ -33,9 +35,10 @@ public class DeviceDBDao {
         return devices;
     }
 
-    public void saveAllDevices(ArrayList<Device> devices){
-        try(Connection connection = holder.db.getConnection()){
-            PreparedStatement stmt = connection.prepareStatement("INSERT INTO devices (name, email, blueprint_id, token, json) VALUES (?, ?, ?, ?, ?) ON CONFLICT (token) DO UPDATE SET name = EXCLUDED.name, email = EXCLUDED.email, blueprint_id = EXCLUDED.blueprint_id, json = EXCLUDED.json");
+    public void saveAllDevices(ArrayList<Device> devices) {
+        try (Connection connection = holder.db.getConnection()) {
+            PreparedStatement stmt = connection.prepareStatement(
+                    "INSERT INTO devices (name, email, blueprint_id, token, json) VALUES (?, ?, ?, ?, ?) ON CONFLICT (token) DO UPDATE SET name = EXCLUDED.name, email = EXCLUDED.email, blueprint_id = EXCLUDED.blueprint_id, json = EXCLUDED.json");
             for (Device device : devices) {
                 stmt.setString(1, device.name);
                 stmt.setString(2, device.email);
@@ -45,8 +48,7 @@ public class DeviceDBDao {
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        }catch(Exception e){
-            e.printStackTrace();
+        } catch (Exception e) {
         }
     }
 

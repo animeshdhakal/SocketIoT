@@ -27,24 +27,22 @@ public class UserDBDao {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
         }
 
         return users;
     }
 
-
     public void saveAllUsers(ArrayList<User> users) {
-        try(Connection connection = holder.db.getConnection()){
-            PreparedStatement stmt = connection.prepareStatement("INSERT INTO users (email, password) VALUES (?, ?) ON CONFLICT (email) DO UPDATE SET password = EXCLUDED.password");
+        try (Connection connection = holder.db.getConnection()) {
+            PreparedStatement stmt = connection.prepareStatement(
+                    "INSERT INTO users (email, password) VALUES (?, ?) ON CONFLICT (email) DO UPDATE SET password = EXCLUDED.password");
             for (User user : users) {
                 stmt.setString(1, user.email);
                 stmt.setString(2, user.password);
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        }catch(Exception e){
-            e.printStackTrace();
+        } catch (Exception e) {
         }
     }
 

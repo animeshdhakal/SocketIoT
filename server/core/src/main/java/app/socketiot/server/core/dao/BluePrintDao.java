@@ -40,11 +40,11 @@ public class BluePrintDao {
     }
 
     public List<BluePrint> getAllBluePrintsByEmail(String email) {
-        List<BluePrint> bluePrintsList = bluePrints.values().stream().filter(blueprint -> blueprint.email.equals(email)).collect(Collectors.toList());
+        List<BluePrint> bluePrintsList = bluePrints.values().stream().filter(blueprint -> blueprint.email.equals(email))
+                .collect(Collectors.toList());
         bluePrintsList.forEach(blueprint -> blueprint.json = null);
         return bluePrintsList;
     }
-
 
     public Widget getWidget(String email, String blueprintId, long widgetId) {
         BluePrint bluePrint = bluePrints.get(blueprintId);
@@ -53,7 +53,6 @@ public class BluePrintDao {
         }
         return bluePrint.json.widgets.stream().filter(widget -> widget.id == widgetId).findFirst().orElse(null);
     }
-
 
     public void updateWidget(String email, String blueprintId, long widgetId, Widget widget) {
         BluePrint bluePrint = bluePrints.get(blueprintId);
@@ -65,7 +64,7 @@ public class BluePrintDao {
             w.width = widget.width;
             w.x = widget.x;
             w.y = widget.y;
-            w.pin = widget.pin;    
+            w.pin = widget.pin;
         });
         updateBluePrint(bluePrint);
     }
@@ -73,18 +72,16 @@ public class BluePrintDao {
     public boolean addWidget(String email, String blueprint_id, Widget widget) {
         BluePrint bluePrint = bluePrints.get(blueprint_id);
         if (bluePrint != null && bluePrint.email.equals(email)) {
-            if(bluePrint.json == null){
+            if (bluePrint.json == null || bluePrint.json.widgets == null) {
                 bluePrint.json = new BluePrintJson();
                 bluePrint.json.widgets = new ArrayList<Widget>();
             }
-            if(bluePrint.json.widgets.size() > 0 ){
+            if (bluePrint.json.widgets.size() > 0) {
                 widget.id = bluePrint.json.widgets.get(bluePrint.json.widgets.size() - 1).id + 1;
-            }else{
+            } else {
                 widget.id = 1;
             }
             bluePrint.json.widgets.add(widget);
-
-
 
             updateBluePrint(bluePrint);
 
@@ -93,11 +90,10 @@ public class BluePrintDao {
         return false;
     }
 
-
     public boolean removeWidget(String email, String blueprint_id, long widgetId) {
         BluePrint bluePrint = bluePrints.get(blueprint_id);
         if (bluePrint != null && bluePrint.email.equals(email)) {
-            if(!bluePrint.json.widgets.removeIf(w -> w.id == widgetId)){
+            if (!bluePrint.json.widgets.removeIf(w -> w.id == widgetId)) {
                 return false;
             }
             updateBluePrint(bluePrint);

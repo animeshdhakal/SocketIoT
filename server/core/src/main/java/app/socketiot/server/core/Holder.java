@@ -37,6 +37,7 @@ public class Holder {
     public final BluePrintDBDao bluePrintDBDao;
     public final BlockingIOHandler blockingIOHandler;
     public final JwtUtil jwtUtil;
+    public final Mail mail;
 
     public Holder(ArgParser args) {
         this.args = args;
@@ -63,6 +64,7 @@ public class Holder {
         this.bluePrintDao = new BluePrintDao(bluePrintDBDao.getAllBluePrints());
         this.blockingIOHandler = new BlockingIOHandler();
         this.jwtUtil = new JwtUtil(props.getProperty("server.jwt.secret"));
+        this.mail = new Mail(this);
     }
 
     public void close() {

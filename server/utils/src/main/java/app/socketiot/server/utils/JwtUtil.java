@@ -11,8 +11,11 @@ public class JwtUtil {
 
     private static SecretKey key;
 
-    public JwtUtil(String secret){
-        key = secret == null ? Keys.secretKeyFor(SignatureAlgorithm.HS256) : Keys.hmacShaKeyFor(Sha512Util.createHash(secret, secret).getBytes(StandardCharsets.UTF_8));
+    public JwtUtil(String secret) {
+        if (secret == null) {
+            secret = RandomUtil.unique();
+        }
+        key = Keys.hmacShaKeyFor(Sha512Util.createHash(secret, secret).getBytes(StandardCharsets.UTF_8));
     }
 
     public String createToken(String email, long seconds) {
