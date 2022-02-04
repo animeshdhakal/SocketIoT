@@ -62,6 +62,8 @@ public class DeviceApiHandler extends JwtHttpHandler {
             deviceJson.pins.put(Integer.toString(widget.pin), "");
         }
 
+        device.json = deviceJson;
+
         holder.deviceDao.addDevice(device);
 
         Device resDevice = new Device(device.token);

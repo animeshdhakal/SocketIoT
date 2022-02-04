@@ -18,6 +18,7 @@ public class JsonParser {
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         mapper.setSerializationInclusion(Include.NON_NULL);
         mapper.setFilterProvider(new SimpleFilterProvider().setFailOnUnknownId(false));
+
     }
 
     public static BluePrintJson parseBluePrintJson(String json) {
@@ -47,12 +48,14 @@ public class JsonParser {
         }
     }
 
-    public static String toString(Object obj, String filterName, String... except) {
-        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(except);
-        FilterProvider provider = new SimpleFilterProvider().addFilter("BluePrintJsonFilter", filter);
+    public static String toString(Object obj, String filterName, String... exceptFields) {
+        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(exceptFields);
+        FilterProvider provider = new SimpleFilterProvider().setFailOnUnknownId(false).addFilter(filterName,
+                filter);
         try {
             return mapper.writer(provider).writeValueAsString(obj);
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
