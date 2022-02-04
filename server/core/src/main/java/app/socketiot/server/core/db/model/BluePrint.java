@@ -1,9 +1,11 @@
 package app.socketiot.server.core.db.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import app.socketiot.server.core.json.model.BluePrintJson;
 
+@JsonFilter("BluePrintJsonFilter")
 public class BluePrint {
     public String name;
     @JsonIgnore
@@ -18,8 +20,7 @@ public class BluePrint {
         this.json = json;
     }
 
-
-    public BluePrint(String id){
+    public BluePrint(String id) {
         this.id = id;
     }
 

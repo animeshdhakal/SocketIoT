@@ -42,7 +42,6 @@ public class BluePrintDao {
     public List<BluePrint> getAllBluePrintsByEmail(String email) {
         List<BluePrint> bluePrintsList = bluePrints.values().stream().filter(blueprint -> blueprint.email.equals(email))
                 .collect(Collectors.toList());
-        bluePrintsList.forEach(blueprint -> blueprint.json = null);
         return bluePrintsList;
     }
 

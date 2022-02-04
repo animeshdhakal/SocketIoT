@@ -19,21 +19,19 @@ public class DeviceDao {
         return devices.get(token);
     }
 
-    public Device getDeviceByEmail(String email){
+    public Device getDeviceByEmail(String email) {
         return devices.values().stream().filter(device -> device.email.equals(email)).findFirst().orElse(null);
     }
 
-    public Device getDeviceByName(String name){
+    public Device getDeviceByName(String name) {
         return devices.values().stream().filter(device -> device.name.equals(name)).findFirst().orElse(null);
     }
 
-
-    public List<Device> getAllDevicesByEmail(String email){ 
-        List<Device> devicesList = devices.values().stream().filter(device -> device.email.equals(email)).collect(Collectors.toList());
-        devicesList.forEach(device -> device.json = null);
+    public List<Device> getAllDevicesByEmail(String email) {
+        List<Device> devicesList = devices.values().stream().filter(device -> device.email.equals(email))
+                .collect(Collectors.toList());
         return devicesList;
     }
-
 
     public void addDevice(Device device) {
         devices.put(device.token, device);

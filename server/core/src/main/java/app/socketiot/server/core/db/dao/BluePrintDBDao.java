@@ -42,7 +42,7 @@ public class BluePrintDBDao {
                 stmt.setString(1, bluePrint.name);
                 stmt.setString(2, bluePrint.email);
                 stmt.setString(3, bluePrint.id);
-                stmt.setString(4, bluePrint.json != null ? JsonParser.toString(bluePrint.json) : "{}");
+                stmt.setString(4, JsonParser.toString(bluePrint.json));
                 stmt.addBatch();
             }
             stmt.executeBatch();

@@ -3,6 +3,10 @@ package app.socketiot.server.core.json;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 import app.socketiot.server.core.json.model.BluePrintJson;
 
@@ -11,6 +15,7 @@ public class JsonParser {
 
     static {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         mapper.setSerializationInclusion(Include.NON_NULL);
     }
 
@@ -31,11 +36,22 @@ public class JsonParser {
             return null;
         }
     }
+
     public static <T> T parse(Class<T> clazz, String json) {
         try {
             return mapper.readValue(json, clazz);
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String toString(Object obj, String filterName, String... except) {
+        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(except);
+        FilterProvider provider = new SimpleFilterProvider().addFilter("BluePrintJsonFilter", filter);
+        try {
+            return mapper.writer(provider).writeValueAsString(obj);
+        } catch (Exception e) {
             return null;
         }
     }

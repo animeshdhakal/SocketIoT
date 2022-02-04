@@ -1,10 +1,12 @@
 package app.socketiot.server.core.db.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import app.socketiot.server.core.json.model.DeviceJson;
 
+@JsonFilter("DeviceJsonFilter")
 public class Device {
     public String name;
     @JsonIgnore
@@ -24,7 +26,6 @@ public class Device {
         this.json = json;
     }
 
-
     public Device(String token) {
         this.token = token;
     }
@@ -32,4 +33,3 @@ public class Device {
     public Device() {
     }
 }
-

@@ -10,6 +10,7 @@ import app.socketiot.server.core.http.annotations.Path;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
+import app.socketiot.server.core.json.JsonParser;
 import app.socketiot.server.core.json.model.BluePrintJson;
 import app.socketiot.server.core.json.model.Widget;
 import app.socketiot.server.utils.RandomUtil;
@@ -70,7 +71,8 @@ public class BluePrintApiHandler extends JwtHttpHandler {
     public HttpRes all(HttpReq req) {
         BluePrintList bluePrintList = new BluePrintList(
                 holder.bluePrintDao.getAllBluePrintsByEmail(req.getUser().email));
-        return new HttpRes(bluePrintList);
+
+        return new HttpRes(JsonParser.toString(bluePrintList, "BluePrintJsonFilter", "json"));
     }
 
     @Path("/get")
