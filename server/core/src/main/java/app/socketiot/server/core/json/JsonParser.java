@@ -17,6 +17,7 @@ public class JsonParser {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         mapper.setSerializationInclusion(Include.NON_NULL);
+        mapper.setFilterProvider(new SimpleFilterProvider().setFailOnUnknownId(false));
     }
 
     public static BluePrintJson parseBluePrintJson(String json) {

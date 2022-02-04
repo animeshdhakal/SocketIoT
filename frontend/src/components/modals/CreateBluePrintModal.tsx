@@ -29,8 +29,10 @@ const CreateBluePrintModal: React.FC<Props> = ({ show, onClose, onCreate }) => {
 
     if (!bluePrintName) {
       setBluePrintNameError("BluePrint Name is required");
+      validated = false;
     } else if (bluePrintName.length < 8) {
       setBluePrintNameError("BluePrint Name must be at least 8 characters");
+      validated = false;
     }
 
     if (validated) {
