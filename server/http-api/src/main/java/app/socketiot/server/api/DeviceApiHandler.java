@@ -51,7 +51,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("BluePrint Not Found");
         }
 
-        if(bluePrint.json == null || bluePrint.json.widgets == null) {
+        if(bluePrint.json == null) {
             return StatusMsg.badRequest("Invalid Blueprint");
         }
 

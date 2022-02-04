@@ -37,7 +37,8 @@ public class BluePrintApiHandler extends JwtHttpHandler {
 
         blueprint.id = RandomUtil.unique(8);
         blueprint.email = req.getUser().email;
-        blueprint.json = new BluePrintJson(new ArrayList<Widget>());
+        blueprint.json = new BluePrintJson();
+        blueprint.json.widgets = new ArrayList<Widget>();
 
         holder.bluePrintDao.addBluePrint(blueprint);
 

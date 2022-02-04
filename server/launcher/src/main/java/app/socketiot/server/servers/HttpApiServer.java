@@ -2,7 +2,6 @@ package app.socketiot.server.servers;
 
 import app.socketiot.server.api.BluePrintApiHandler;
 import app.socketiot.server.api.DeviceApiHandler;
-import app.socketiot.server.api.HttpApiHandler;
 import app.socketiot.server.api.ReactHandler;
 import app.socketiot.server.api.UserApiHandler;
 import app.socketiot.server.api.WidgetApiHandler;
@@ -46,13 +45,12 @@ public class HttpApiServer extends BaseServer {
 
             public void initHttpPipeline(ChannelHandlerContext ctx) {
                 ChannelPipeline pipeline = ctx.pipeline();
-                pipeline.addLast(new StaticFileHandler(HttpApiHandler.class, "/static"));
-                pipeline.addLast(new HttpApiHandler(holder));
+                pipeline.addLast(new StaticFileHandler(UserApiHandler.class, "/static"));
                 pipeline.addLast(new UserApiHandler(holder));
                 pipeline.addLast(new DeviceApiHandler(holder));
                 pipeline.addLast(new BluePrintApiHandler(holder));
                 pipeline.addLast(new WidgetApiHandler(holder));
-                pipeline.addLast(new ReactHandler(HttpApiHandler.class, "/index.html"));
+                pipeline.addLast(new ReactHandler(UserApiHandler.class, "/index.html"));
                 pipeline.addLast(this);
             }
 

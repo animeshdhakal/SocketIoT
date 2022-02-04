@@ -24,6 +24,7 @@ public class Launcher {
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
             scheduler.scheduleAtFixedRate(new DBWorker(holder), 6000, 6000, TimeUnit.MILLISECONDS);
             Runtime.getRuntime().addShutdownHook(new Thread(new ExitLauncher(servers, holder, scheduler)));
+            System.out.println("Server Started");
         }
     }
 

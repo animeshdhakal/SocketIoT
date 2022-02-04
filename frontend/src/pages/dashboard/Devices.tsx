@@ -1,5 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import AreYouSureModal from "../../components/modals/AreYouSureModal";
+import AddDeviceModal from "../../components/modals/AddDeviceModal";
 
 interface DeviceInterface {
   name: string;
@@ -13,7 +15,9 @@ interface DeviceRes {
 }
 
 export const Devices = () => {
-  const [devices, setDevices] = React.useState<DeviceInterface[]>([]);
+  const [devices, setDevices] = useState<DeviceInterface[]>([]);
+  const [deviceDelete, setDeviceDelete] = useState<string>("");
+  const [showAddDeviceModal, setShowAddDeviceModal] = useState<boolean>(false);
 
   const fetchBluePrints = () => {
     axios.post<DeviceRes>("/api/device/all").then((res) => {
@@ -34,6 +38,26 @@ export const Devices = () => {
   return (
     <div className="container flex justify-center mx-auto">
       <div className="flex flex-col">
+        <button
+          className="my-5 bg--500 w-40 h-10 rounded-md text-black font-light text-center mx-auto bg-green-400 flex justify-center items-center hover:bg-green-300 hover:text-gray-700 group shadow-gray-400 shadow-md"
+          onClick={() => setShowAddDeviceModal(true)}
+        >
+          Add Device
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 ml-1 group-hover:text-gray-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+            />
+          </svg>
+        </button>
         <div className="w-full">
           <div className="border-b border-gray-200 shadow">
             <table>
@@ -96,7 +120,7 @@ export const Devices = () => {
                       <td className="px-6 py-4">
                         <button
                           className="px-4 py-1 text-sm text-white bg-red-400 rounded"
-                          onClick={() => deleteDevice(device.token)}
+                          onClick={() => setDeviceDelete(device.token)}
                         >
                           Delete
                         </button>
@@ -114,6 +138,19 @@ export const Devices = () => {
           </div>
         </div>
       </div>
+      <AddDeviceModal
+        show={showAddDeviceModal}
+        onCreate={fetchBluePrints}
+        onClose={() => setShowAddDeviceModal(false)}
+      />
+      <AreYouSureModal
+        show={Boolean(deviceDelete)}
+        onClose={() => setDeviceDelete("")}
+        onYes={() => {
+          deleteDevice(deviceDelete);
+          setDeviceDelete("");
+        }}
+      />
     </div>
   );
 };
