@@ -12,6 +12,8 @@ public class BluePrint {
     public String email;
     public String id;
     public BluePrintJson json;
+    @JsonIgnore
+    public volatile boolean isUpdated = false;
 
     public BluePrint(String name, String email, String id, BluePrintJson json) {
         this.name = name;

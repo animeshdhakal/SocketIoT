@@ -34,6 +34,7 @@ public class DeviceDao {
     }
 
     public void addDevice(Device device) {
+        device.isUpdated = true;
         devices.put(device.token, device);
     }
 
@@ -42,13 +43,16 @@ public class DeviceDao {
     }
 
     public void updateDevice(Device device) {
-        devices.put(device.token, device);
+        device.isUpdated = true;
     }
 
     public ArrayList<Device> getAllDevices() {
         ArrayList<Device> data = new ArrayList<>();
         for (Device device : devices.values()) {
-            data.add(device);
+            if (device.isUpdated) {
+                data.add(device);
+                device.isUpdated = false;
+            }
         }
         return data;
     }

@@ -1,8 +1,12 @@
 package app.socketiot.server.core.db.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class User {
     public String email;
     public String password;
+    @JsonIgnore
+    public volatile boolean isUpdated = false;
 
     public User() {
     }

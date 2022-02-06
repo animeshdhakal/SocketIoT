@@ -20,6 +20,7 @@ public class BluePrintDao {
     }
 
     public void addBluePrint(BluePrint bluePrint) {
+        bluePrint.isUpdated = true;
         bluePrints.put(bluePrint.id, bluePrint);
     }
 
@@ -28,7 +29,7 @@ public class BluePrintDao {
     }
 
     public void updateBluePrint(BluePrint bluePrint) {
-        bluePrints.put(bluePrint.id, bluePrint);
+        bluePrint.isUpdated = true;
     }
 
     public BluePrint getBluePrintByName(String name) {
@@ -104,7 +105,10 @@ public class BluePrintDao {
     public ArrayList<BluePrint> getAllBluePrints() {
         ArrayList<BluePrint> data = new ArrayList<>();
         for (BluePrint bluePrint : bluePrints.values()) {
-            data.add(bluePrint);
+            if (bluePrint.isUpdated) {
+                data.add(bluePrint);
+                bluePrint.isUpdated = false;
+            }
         }
         return data;
     }

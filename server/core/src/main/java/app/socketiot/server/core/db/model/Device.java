@@ -17,6 +17,8 @@ public class Device {
     public DeviceJson json;
     public Boolean online = false;
     public String lastIP;
+    @JsonIgnore
+    public volatile boolean isUpdated = false;
 
     public Device(String name, String email, String blueprint_id, String token, DeviceJson json) {
         this.name = name;

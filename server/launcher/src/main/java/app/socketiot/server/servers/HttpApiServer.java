@@ -29,7 +29,6 @@ public class HttpApiServer extends BaseServer {
 
         int hardwareIdleTimeout = 10;
         String webSocketPath = "/websocket";
-        ;
 
         WebSocketMerger webSocketMerger = new WebSocketMerger() {
             @Override

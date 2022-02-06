@@ -1,9 +1,12 @@
 package app.socketiot.server.hardware;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.db.model.Device;
 import app.socketiot.server.core.exceptions.ExceptionHandler;
+import app.socketiot.server.core.metrics.QuotaLimitChecker;
 import app.socketiot.server.hardware.message.MsgType;
 import app.socketiot.server.utils.IPUtil;
 import io.netty.buffer.ByteBuf;
@@ -11,8 +14,6 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.group.ChannelGroup;
-import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.AttributeKey;
@@ -23,10 +24,12 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
     private final Holder holder;
     private final static int HEADER_SIZE = 4;
     private final static AttributeKey<String> tokenKey = AttributeKey.valueOf("token");
-    private static ConcurrentHashMap<String, ChannelGroup> groups = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, Set<Channel>> groups = new ConcurrentHashMap<>();
+    private final QuotaLimitChecker limitChecker;
 
     public HardwareHandler(Holder holder) {
         this.holder = holder;
+        this.limitChecker = new QuotaLimitChecker(10);
     }
 
     @Override
@@ -43,6 +46,10 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (limitChecker.quotaExceeded()) {
+            return;
+        }
+
         ByteBuf buf = (ByteBuf) msg;
 
         if (buf.readableBytes() < HEADER_SIZE)
@@ -85,7 +92,7 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
     }
 
     public void broadCastMessage(ChannelHandlerContext ctx, ByteBuf msg, String token) {
-        ChannelGroup group = groups.get(token);
+        var group = groups.get(token);
         if (group != null) {
             for (Channel c : group) {
                 if (!c.equals(ctx.channel())) {
@@ -101,20 +108,24 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
             broadCastMessage(ctx, msg, token);
     }
 
-    public void handleAuth(ChannelHandlerContext ctx, String token) {
+    public void handleAuth(ChannelHandlerContext ctx, String token, boolean isHardware) {
         Device device = holder.deviceDao.getDeviceByToken(token);
         if (device != null) {
             ctx.channel().attr(tokenKey).set(token);
-            ChannelGroup group = groups.get(token);
+            var group = groups.get(token);
             if (group == null) {
-                group = new DefaultChannelGroup(ctx.executor());
+                group = new HashSet<>();
                 group.add(ctx.channel());
                 groups.put(token, group);
             } else {
                 group.add(ctx.channel());
             }
-            device.online = true;
-            device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
+
+            if (isHardware) {
+                device.online = true;
+                device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
+            }
+
             holder.deviceDao.updateDevice(device);
 
             sendMessage(ctx, createMessage(MsgType.AUTH, "1"));
@@ -135,19 +146,24 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
                     holder.deviceDao.updateDevice(device);
                     broadCastMessage(ctx, createMessage(MsgType.WRITE, params[0], params[1]));
                 }
-
             }
         }
     }
 
     public void handleSync(ChannelHandlerContext ctx) {
-
+        String token = ctx.channel().attr(tokenKey).get();
+        if (token != null) {
+            Device device = holder.deviceDao.getDeviceByToken(token);
+            for (String key : device.json.pins.keySet()) {
+                sendMessage(ctx, createMessage(MsgType.WRITE, key, device.json.pins.get(key)));
+            }
+        }
     }
 
     public void process(ChannelHandlerContext ctx, int msg_type, String[] params) {
         switch (msg_type) {
             case MsgType.AUTH:
-                handleAuth(ctx, params[0]);
+                handleAuth(ctx, params[0], params.length == 1);
                 break;
             case MsgType.WRITE:
                 handleWrite(ctx, params);
@@ -163,15 +179,10 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) {
-        System.out.println("Connected");
-    }
-
-    @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         String token = ctx.channel().attr(tokenKey).get();
         if (token != null) {
-            ChannelGroup group = groups.get(token);
+            var group = groups.get(token);
             Device device = holder.deviceDao.getDeviceByToken(token);
             if (group != null) {
                 if (group.size() == 1) {

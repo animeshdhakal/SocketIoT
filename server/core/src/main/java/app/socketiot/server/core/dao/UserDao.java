@@ -18,6 +18,7 @@ public class UserDao {
     }
 
     public void addUser(User user) {
+        user.isUpdated = true;
         users.put(user.email, user);
     }
 
@@ -26,13 +27,16 @@ public class UserDao {
     }
 
     public void updateUser(User user) {
-        users.put(user.email, user);
+        user.isUpdated = true;
     }
 
     public ArrayList<User> getAllUsers() {
         ArrayList<User> data = new ArrayList<>();
         for (User user : users.values()) {
-            data.add(user);
+            if (user.isUpdated) {
+                data.add(user);
+                user.isUpdated = false;
+            }
         }
         return data;
     }
