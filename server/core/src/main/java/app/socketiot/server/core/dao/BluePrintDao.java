@@ -19,6 +19,11 @@ public class BluePrintDao {
         return bluePrints.get(blueprintId);
     }
 
+    public BluePrint getBluePrintByEmailAndID(String email, String blueprintId) {
+        BluePrint bluePrint = this.getBluePrint(blueprintId);
+        return bluePrint.email.equals(email) ? bluePrint : null;
+    }
+
     public void addBluePrint(BluePrint bluePrint) {
         bluePrint.isUpdated = true;
         bluePrints.put(bluePrint.id, bluePrint);
@@ -30,10 +35,6 @@ public class BluePrintDao {
 
     public void updateBluePrint(BluePrint bluePrint) {
         bluePrint.isUpdated = true;
-    }
-
-    public BluePrint getBluePrintByName(String name) {
-        return bluePrints.values().stream().filter(blueprint -> blueprint.name.equals(name)).findFirst().orElse(null);
     }
 
     public BluePrint getBluePrintByEmail(String email) {

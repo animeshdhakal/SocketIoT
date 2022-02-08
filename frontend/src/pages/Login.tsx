@@ -63,7 +63,7 @@ const Login = () => {
   };
 
   if (user.email) {
-    return <Navigate to="/dashboard/home" />;
+    return <Navigate to="/dashboard/devices" />;
   }
 
   return (

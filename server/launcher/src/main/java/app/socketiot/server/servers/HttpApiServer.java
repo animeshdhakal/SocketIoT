@@ -2,6 +2,7 @@ package app.socketiot.server.servers;
 
 import app.socketiot.server.api.BluePrintApiHandler;
 import app.socketiot.server.api.DeviceApiHandler;
+import app.socketiot.server.api.FileUploadHandler;
 import app.socketiot.server.api.ReactHandler;
 import app.socketiot.server.api.UserApiHandler;
 import app.socketiot.server.api.WidgetApiHandler;

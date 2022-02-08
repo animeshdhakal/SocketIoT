@@ -5,7 +5,6 @@ import app.socketiot.server.api.model.DevicesList;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.db.model.BluePrint;
 import app.socketiot.server.core.db.model.Device;
-import app.socketiot.server.core.db.model.User;
 import app.socketiot.server.core.http.JwtHttpHandler;
 import app.socketiot.server.core.http.annotations.POST;
 import app.socketiot.server.core.http.annotations.Path;
@@ -28,20 +27,19 @@ public class DeviceApiHandler extends JwtHttpHandler {
     @Path("/add")
     @POST
     public HttpRes add(HttpReq req) {
-        User user = req.getUser();
         Device device = req.getContentAs(Device.class);
 
         if (device == null || device.name == null || device.blueprint_id == null) {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        Device dbDevice = holder.deviceDao.getDeviceByEmail(user.email);
+        Device dbDevice = holder.deviceDao.getDeviceByEmail(req.user.email);
 
         if (dbDevice != null && dbDevice.name.equals(device.name)) {
             return StatusMsg.badRequest("Name should be unique");
         }
 
-        device.email = req.getUser().email;
+        device.email = req.user.email;
         device.token = RandomUtil.unique();
 
         BluePrint bluePrint = holder.bluePrintDao.getBluePrint(device.blueprint_id);
@@ -95,9 +93,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
     @POST
     @Path("/all")
     public HttpRes all(HttpReq req) {
-        User user = req.getUser();
-
-        DevicesList devices = new DevicesList(holder.deviceDao.getAllDevicesByEmail(user.email));
+        DevicesList devices = new DevicesList(holder.deviceDao.getAllDevicesByEmail(req.user.email));
 
         return new HttpRes(JsonParser.toString(devices, "DeviceJsonFilter", "json"));
     }

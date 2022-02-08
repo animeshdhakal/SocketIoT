@@ -8,6 +8,7 @@ interface DeviceInterface {
   token: string;
   blueprint_id: string;
   online: boolean;
+  lastIP: string;
 }
 
 interface DeviceRes {
@@ -70,6 +71,9 @@ export const Devices = () => {
                   <th className="px-6 py-2 text-md text-gray-500">
                     Device Status
                   </th>
+
+                  <th className="px-6 py-2 text-md text-gray-500">Last IP</th>
+
                   <th className="px-6 py-2 text-md text-gray-500">
                     Device Token
                   </th>
@@ -100,6 +104,11 @@ export const Devices = () => {
                               device.online ? "bg-green-600" : "bg-red-600"
                             } ml-3 rounded-full`}
                           ></div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900 flex items-center">
+                          {device.lastIP || "-"}
                         </div>
                       </td>
                       <td className="px-6 py-4">

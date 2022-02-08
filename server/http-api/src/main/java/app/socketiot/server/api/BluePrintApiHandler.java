@@ -32,12 +32,14 @@ public class BluePrintApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        if (holder.bluePrintDao.getBluePrintByName(blueprint.name) != null) {
+        BluePrint bluePrint = holder.bluePrintDao.getBluePrintByEmail(req.user.email);
+
+        if (bluePrint != null && bluePrint.name.equals(blueprint.name)) {
             return StatusMsg.badRequest("Name should be unique");
         }
 
         blueprint.id = RandomUtil.unique(8);
-        blueprint.email = req.getUser().email;
+        blueprint.email = req.user.email;
         blueprint.json = new BluePrintJson();
         blueprint.json.widgets = new ArrayList<Widget>();
 
@@ -55,7 +57,7 @@ public class BluePrintApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        BluePrint dbBluePrint = holder.bluePrintDao.getBluePrint(blueprint.id);
+        BluePrint dbBluePrint = holder.bluePrintDao.getBluePrintByEmailAndID(req.user.email, blueprint.id);
 
         if (dbBluePrint == null) {
             return StatusMsg.badRequest("BluePrint Not Found");
@@ -70,7 +72,7 @@ public class BluePrintApiHandler extends JwtHttpHandler {
     @POST
     public HttpRes all(HttpReq req) {
         BluePrintList bluePrintList = new BluePrintList(
-                holder.bluePrintDao.getAllBluePrintsByEmail(req.getUser().email));
+                holder.bluePrintDao.getAllBluePrintsByEmail(req.user.email));
 
         return new HttpRes(JsonParser.toString(bluePrintList, "BluePrintJsonFilter", "json"));
     }

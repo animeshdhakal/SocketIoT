@@ -64,6 +64,8 @@ const AddDeviceModal: React.FC<Props> = ({ show, onClose, onCreate }) => {
               setBluePrintIDError("BluePrint ID is invalid");
             } else if (message.toLowerCase().includes("device")) {
               setDeviceNameError("Device Name should be unique");
+            } else {
+              setDeviceNameError(message);
             }
           }
         });

@@ -23,6 +23,11 @@ public class DeviceDao {
         return devices.values().stream().filter(device -> device.email.equals(email)).findFirst().orElse(null);
     }
 
+    public Device getDeviceByEmailAndToken(String email, String token) {
+        Device device = devices.get(token);
+        return device.email.equals(email) ? device : null;
+    }
+
     public Device getDeviceByName(String name) {
         return devices.values().stream().filter(device -> device.name.equals(name)).findFirst().orElse(null);
     }

@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import AreYouSureModal from "../../components/modals/AreYouSureModal";
 import CreateBluePrintModal from "../../components/modals/CreateBluePrintModal";
+import { Link } from "react-router-dom";
 
 interface BluePrintInterface {
   name: string;
@@ -68,7 +69,6 @@ const BluePrints = () => {
                   <th className="px-6 py-2 text-md text-gray-500">
                     BluePrint ID
                   </th>
-                  <th className="px-6 py-2 text-md text-gray-500">Edit</th>
                   <th className="px-6 py-2 text-md text-gray-500">Delete</th>
                 </tr>
               </thead>
@@ -81,7 +81,14 @@ const BluePrints = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900">
-                          {bluePrint.name}
+                          <Link
+                            to="/dashboard/blueprint"
+                            state={{
+                              id: bluePrint.id,
+                            }}
+                          >
+                            {bluePrint.name}
+                          </Link>
                         </div>
                       </td>
 
@@ -89,11 +96,6 @@ const BluePrints = () => {
                         <div className="text-sm text-gray-500">
                           {bluePrint.id}
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <button className="px-4 py-1 text-sm text-white bg-blue-400 rounded">
-                          Edit
-                        </button>
                       </td>
                       <td className="px-6 py-4">
                         <button

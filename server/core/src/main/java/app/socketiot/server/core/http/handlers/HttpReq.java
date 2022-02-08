@@ -16,8 +16,7 @@ public class HttpReq {
     private FullHttpRequest req;
     private QueryStringDecoder querydecoder;
     private Map<String, String> pathParam;
-    private User user;
-
+    public User user;
 
     public HttpReq(ChannelHandlerContext ctx, FullHttpRequest req, QueryStringDecoder querydecoder,
             Map<String, String> pathParam) {
@@ -29,10 +28,6 @@ public class HttpReq {
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public User getUser() {
-        return user;
     }
 
     public HttpReq(ChannelHandlerContext ctx, FullHttpRequest req, QueryStringDecoder querydecoder) {
