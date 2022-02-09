@@ -6,7 +6,6 @@ import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.db.model.User;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
-import io.netty.handler.codec.http.HttpResponseStatus;
 
 public class JwtHttpHandler extends BaseHttpHandler {
 
@@ -29,7 +28,6 @@ public class JwtHttpHandler extends BaseHttpHandler {
                 }
             }
         }
-        sendHttpResponse(req.getCtx(), new HttpRes("Unauthorized", HttpResponseStatus.UNAUTHORIZED)
-                .getFullHttpResponse(req.getProtocolVersion()));
+        sendHttpResponse(req.getCtx(), HttpRes.unauthorized("Unauthorized"));
     }
 }

@@ -56,7 +56,7 @@ const Dashboard: React.FC = () => {
           </MenuLink>
         </div>
       </div>
-      <div className="w-full h-screen overflow-y-auto">
+      <div className="w-full h-screen overflow-y-auto flex flex-col">
         <div className="header w-full h-14 bg-gray-300 flex justify-between items-center relative">
           <div>
             <h1 className="text-gray-700 m-5">Dashboard</h1>
@@ -96,9 +96,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
-        <div>
-          <Outlet />
-        </div>
+        <Outlet />
       </div>
     </div>
   );

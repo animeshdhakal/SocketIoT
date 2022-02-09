@@ -51,7 +51,7 @@ public class BaseHttpHandler extends ChannelInboundHandlerAdapter {
 
     public void completeHttp(Method method, HttpReq req) throws Exception {
         HttpRes res = (HttpRes) method.invoke(this, req);
-        sendHttpResponse(req.getCtx(), res.getFullHttpResponse(req.getProtocolVersion()));
+        sendHttpResponse(req.getCtx(), res);
     }
 
     public boolean process(ChannelHandlerContext ctx, FullHttpRequest req) throws Exception {

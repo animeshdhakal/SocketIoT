@@ -1,7 +1,5 @@
 package app.socketiot.server.core.http.handlers;
 
-import java.io.InputStream;
-import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
@@ -28,41 +26,23 @@ public class StaticFile extends HttpRes {
         return content_type;
     }
 
-    public StaticFile(String path, HttpResponseStatus status) {
-        super();
-
-        this.status = status;
-
-        try {
-            InputStream fileStream = this.getClass().getResourceAsStream(path);
-
-            buff = Unpooled.copiedBuffer(fileStream.readAllBytes());
-
-            headers.set(HttpHeaderNames.CONTENT_TYPE, getContentType(path));
-
-        } catch (Exception e) {
-        }
-
-    }
-
-    public StaticFile(Class<?> clazz, String path, HttpResponseStatus status) {
-        super();
-
-        this.status = status;
-
-        try {
-            InputStream fileStream = clazz.getResourceAsStream(path);
-
-            buff = Unpooled.copiedBuffer(fileStream.readAllBytes());
-
-            headers.set(HttpHeaderNames.CONTENT_TYPE, getContentType(path));
-
-        } catch (Exception e) {
-        }
-
-    }
-
     public StaticFile(String path) {
-        this(path, HttpResponseStatus.OK);
+        super(HttpResponseStatus.OK);
+        try {
+            super.content().writeBytes(this.getClass().getResourceAsStream(path).readAllBytes());
+            addRequiredHeaders();
+            headers().set(HttpHeaderNames.CONTENT_TYPE, getContentType(path));
+        } catch (Exception e) {
+        }
+    }
+
+    public StaticFile(Class<?> clazz, String path) {
+        super(HttpStatus.OK);
+        try {
+            super.content().writeBytes(clazz.getResourceAsStream(path).readAllBytes());
+            addRequiredHeaders();
+            headers().set(HttpHeaderNames.CONTENT_TYPE, getContentType(path));
+        } catch (Exception e) {
+        }
     }
 }

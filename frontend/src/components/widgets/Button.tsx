@@ -7,6 +7,7 @@ interface Props {
   onValue?: string;
   offValue?: string;
   initialState?: string;
+  disabled?: boolean;
   onClick?: (value: string | undefined) => void;
 }
 
@@ -17,6 +18,7 @@ const Button: React.FC<Props> = ({
   offLabel,
   onValue,
   offValue,
+  disabled,
 }) => {
   const [state, setState] = React.useState<string | undefined>(
     initialState || "0"
@@ -24,7 +26,9 @@ const Button: React.FC<Props> = ({
 
   return (
     <div
-      className="h-20 bg-blue-400 px-1 flex justify-center items-center group select-none"
+      className={`h-20 px-1 w-32 bg-blue-400 flex justify-center items-center group select-none ${
+        disabled ? "pointer-events-none" : ""
+      }`}
       onClick={() => {
         setState(state === onValue ? offValue : onValue);
         onClick && onClick(state === onValue ? offValue : onValue);

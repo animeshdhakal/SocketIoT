@@ -28,7 +28,7 @@ public class HttpApiServer extends BaseServer {
     public HttpApiServer(final Holder holder) {
         super(holder, null, 4444);
 
-        int hardwareIdleTimeout = 10;
+        int hardwareIdleTimeout = 15;
         String webSocketPath = "/websocket";
 
         WebSocketMerger webSocketMerger = new WebSocketMerger() {
@@ -50,6 +50,7 @@ public class HttpApiServer extends BaseServer {
                 pipeline.addLast(new DeviceApiHandler(holder));
                 pipeline.addLast(new BluePrintApiHandler(holder));
                 pipeline.addLast(new WidgetApiHandler(holder));
+                pipeline.addLast(new FileUploadHandler("/upload", "./static/"));
                 pipeline.addLast(new ReactHandler(UserApiHandler.class, "/index.html"));
                 pipeline.addLast(this);
             }
@@ -78,7 +79,7 @@ public class HttpApiServer extends BaseServer {
                     @Override
                     public ChannelPipeline buildHttpPipeline(ChannelPipeline p) {
                         p.addLast(new HttpServerCodec());
-                        p.addLast(new HttpObjectAggregator(512 * 1024));
+                        p.addLast(new HttpObjectAggregator(512 * 1024, true));
                         p.addLast(webSocketMerger);
                         return p;
                     }

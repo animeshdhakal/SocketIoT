@@ -1,9 +1,9 @@
 package app.socketiot.server.api;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import app.socketiot.server.core.exceptions.ExceptionHandler;
+import app.socketiot.server.core.http.handlers.StatusMsg;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.HttpContent;
@@ -25,13 +25,13 @@ import io.netty.channel.ChannelHandler;
 public class FileUploadHandler extends SimpleChannelInboundHandler<HttpObject> {
 
     private static final HttpDataFactory factory = new DefaultHttpDataFactory(true);
-    private HttpPostRequestDecoder decoder;
+    private HttpPostRequestDecoder decoder = null;
     private String uploadUri;
-    private String uploadPath;
+    private String uploadFolder;
 
-    public FileUploadHandler(String uploadUri, String uploadPath) {
+    public FileUploadHandler(String uploadUri, String uploadFolder) {
         this.uploadUri = uploadUri;
-        this.uploadPath = uploadPath;
+        this.uploadFolder = uploadFolder.endsWith("/") ? uploadFolder : uploadFolder + "/";
     }
 
     @Override
@@ -46,7 +46,7 @@ public class FileUploadHandler extends SimpleChannelInboundHandler<HttpObject> {
         if (msg instanceof HttpRequest) {
             HttpRequest req = (HttpRequest) msg;
 
-            if (!req.uri().equals(uploadUri) && !HttpMethod.POST.equals(req.method())) {
+            if (!req.uri().equals(uploadUri) || !HttpMethod.POST.equals(req.method())) {
                 ctx.fireChannelRead(msg);
                 return;
             }
@@ -54,26 +54,31 @@ public class FileUploadHandler extends SimpleChannelInboundHandler<HttpObject> {
             try {
                 decoder = new HttpPostRequestDecoder(factory, req);
             } catch (ErrorDataDecoderException e) {
-                e.printStackTrace();
                 return;
             }
+
         }
 
-        if (decoder != null) {
-            if (msg instanceof HttpContent) {
+        if (decoder != null && msg instanceof HttpContent) {
+            
                 HttpContent chunk = (HttpContent) msg;
                 try {
                     decoder.offer(chunk);
                 } catch (ErrorDataDecoderException e1) {
-                    e1.printStackTrace();
-                    return;
                 }
-                readHttpDataChunkByChunk();
+
                 if (chunk instanceof LastHttpContent) {
-                    reset();
+                    String path = completeUpload();
+                    if (path != null) {
+                        afterUpload(path);
+                        ctx.writeAndFlush(StatusMsg.ok("Uploaded"));
+                    } else {
+                        ctx.writeAndFlush(StatusMsg.badRequest("Invalid Upload"));
+                    }
                 }
-            }
+            
         }
+
     }
 
     private void reset() {
@@ -81,46 +86,54 @@ public class FileUploadHandler extends SimpleChannelInboundHandler<HttpObject> {
         decoder = null;
     }
 
-    private void readHttpDataChunkByChunk() {
+    public void afterUpload(String path) {
+
+    }
+
+    private String completeUpload() {
+        String uploadedFile = null;
         try {
             while (decoder.hasNext()) {
                 InterfaceHttpData data = decoder.next();
-                if (data != null) {
-                    writeHttpData(data);
+                if (data != null && data.getHttpDataType() == HttpDataType.FileUpload) {
+                    FileUpload fileUpload = (FileUpload) data;
+                    if (fileUpload.isCompleted()) {
+                        try {
+                            Path tempFile = fileUpload.getFile().toPath();
+                            Path uploadPath = Path.of(uploadFolder);
+                            if (!Files.exists(uploadPath)) {
+                                Files.createDirectories(uploadPath);
+                            }
+
+                            String extension = "";
+
+                            if (fileUpload.getFilename().contains(".")) {
+                                extension = fileUpload.getFilename()
+                                        .substring(fileUpload.getFilename().lastIndexOf("."));
+                            }
+
+                            String fileName = tempFile.getFileName().toString() + extension;
+
+                            Files.move(tempFile, Path.of(uploadFolder, fileName));
+
+                            uploadedFile = uploadFolder + fileName;
+
+                        } catch (Exception e) {
+                        }
+                    }
                 }
             }
         } catch (EndOfDataDecoderException e1) {
 
+        } finally {
+            reset();
         }
-    }
 
-    private void writeHttpData(InterfaceHttpData data) {
-        if (data.getHttpDataType() == HttpDataType.FileUpload) {
-            FileUpload fileUpload = (FileUpload) data;
-            if (fileUpload.isCompleted()) {
-                try {
-                    File file = new File(fileUpload.getFilename());
-                    if (!file.exists()) {
-                        file.createNewFile();
-                    }
-
-                    // To do
-                    // FileChannel inputChannel = new
-                    // FileInputStream(fileUpload.getFile()).getChannel();
-                    // FileChannel outputChannel = new FileOutputStream(file).getChannel();
-
-                    // outputChannel.transferFrom(inputChannel, 0, inputChannel.size());
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        return uploadedFile;
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
-        ctx.channel().close();
+        ExceptionHandler.handleException(ctx, cause);
     }
 }

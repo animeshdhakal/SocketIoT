@@ -2,7 +2,6 @@ package app.socketiot.server.core.http;
 
 import java.util.regex.Pattern;
 import app.socketiot.server.core.http.handlers.HttpRes;
-import app.socketiot.server.core.http.handlers.HttpStatus;
 import app.socketiot.server.core.http.handlers.StaticFile;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -26,6 +25,7 @@ public class StaticFileHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof FullHttpRequest) {
             FullHttpRequest req = (FullHttpRequest) msg;
             if (req.uri().startsWith(path)) {
+
                 try {
                     processStaticFile(ctx, req);
                 } finally {
@@ -40,8 +40,7 @@ public class StaticFileHandler extends ChannelInboundHandlerAdapter {
     public void processStaticFile(ChannelHandlerContext ctx, FullHttpRequest req) throws Exception {
 
         if (!req.decoderResult().isSuccess()) {
-            HttpRes res = new HttpRes("Error", HttpStatus.BAD_REQUEST);
-            BaseHttpHandler.sendHttpResponse(ctx, res.getFullHttpResponse(req.protocolVersion()));
+            ctx.writeAndFlush(HttpRes.badRequest("Decoder Error"));
             return;
         }
 
@@ -50,19 +49,18 @@ public class StaticFileHandler extends ChannelInboundHandlerAdapter {
         }
 
         if (isNotValid(req.uri())) {
-            HttpRes res = new HttpRes("Error", HttpStatus.BAD_REQUEST);
-            BaseHttpHandler.sendHttpResponse(ctx, res.getFullHttpResponse(req.protocolVersion()));
+            ctx.writeAndFlush(HttpRes.badRequest("Invalid Static File"));
             return;
         }
 
-        HttpRes res = new StaticFile(resourceClass, req.uri(), HttpStatus.OK);
+        StaticFile file = new StaticFile(resourceClass, req.uri());
 
-        if (res.getContent() == null) {
-            res = new HttpRes("Error", HttpStatus.NOT_FOUND);
+        if (file.content() == null || file.content().readableBytes() == 0) {
+            ctx.writeAndFlush(HttpRes.notFound("Not Found"));
+            return;
         }
 
-        BaseHttpHandler.sendHttpResponse(ctx, res.getFullHttpResponse(req.protocolVersion()));
-
+        ctx.writeAndFlush(file);
     }
 
     private static final Pattern INVALID_URI = Pattern.compile(".*[<>&\"].*");

@@ -1,8 +1,6 @@
 package app.socketiot.server.api;
 
-import app.socketiot.server.core.http.BaseHttpHandler;
 import app.socketiot.server.core.http.handlers.HttpRes;
-import app.socketiot.server.core.http.handlers.HttpStatus;
 import app.socketiot.server.core.http.handlers.StaticFile;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -22,12 +20,11 @@ public class ReactHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof FullHttpRequest) {
-            FullHttpRequest req = (FullHttpRequest) msg;
-            HttpRes res = new StaticFile(clazz, indexFilePath, HttpStatus.OK);
-            if (res.getContent() == null) {
-                res = new HttpRes("Not Found", HttpStatus.NOT_FOUND);
+            HttpRes res = new StaticFile(clazz, indexFilePath);
+            if (res.content() == null || res.content().readableBytes() == 0) {
+                res = HttpRes.notFound("Error");
             }
-            BaseHttpHandler.sendHttpResponse(ctx, res.getFullHttpResponse(req.protocolVersion()));
+            ctx.writeAndFlush(res);
             return;
         }
 
