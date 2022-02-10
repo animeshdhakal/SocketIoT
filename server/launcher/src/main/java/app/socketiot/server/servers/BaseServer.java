@@ -30,7 +30,8 @@ public abstract class BaseServer {
             bootstrap.group(holder.bossGroup, holder.workerGroup)
                     .channel(holder.channelClass)
                     .childHandler(getInitializer());
-            InetSocketAddress addr = (host == null || host.isEmpty()) ? new InetSocketAddress(port) : new InetSocketAddress(host, port);
+            InetSocketAddress addr = (host == null || host.isEmpty()) ? new InetSocketAddress(port)
+                    : new InetSocketAddress(host, port);
             this.cf = bootstrap.bind(addr).sync();
             log.info("{} started at port {}", getServerName(), port);
         } catch (Exception e) {

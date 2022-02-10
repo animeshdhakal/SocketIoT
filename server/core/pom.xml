@@ -41,6 +41,18 @@
       <artifactId>javax.mail</artifactId>
       <version>${javax.mail.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.shredzone.acme4j</groupId>
+      <artifactId>acme4j-client</artifactId>
+      <version>${acme4j.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.shredzone.acme4j</groupId>
+      <artifactId>acme4j-utils</artifactId>
+      <version>${acme4j.version}</version>
+    </dependency>
+
 
   </dependencies>
 

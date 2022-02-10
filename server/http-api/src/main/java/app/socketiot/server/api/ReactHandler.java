@@ -22,7 +22,7 @@ public class ReactHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof FullHttpRequest) {
             HttpRes res = new StaticFile(clazz, indexFilePath);
             if (res.content() == null || res.content().readableBytes() == 0) {
-                res = HttpRes.notFound("Error");
+                res = HttpRes.notFound("Not Found");
             }
             ctx.writeAndFlush(res);
             return;

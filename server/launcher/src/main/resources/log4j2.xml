@@ -10,6 +10,10 @@
 
         <Logger name="io.netty" level="INFO" additivity="false" />
 
+        <Logger name="org.shredzone.acme4j" level="INFO" additivity="false" />
+
+        <Logger name="org.jose4j" level="INFO" additivity="false" />
+
         <Root level="all">
             <AppenderRef ref="File"/>
         </Root>

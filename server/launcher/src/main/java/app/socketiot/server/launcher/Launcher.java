@@ -8,6 +8,7 @@ import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.cli.ArgParser;
 import app.socketiot.server.servers.BaseServer;
 import app.socketiot.server.servers.HttpApiServer;
+import app.socketiot.server.workers.CertificateWorker;
 import app.socketiot.server.workers.DBWorker;;
 
 public class Launcher {
@@ -23,8 +24,10 @@ public class Launcher {
         if (startServers(servers)) {
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
             scheduler.scheduleAtFixedRate(new DBWorker(holder), 6000, 6000, TimeUnit.MILLISECONDS);
+            scheduler.scheduleAtFixedRate(new CertificateWorker(holder.sslprovider), 1, 1, TimeUnit.DAYS);
             Runtime.getRuntime().addShutdownHook(new Thread(new ExitLauncher(servers, holder, scheduler)));
             System.out.println("Server Started");
+            holder.sslprovider.generateInitialCertificates(holder.props);
         }
     }
 

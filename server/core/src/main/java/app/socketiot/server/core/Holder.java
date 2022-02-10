@@ -42,7 +42,6 @@ public class Holder {
     public Holder(ArgParser args) {
         this.args = args;
         this.props = new ServerProperties();
-        this.sslprovider = new SSLHandlerProvider(this);
         int workerThreads = props.getIntProperty("server.worker.threads",
                 Runtime.getRuntime().availableProcessors() * 2);
         if (Epoll.isAvailable()) {
@@ -65,6 +64,7 @@ public class Holder {
         this.blockingIOHandler = new BlockingIOHandler();
         this.jwtUtil = new JwtUtil(props.getProperty("server.jwt.secret"));
         this.mail = new Mail(this);
+        this.sslprovider = new SSLHandlerProvider(this);
     }
 
     public void close() {

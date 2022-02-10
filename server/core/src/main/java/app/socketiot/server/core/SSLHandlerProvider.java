@@ -4,6 +4,10 @@ import java.io.InputStream;
 import java.security.cert.CertificateException;
 import javax.net.ssl.SSLException;
 import org.apache.logging.log4j.Logger;
+
+import app.socketiot.server.core.acme.AcmeClient;
+import app.socketiot.server.core.cli.properties.ServerProperties;
+
 import org.apache.logging.log4j.LogManager;
 import io.netty.handler.ssl.OpenSsl;
 import io.netty.handler.ssl.SslContext;
@@ -16,24 +20,112 @@ import java.io.File;
 public class SSLHandlerProvider {
 
     private volatile SslContext sslCtx = null;
+    private boolean isAutoGenerate;
+    private boolean isInitializeOnStart;
+    public AcmeClient acmeClient;
     private static Logger log = LogManager.getLogger();
 
     public SSLHandlerProvider(
             Holder holder) {
         if (holder.args.hasArg("--ssl")) {
-            try {
-                File serverCert = new File(holder.props.getProperty("ssl.cert"), "");
-                File serverKey = new File(holder.props.getProperty("ssl.key"), "");
-                if (!serverCert.exists() || !serverKey.exists()) {
-                    sslCtx = build(fetchSslProvider());
+            log.info("SSL Enabled");
+
+            String certPath = holder.props.getProperty("ssl.cert");
+            String keyPath = holder.props.getProperty("ssl.key");
+            String keyPass = holder.props.getProperty("ssl.key.password");
+            String email = holder.props.getProperty("ssl.email");
+
+            if (certPath == null || certPath.isEmpty()) {
+                log.info("Custom Certificate Not Found");
+                isAutoGenerate = true;
+            } else {
+                isAutoGenerate = false;
+            }
+
+            String host = holder.props.getProperty("server.host");
+
+            if (AcmeClient.DOMAIN_CHAIN_FILE.exists() && AcmeClient.DOMAIN_KEY_FILE.exists()) {
+                log.info("Let's Encrypt Certificates Found");
+
+                certPath = AcmeClient.DOMAIN_CHAIN_FILE.getAbsolutePath();
+                keyPath = AcmeClient.DOMAIN_KEY_FILE.getAbsolutePath();
+                keyPass = null;
+
+                this.isInitializeOnStart = false;
+                this.acmeClient = new AcmeClient(email, host);
+
+            } else {
+                log.info("Let's Encrypt Certificate Not Found");
+                if (host == null || host.isEmpty() || email == null || email.isEmpty()) {
+                    log.error("Host or Email is not set for Ssl. Auto Certificate Generation Disabled");
+                    this.acmeClient = null;
+                    this.isInitializeOnStart = false;
                 } else {
-                    sslCtx = build(serverCert, serverKey, holder.props.getProperty("ssl.key.password", ""),
-                            fetchSslProvider());
+                    log.info("Auto Certificate Generation Enabled");
+                    this.isInitializeOnStart = true;
+                    this.acmeClient = new AcmeClient(email, host);
                 }
-            } catch (CertificateException | SSLException e) {
-                log.error("Error creating SSLContext", e);
+            }
+
+            if (isOpenSslAvailable()) {
+                log.info("Using Native OpenSsl Provider");
+            }
+
+            this.sslCtx = initSslContext(certPath, keyPath, keyPass);
+
+        }
+    }
+
+    public void generateInitialCertificates(ServerProperties props) {
+        if (isAutoGenerate && isInitializeOnStart) {
+            System.out.println("Generating own initial certificates...");
+            try {
+                regenerate();
+                System.out.println("The certificate for your domain "
+                        + props.getProperty("server.host") + " has been generated!");
+            } catch (Exception e) {
+                System.out.println("Error during certificate generation.");
+                System.out.println(e.getMessage());
             }
         }
+    }
+
+    private SslContext initSslContext(String certPath, String keyPath, String keyPass) {
+        try {
+            if (certPath != null && !certPath.isEmpty() && keyPath != null && !keyPath.isEmpty()) {
+                File certFile = new File(certPath);
+                File keyFile = new File(keyPath);
+
+                if (!certFile.exists() || !keyFile.exists()) {
+
+                    log.warn("Using one way SSL Certificate. This is not Secure !!!");
+                    return build(fetchSslProvider());
+                }
+
+                return build(certFile, keyFile, keyPass, fetchSslProvider());
+            }
+
+            log.warn("Using one way SSL Certificate. This is not Secure !!!");
+            return build(fetchSslProvider());
+
+        } catch (Exception e) {
+            log.error("Error while loading SSL Certificates", e);
+            throw new RuntimeException("Error loading SSL Certificates", e);
+        }
+
+    }
+
+    public boolean runRenewalWorker() {
+        return isAutoGenerate && acmeClient != null;
+    }
+
+    public void regenerate() throws Exception {
+        this.acmeClient.requestCertificate();
+
+        String certPath = AcmeClient.DOMAIN_CHAIN_FILE.getAbsolutePath();
+        String keyPath = AcmeClient.DOMAIN_KEY_FILE.getAbsolutePath();
+
+        this.sslCtx = initSslContext(certPath, keyPath, null);
     }
 
     boolean isOpenSslAvailable() {

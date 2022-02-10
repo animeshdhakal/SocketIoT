@@ -3,6 +3,7 @@ package app.socketiot.server.servers;
 import app.socketiot.server.api.BluePrintApiHandler;
 import app.socketiot.server.api.DeviceApiHandler;
 import app.socketiot.server.api.FileUploadHandler;
+import app.socketiot.server.api.LetsEncryptHandler;
 import app.socketiot.server.api.ReactHandler;
 import app.socketiot.server.api.UserApiHandler;
 import app.socketiot.server.api.WidgetApiHandler;
@@ -51,6 +52,7 @@ public class HttpApiServer extends BaseServer {
                 pipeline.addLast(new BluePrintApiHandler(holder));
                 pipeline.addLast(new WidgetApiHandler(holder));
                 pipeline.addLast(new FileUploadHandler("/upload", "./static/"));
+                pipeline.addLast(new LetsEncryptHandler(holder.sslprovider.acmeClient));
                 pipeline.addLast(new ReactHandler(UserApiHandler.class, "/index.html"));
                 pipeline.addLast(this);
             }

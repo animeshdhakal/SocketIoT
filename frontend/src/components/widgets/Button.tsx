@@ -1,5 +1,4 @@
 import React from "react";
-import { DraggableProvided } from "react-beautiful-dnd";
 
 interface Props {
   onLabel?: string;
