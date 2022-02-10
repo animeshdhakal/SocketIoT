@@ -14,9 +14,13 @@ public class HttpRes extends DefaultFullHttpResponse {
         addRequiredHeaders();
     }
 
-    public HttpRes(Object obj) {
-        this(HttpResponseStatus.OK, HttpVersion.HTTP_1_1, JsonParser.toString(obj));
+    public HttpRes(HttpResponseStatus status, Object obj) {
+        this(status, HttpVersion.HTTP_1_1, JsonParser.toString(obj));
         headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json");
+    }
+
+    public HttpRes(Object obj) {
+        this(HttpResponseStatus.OK, obj);
     }
 
     public HttpRes(String content) {

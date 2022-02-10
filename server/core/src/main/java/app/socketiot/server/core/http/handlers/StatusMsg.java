@@ -6,7 +6,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 public class StatusMsg extends HttpRes {
 
     public StatusMsg(boolean error, String message, HttpResponseStatus responseStatus) {
-        super(new Status(error, message));
+        super(responseStatus, new Status(error, message));
     }
 
     public static StatusMsg ok(String message) {
