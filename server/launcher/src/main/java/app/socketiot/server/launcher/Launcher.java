@@ -19,8 +19,9 @@ public class Launcher {
     public static void main(String[] args) {
         ArgParser argParser = new ArgParser(args);
 
-        Holder holder = new Holder(argParser);
         Security.addProvider(new BouncyCastleProvider());
+
+        Holder holder = new Holder(argParser);
 
         BaseServer[] servers = new BaseServer[] {
                 new HttpApiServer(holder),
