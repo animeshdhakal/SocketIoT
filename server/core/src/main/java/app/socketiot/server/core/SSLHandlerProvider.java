@@ -64,6 +64,7 @@ public class SSLHandlerProvider {
                     log.info("Auto Certificate Generation Enabled");
                     this.isInitializeOnStart = true;
                     this.acmeClient = new AcmeClient(email, host);
+                    return;
                 }
             }
 
@@ -136,6 +137,13 @@ public class SSLHandlerProvider {
         return isOpenSslAvailable() ? SslProvider.OPENSSL : SslProvider.JDK;
     }
 
+    public static SslContext build(SslProvider sslProvider) throws CertificateException, SSLException {
+        SelfSignedCertificate ssc = new SelfSignedCertificate();
+        return SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey())
+                .sslProvider(sslProvider)
+                .build();
+    }
+
     public SslContext build(File serverCert, File serverKey,
             String serverPass, SslProvider sslProvider) throws SSLException {
         SslContextBuilder sslContextBuilder;
@@ -147,28 +155,25 @@ public class SSLHandlerProvider {
                     .sslProvider(sslProvider);
         }
         sslContextBuilder.protocols("TLSv1.3", "TLSv1.2");
+
         return sslContextBuilder.build();
     }
 
-    public SslContext build(InputStream serverCert, InputStream serverKey,
-            String serverPass, SslProvider sslProvider) throws SSLException {
-        SslContextBuilder sslContextBuilder;
+    public static SslContext build(File serverCert, File serverKey, String serverPass,
+            SslProvider sslProvider, File clientCert) throws SSLException {
+        log.info("Creating SSL context for cert '{}', key '{}', key pass '{}'",
+                serverCert.getAbsolutePath(), serverKey.getAbsoluteFile(), serverPass);
         if (serverPass == null || serverPass.isEmpty()) {
-            sslContextBuilder = SslContextBuilder.forServer(serverCert, serverKey)
-                    .sslProvider(sslProvider);
+            return SslContextBuilder.forServer(serverCert, serverKey)
+                    .sslProvider(sslProvider)
+                    .trustManager(clientCert)
+                    .build();
         } else {
-            sslContextBuilder = SslContextBuilder.forServer(serverCert, serverKey, serverPass)
-                    .sslProvider(sslProvider);
+            return SslContextBuilder.forServer(serverCert, serverKey, serverPass)
+                    .sslProvider(sslProvider)
+                    .trustManager(clientCert)
+                    .build();
         }
-        sslContextBuilder.protocols("TLSv1.3", "TLSv1.2");
-        return sslContextBuilder.build();
-    }
-
-    public SslContext build(SslProvider sslProvider) throws CertificateException, SSLException {
-        SelfSignedCertificate ssc = new SelfSignedCertificate();
-        return SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey())
-                .sslProvider(sslProvider)
-                .build();
     }
 
     public SslContext getSslCtx() {

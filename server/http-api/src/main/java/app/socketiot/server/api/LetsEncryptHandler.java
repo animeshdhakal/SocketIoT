@@ -2,13 +2,13 @@ package app.socketiot.server.api;
 
 import app.socketiot.server.core.acme.AcmeClient;
 import app.socketiot.server.core.http.handlers.HttpRes;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpUtil;
-import io.netty.util.ReferenceCountUtil;
 
 public class LetsEncryptHandler extends ChannelInboundHandlerAdapter {
     private static final String LETS_ENCRYPT_PATH = "/.well-known/acme-challenge/";
@@ -45,11 +45,11 @@ public class LetsEncryptHandler extends ChannelInboundHandlerAdapter {
 
                 res.setHeader("content-type", "text/html");
 
-                if (!HttpUtil.isKeepAlive(request)) {
-                    ctx.writeAndFlush(res).addListener(ChannelFutureListener.CLOSE);
-                }
+                ChannelFuture future = ctx.writeAndFlush(res);
 
-                ReferenceCountUtil.release(msg);
+                if (!HttpUtil.isKeepAlive(request)) {
+                    future.addListener(ChannelFutureListener.CLOSE);
+                }
 
                 return;
 

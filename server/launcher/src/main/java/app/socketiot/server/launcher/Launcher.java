@@ -1,9 +1,13 @@
 package app.socketiot.server.launcher;
 
 import java.net.BindException;
+import java.security.Security;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.cli.ArgParser;
 import app.socketiot.server.servers.BaseServer;
@@ -16,6 +20,7 @@ public class Launcher {
         ArgParser argParser = new ArgParser(args);
 
         Holder holder = new Holder(argParser);
+        Security.addProvider(new BouncyCastleProvider());
 
         BaseServer[] servers = new BaseServer[] {
                 new HttpApiServer(holder),

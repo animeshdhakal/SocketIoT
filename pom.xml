@@ -11,7 +11,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
-
     <netty.version>4.1.73.Final</netty.version>
     <jackson.version>2.13.1</jackson.version>
     <log4j2.version>2.17.1</log4j2.version>
@@ -21,7 +20,7 @@
     <postgres.version>42.3.1</postgres.version>
     <jjwt.version>0.11.2</jjwt.version>
     <javax.mail.version>1.6.2</javax.mail.version>
-    <acme4j.version>2.11</acme4j.version>
+    <acme4j.version>2.12</acme4j.version>
     <bouncycastle.version>1.70</bouncycastle.version>
   </properties>
   <dependencies>
@@ -55,23 +54,18 @@
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-impl</artifactId>
       <version>${jjwt.version}</version>
-      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-jackson</artifactId>
       <version>${jjwt.version}</version>
-      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk15on</artifactId>
+      <artifactId>bcpg-jdk15on</artifactId>
       <version>${bouncycastle.version}</version>
     </dependency>
-
-
   </dependencies>
-  
   <modules>
     <module>server</module>
   </modules>
