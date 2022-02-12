@@ -10,6 +10,7 @@ import { Devices } from "./pages/dashboard/Devices";
 import BluePrints from "./pages/dashboard/BluePrints";
 import BluePrint from "./pages/dashboard/BluePrint";
 import NotFound from "./pages/NotFound";
+import Register from "./pages/Register";
 
 export const UserContext = React.createContext<AuthContextInterface>(
   {} as AuthContextInterface
@@ -45,6 +46,7 @@ function App() {
         <Routes>
           <Route path="/" element={<h1>SocketIoT</h1>} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route element={<ProtectedRoute isLoggedIn={Boolean(user.email)} />}>
             <Route path="/dashboard" element={<Dashboard />}>
               <Route path="settings" element={<About />} />

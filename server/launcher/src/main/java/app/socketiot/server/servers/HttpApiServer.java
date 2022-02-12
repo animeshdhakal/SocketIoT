@@ -27,7 +27,8 @@ public class HttpApiServer extends BaseServer {
     private final ChannelInitializer<SocketChannel> initializer;
 
     public HttpApiServer(final Holder holder) {
-        super(holder, null, 4444);
+        super(holder, holder.props.getProperty("server.http.host"),
+                holder.props.getIntProperty("server.http.port", 4444));
 
         int hardwareIdleTimeout = 15;
         String webSocketPath = "/websocket";

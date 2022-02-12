@@ -55,9 +55,9 @@ public class Holder {
             channelClass = NioServerSocketChannel.class;
         }
         this.db = new DB(this);
-        this.userDBDao = new UserDBDao(this);
-        this.deviceDBDao = new DeviceDBDao(this);
-        this.bluePrintDBDao = new BluePrintDBDao(this);
+        this.userDBDao = new UserDBDao(db);
+        this.deviceDBDao = new DeviceDBDao(db);
+        this.bluePrintDBDao = new BluePrintDBDao(db);
         this.userDao = new UserDao(userDBDao.getAllUsers());
         this.deviceDao = new DeviceDao(deviceDBDao.getAllDevices());
         this.bluePrintDao = new BluePrintDao(bluePrintDBDao.getAllBluePrints());

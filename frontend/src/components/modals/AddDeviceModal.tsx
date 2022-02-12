@@ -108,6 +108,7 @@ const AddDeviceModal: React.FC<Props> = ({ show, onClose, onCreate }) => {
                   type="text"
                   id="email"
                   placeholder="Enter Device Name"
+                  autoComplete="off"
                   className={`outline-none bg-none p-1 rounded-md w-70 outline-1 outline-gray-300 focus:ring focus:ring-blue-300 focus:outline-2 ${
                     deviceNameError ? "outline-red-500" : ""
                   }`}
@@ -131,6 +132,7 @@ const AddDeviceModal: React.FC<Props> = ({ show, onClose, onCreate }) => {
                   type="text"
                   id="email"
                   placeholder="Enter BluePrint ID"
+                  autoComplete="off"
                   className={`outline-none bg-none p-1 rounded-md w-70 outline-1 outline-gray-300 focus:ring focus:ring-blue-300 focus:outline-2 ${
                     bluePrintIDError ? "outline-red-500" : ""
                   }`}

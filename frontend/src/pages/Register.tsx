@@ -3,12 +3,13 @@ import React, { FormEvent, useContext, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { UserContext } from "../App";
 
-const Login = () => {
+const Register = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [emailError, setEmailError] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
-  const [loginError, setLoginError] = useState<string>("");
+  const [registerError, setRegisterError] = useState<string>("");
+  const [registerSuccess, setRegisterSuccess] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const { user, setUser } = useContext(UserContext);
 
@@ -39,23 +40,19 @@ const Login = () => {
     return isValid;
   };
 
-  const onLogin = async (e: FormEvent<HTMLFormElement>) => {
+  const onRegister = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (validateForm()) {
       try {
         setLoading(true);
-        const res = await axios.post("/api/user/login", { email, password });
-        localStorage.setItem(
-          "user",
-          JSON.stringify({ email, token: res.data.token })
-        );
-        setUser({ email, token: res.data.token });
+        const res = await axios.post("/api/user/register", { email, password });
+        setRegisterSuccess(res.data.message);
       } catch (e) {
         const error = e as AxiosError;
         if (error.response?.data.message) {
-          setLoginError(error.response.data.message);
+          setRegisterError(error.response.data.message);
         } else {
-          setLoginError("Login Failed");
+          setRegisterError("Login Failed");
         }
       }
       setLoading(false);
@@ -70,14 +67,20 @@ const Login = () => {
     <div className="w-screen h-screen flex justify-center items-center flex-col">
       <form
         className="h-auto w-96 shadow-2x flex flex-col items-center  shadow-gray-300 shadow-xl border-gray-300 border-[0.2px]"
-        onSubmit={(e) => onLogin(e)}
+        onSubmit={(e) => onRegister(e)}
       >
         <h1 className="text-3xl my-6">SocketIoT</h1>
-        <h1 className="text-center my-5 text-xl">Login</h1>
+        <h1 className="text-center my-5 text-xl">Register</h1>
 
-        {loginError && (
+        {registerError && (
           <div className="bg-red-200 w-80 py-2 text-center border-[0.1px] border-red-400 rounded-md text-rose-600">
-            {loginError}
+            {registerError}
+          </div>
+        )}
+
+        {registerSuccess && (
+          <div className="bg-green-200 w-80 py-2 text-center border-[0.1px] border-green-400 rounded-md text-green-600">
+            {registerSuccess}
           </div>
         )}
 
@@ -97,7 +100,7 @@ const Login = () => {
             onChange={(e) => {
               setEmail(e.target.value);
               setEmailError("");
-              setLoginError("");
+              setRegisterError("");
             }}
           />
           {emailError && (
@@ -118,12 +121,12 @@ const Login = () => {
             className={`outline-none bg-none p-1 rounded-md outline-1 outline-gray-300 focus:ring focus:ring-blue-300 ${
               passwordError ? "outline-red-500" : ""
             }`}
-            value={password}
             autoComplete="off"
+            value={password}
             onChange={(e) => {
               setPassword(e.target.value);
               setPasswordError("");
-              setLoginError("");
+              setRegisterError("");
             }}
           />
           {passwordError && (
@@ -142,14 +145,14 @@ const Login = () => {
           type="submit"
           disabled={Boolean(emailError || passwordError || loading)}
         >
-          Login
+          Register
         </button>
-        <Link className="text-blue-800 underline mb-6" to="/register">
-          Register a Account
+        <Link className="text-blue-800 underline mb-6" to="/login">
+          Already Registered
         </Link>
       </form>
     </div>
   );
 };
 
-export default Login;
+export default Register;

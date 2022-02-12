@@ -111,7 +111,7 @@ const BluePrints = () => {
               </tbody>
             </table>
             {bluePrints.length === 0 && (
-              <h1 className="text-center text-gray-500 text-xl w-full mt-10">
+              <h1 className="text-center text-gray-500 text-xl w-full my-10">
                 Nothing to Show. Please Create a BluePrint
               </h1>
             )}

@@ -74,14 +74,13 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
     public ByteBuf createMessage(short msg_type, String... args) {
         ByteBuf buf = PooledByteBufAllocator.DEFAULT.buffer();
 
-        buf.writeShort(HEADER_SIZE);
+        String msg_str = String.join("\0", args);
+
+        buf.writeShort(msg_str.length());
         buf.writeShort(msg_type);
 
-        for (int i = 0; i < args.length; i++) {
-            buf.writeBytes(args[i].getBytes());
-            if (i != (args.length - 1)) {
-                buf.writeByte(0);
-            }
+        if (msg_str.length() > 0) {
+            buf.writeBytes(msg_str.getBytes());
         }
 
         return buf;

@@ -1,6 +1,5 @@
 package app.socketiot.server.core;
 
-import java.io.InputStream;
 import java.security.cert.CertificateException;
 import javax.net.ssl.SSLException;
 import org.apache.logging.log4j.Logger;

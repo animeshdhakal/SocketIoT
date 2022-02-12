@@ -5,22 +5,22 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
-import app.socketiot.server.core.Holder;
+import app.socketiot.server.core.db.DB;
 import app.socketiot.server.core.db.model.BluePrint;
 import app.socketiot.server.core.json.JsonParser;
 import app.socketiot.server.core.json.model.BluePrintJson;
 
 public class BluePrintDBDao {
-    private final Holder holder;
+    private final DB db;
 
-    public BluePrintDBDao(Holder holder) {
-        this.holder = holder;
+    public BluePrintDBDao(DB db) {
+        this.db = db;
     }
 
     public ConcurrentHashMap<String, BluePrint> getAllBluePrints() {
         ConcurrentHashMap<String, BluePrint> bluePrints = new ConcurrentHashMap<>();
 
-        try (Connection connection = holder.db.getConnection()) {
+        try (Connection connection = db.getConnection()) {
             PreparedStatement stmt = connection.prepareStatement("SELECT * FROM blueprints");
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -35,7 +35,7 @@ public class BluePrintDBDao {
     }
 
     public void saveAllBluePrints(ArrayList<BluePrint> blueprints) {
-        try (Connection connection = holder.db.getConnection()) {
+        try (Connection connection = db.getConnection()) {
             PreparedStatement stmt = connection.prepareStatement(
                     "INSERT INTO blueprints (name, email, id, json) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, json = EXCLUDED.json");
             for (BluePrint bluePrint : blueprints) {
@@ -51,7 +51,7 @@ public class BluePrintDBDao {
     }
 
     public void deleteBluePrint(String blueprintId) {
-        try (Connection connection = holder.db.getConnection()) {
+        try (Connection connection = db.getConnection()) {
             PreparedStatement stmt = connection.prepareStatement("DELETE FROM blueprints WHERE id = ?");
             stmt.setString(1, blueprintId);
             stmt.execute();

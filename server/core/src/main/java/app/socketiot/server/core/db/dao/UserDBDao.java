@@ -6,19 +6,19 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import app.socketiot.server.core.Holder;
+import app.socketiot.server.core.db.DB;
 import app.socketiot.server.core.db.model.User;
 
 public class UserDBDao {
-    private final Holder holder;
+    private final DB db;
 
-    public UserDBDao(Holder holder) {
-        this.holder = holder;
+    public UserDBDao(DB db) {
+        this.db = db;
     }
 
     public ConcurrentMap<String, User> getAllUsers() {
         ConcurrentMap<String, User> users = new ConcurrentHashMap<>();
-        try (Connection connection = holder.db.getConnection()) {
+        try (Connection connection = db.getConnection()) {
             PreparedStatement stmt = connection.prepareStatement("SELECT * FROM users");
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -33,7 +33,7 @@ public class UserDBDao {
     }
 
     public void saveAllUsers(ArrayList<User> users) {
-        try (Connection connection = holder.db.getConnection()) {
+        try (Connection connection = db.getConnection()) {
             PreparedStatement stmt = connection.prepareStatement(
                     "INSERT INTO users (email, password) VALUES (?, ?) ON CONFLICT (email) DO UPDATE SET password = EXCLUDED.password");
             for (User user : users) {

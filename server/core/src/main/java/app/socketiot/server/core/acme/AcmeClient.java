@@ -39,7 +39,6 @@ public class AcmeClient {
     public static final File DOMAIN_CHAIN_FILE = new File("fullchain.crt");
 
     private static final String PRODUCTION = "acme://letsencrypt.org";
-    private static final String TEST = "acme://letsencrypt.org/staging";
 
     // RSA key size of generated key pairs
     private static final int KEY_SIZE = 2048;

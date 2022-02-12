@@ -6,21 +6,21 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import app.socketiot.server.core.Holder;
+import app.socketiot.server.core.db.DB;
 import app.socketiot.server.core.db.model.Device;
 import app.socketiot.server.core.json.JsonParser;
 import app.socketiot.server.core.json.model.DeviceJson;
 
 public class DeviceDBDao {
-    private final Holder holder;
+    private final DB db;
 
-    public DeviceDBDao(Holder holder) {
-        this.holder = holder;
+    public DeviceDBDao(DB db) {
+        this.db = db;
     }
 
     public ConcurrentMap<String, Device> getAllDevices() {
         ConcurrentMap<String, Device> devices = new ConcurrentHashMap<>();
-        try (Connection connection = holder.db.getConnection()) {
+        try (Connection connection = db.getConnection()) {
             PreparedStatement stmt = connection.prepareStatement("SELECT * FROM devices");
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -36,7 +36,7 @@ public class DeviceDBDao {
     }
 
     public void saveAllDevices(ArrayList<Device> devices) {
-        try (Connection connection = holder.db.getConnection()) {
+        try (Connection connection = db.getConnection()) {
             PreparedStatement stmt = connection.prepareStatement(
                     "INSERT INTO devices (name, email, blueprint_id, token, json) VALUES (?, ?, ?, ?, ?) ON CONFLICT (token) DO UPDATE SET name = EXCLUDED.name, email = EXCLUDED.email, blueprint_id = EXCLUDED.blueprint_id, json = EXCLUDED.json");
             for (Device device : devices) {
@@ -53,7 +53,7 @@ public class DeviceDBDao {
     }
 
     public void removeDevice(String token) {
-        try (Connection connection = holder.db.getConnection()) {
+        try (Connection connection = db.getConnection()) {
             PreparedStatement stmt = connection.prepareStatement("DELETE FROM devices WHERE token = ?");
             stmt.setString(1, token);
             stmt.execute();
