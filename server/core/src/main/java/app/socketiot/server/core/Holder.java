@@ -11,6 +11,7 @@ import app.socketiot.server.core.db.DB;
 import app.socketiot.server.core.db.dao.BluePrintDBDao;
 import app.socketiot.server.core.db.dao.DeviceDBDao;
 import app.socketiot.server.core.db.dao.UserDBDao;
+import app.socketiot.server.core.mail.Mail;
 import app.socketiot.server.utils.JwtUtil;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
@@ -63,7 +64,7 @@ public class Holder {
         this.bluePrintDao = new BluePrintDao(bluePrintDBDao.getAllBluePrints());
         this.blockingIOHandler = new BlockingIOHandler();
         this.jwtUtil = new JwtUtil(props.getProperty("server.jwt.secret"));
-        this.mail = new Mail(this);
+        this.mail = new Mail(props);
         this.sslprovider = new SSLHandlerProvider(this);
     }
 

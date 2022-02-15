@@ -1,4 +1,4 @@
-package app.socketiot.server.core;
+package app.socketiot.server.core.mail;
 
 import java.util.Properties;
 import javax.mail.Authenticator;
@@ -12,16 +12,14 @@ import javax.mail.internet.MimeMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class Mail {
-    private final static Logger log = LogManager.getLogger(Mail.class);
+public class GMail implements BaseMail {
+    private final static Logger log = LogManager.getLogger(GMail.class);
     private final Session session;
     private InternetAddress from;
-    String PLAIN_TEXT = "text/plain; charset=UTF-8";
-    String HTML_TEXT = "text/html; charset=UTF-8";
 
-    public Mail(Holder holder) {
-        String username = holder.props.getProperty("mail.username");
-        String password = holder.props.getProperty("mail.password");
+    public GMail(Properties props) {
+        String username = props.getProperty("mail.smtp.username");
+        String password = props.getProperty("mail.smtp.password");
 
         if (username == null || password == null) {
             log.debug("mail.username or mail.password is not set");
@@ -29,18 +27,13 @@ public class Mail {
             return;
         }
 
-        Properties mailProps = new Properties();
-        mailProps.put("mail.smtp.host", "smtp.gmail.com");
-        mailProps.put("mail.smtp.port", "465");
-        mailProps.put("mail.smtp.ssl.enable", "true");
-        mailProps.put("mail.smtp.auth", "true");
-
-        this.session = Session.getDefaultInstance(mailProps, new Authenticator() {
+        this.session = Session.getDefaultInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(username, password);
             }
         });
+
         try {
             this.from = new InternetAddress(username);
         } catch (AddressException e) {
@@ -54,12 +47,10 @@ public class Mail {
             message.setFrom(from);
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
             message.setSubject(sub);
-            message.setText(body);
             message.setContent(body, contentType);
             Transport.send(message);
         } catch (Exception e) {
             log.error("Error sending mail to {}", to, e);
         }
     }
-
 }
