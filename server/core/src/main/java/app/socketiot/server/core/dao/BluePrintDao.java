@@ -48,7 +48,7 @@ public class BluePrintDao {
 
     public boolean replaceWidgets(String email, String blueprint_id, List<Widget> widgets) {
         BluePrint bluePrint = bluePrints.get(blueprint_id);
-        if (bluePrint == null || bluePrint.email.equals(email)) {
+        if (bluePrint == null || !bluePrint.email.equals(email)) {
             return false;
         }
         bluePrint.json.widgets = widgets;

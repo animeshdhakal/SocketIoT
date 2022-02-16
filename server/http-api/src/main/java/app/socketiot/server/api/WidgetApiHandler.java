@@ -30,10 +30,15 @@ public class WidgetApiHandler extends JwtHttpHandler {
                 return StatusMsg.badRequest("Incomplete Fields");
             }
 
-            holder.bluePrintDao.replaceWidgets(req.user.email, widget.blueprint_id, widget.widgets);
+            if (holder.bluePrintDao.replaceWidgets(req.user.email, widget.blueprint_id, widget.widgets)) {
 
-            return StatusMsg.ok("Widgets Added Successfully");
+                return StatusMsg.ok("Widgets Added Successfully");
+            } else {
+                return StatusMsg.badRequest("Invalid Blueprint Id");
+            }
+
         } catch (Exception e) {
+            e.printStackTrace();
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
