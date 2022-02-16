@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import AreYouSureModal from "../../components/modals/AreYouSureModal";
 import CreateBluePrintModal from "../../components/modals/CreateBluePrintModal";
 import { Link } from "react-router-dom";
+import Alert from "../../components/Alert";
 
 interface BluePrintInterface {
   name: string;
@@ -17,6 +18,12 @@ const BluePrints = () => {
   const [bluePrints, setBluePrints] = useState<BluePrintInterface[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [bluePrintDelete, setBluePrintDelete] = useState<string>("");
+  const [alert, setAlert] = useState<string>("");
+
+  const clickToCopy = (e: React.MouseEvent<HTMLElement>) => {
+    navigator.clipboard.writeText(e.currentTarget.innerText);
+    setAlert("Copied to clipboard");
+  };
 
   const fetchBluePrints = () => {
     axios.post<BluePrintRes>("/api/blueprint/all").then((res) => {
@@ -93,7 +100,10 @@ const BluePrints = () => {
                       </td>
 
                       <td className="px-6 py-4">
-                        <div className="text-sm text-gray-500">
+                        <div
+                          className="text-sm text-gray-500 select-none cursor-pointer"
+                          onClick={clickToCopy}
+                        >
                           {bluePrint.id}
                         </div>
                       </td>
@@ -118,6 +128,7 @@ const BluePrints = () => {
           </div>
         </div>
       </div>
+      <Alert alert={alert} setAlert={setAlert} />
       <CreateBluePrintModal
         show={showModal}
         onClose={() => setShowModal(false)}

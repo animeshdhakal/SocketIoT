@@ -5,9 +5,7 @@ import java.security.Security;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.cli.ArgParser;
 import app.socketiot.server.servers.BaseServer;
@@ -20,6 +18,10 @@ public class Launcher {
         ArgParser argParser = new ArgParser(args);
 
         Security.addProvider(new BouncyCastleProvider());
+
+        String logsFolder = argParser.getArg("-logsFolder");
+
+        System.setProperty("logsFolder", logsFolder == null ? "./" : logsFolder);
 
         Holder holder = new Holder(argParser);
 

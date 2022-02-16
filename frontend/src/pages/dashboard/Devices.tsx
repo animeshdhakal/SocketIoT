@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import AreYouSureModal from "../../components/modals/AreYouSureModal";
 import AddDeviceModal from "../../components/modals/AddDeviceModal";
+import { Link } from "react-router-dom";
+import Alert from "../../components/Alert";
 
 interface DeviceInterface {
   name: string;
@@ -19,6 +21,8 @@ export const Devices = () => {
   const [devices, setDevices] = useState<DeviceInterface[]>([]);
   const [deviceDelete, setDeviceDelete] = useState<string>("");
   const [showAddDeviceModal, setShowAddDeviceModal] = useState<boolean>(false);
+  const [alert, setAlert] = useState<string>("");
+  let alerRef = useRef<HTMLDivElement>(null);
 
   const fetchBluePrints = () => {
     axios.post<DeviceRes>("/api/device/all").then((res) => {
@@ -34,6 +38,11 @@ export const Devices = () => {
     axios.post("/api/device/remove", { token }).then(() => {
       fetchBluePrints();
     });
+  };
+
+  const clickToCopy = (e: React.MouseEvent<HTMLElement>) => {
+    navigator.clipboard.writeText(e.currentTarget.innerText);
+    setAlert("Copied to clipboard");
   };
 
   return (
@@ -80,7 +89,6 @@ export const Devices = () => {
                   <th className="px-6 py-2 text-md text-gray-500">
                     BluePrint ID
                   </th>
-                  <th className="px-6 py-2 text-md text-gray-500">Edit</th>
                   <th className="px-6 py-2 text-md text-gray-500">Delete</th>
                 </tr>
               </thead>
@@ -93,7 +101,15 @@ export const Devices = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900">
-                          {device.name}
+                          <Link
+                            to="/dashboard/device"
+                            state={{
+                              token: device.token,
+                              blueprint_id: device.blueprint_id,
+                            }}
+                          >
+                            {device.name}
+                          </Link>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -112,19 +128,20 @@ export const Devices = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-gray-500">
+                        <div
+                          className="text-sm text-gray-500 select-none cursor-pointer"
+                          onClick={clickToCopy}
+                        >
                           {device.token}
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-gray-500">
+                        <div
+                          className="text-sm text-gray-500 select-none cursor-pointer"
+                          onClick={clickToCopy}
+                        >
                           {device.blueprint_id}
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <button className="px-4 py-1 text-sm text-white bg-blue-400 rounded">
-                          Edit
-                        </button>
                       </td>
                       <td className="px-6 py-4">
                         <button
@@ -147,6 +164,7 @@ export const Devices = () => {
           </div>
         </div>
       </div>
+      <Alert setAlert={setAlert} alert={alert} />
       <AddDeviceModal
         show={showAddDeviceModal}
         onCreate={fetchBluePrints}

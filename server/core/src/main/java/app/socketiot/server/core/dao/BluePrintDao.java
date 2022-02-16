@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import app.socketiot.server.core.db.model.BluePrint;
-import app.socketiot.server.core.json.model.BluePrintJson;
 import app.socketiot.server.core.json.model.Widget;
 
 public class BluePrintDao {
@@ -47,60 +46,14 @@ public class BluePrintDao {
         return bluePrintsList;
     }
 
-    public Widget getWidget(String email, String blueprintId, long widgetId) {
-        BluePrint bluePrint = bluePrints.get(blueprintId);
+    public boolean replaceWidgets(String email, String blueprint_id, List<Widget> widgets) {
+        BluePrint bluePrint = bluePrints.get(blueprint_id);
         if (bluePrint == null || bluePrint.email.equals(email)) {
-            return null;
+            return false;
         }
-        return bluePrint.json.widgets.stream().filter(widget -> widget.id == widgetId).findFirst().orElse(null);
-    }
-
-    public void updateWidget(String email, String blueprintId, long widgetId, Widget widget) {
-        BluePrint bluePrint = bluePrints.get(blueprintId);
-        if (bluePrint == null || bluePrint.email.equals(email)) {
-            return;
-        }
-        bluePrint.json.widgets.stream().filter(w -> w.id == widgetId).findFirst().ifPresent(w -> {
-            w.height = widget.height;
-            w.width = widget.width;
-            w.x = widget.x;
-            w.y = widget.y;
-            w.pin = widget.pin;
-        });
+        bluePrint.json.widgets = widgets;
         updateBluePrint(bluePrint);
-    }
-
-    public boolean addWidget(String email, String blueprint_id, Widget widget) {
-        BluePrint bluePrint = bluePrints.get(blueprint_id);
-        if (bluePrint != null && bluePrint.email.equals(email)) {
-            if (bluePrint.json == null || bluePrint.json.widgets == null) {
-                bluePrint.json = new BluePrintJson();
-                bluePrint.json.widgets = new ArrayList<Widget>();
-            }
-            if (bluePrint.json.widgets.size() > 0) {
-                widget.id = bluePrint.json.widgets.get(bluePrint.json.widgets.size() - 1).id + 1;
-            } else {
-                widget.id = 1;
-            }
-            bluePrint.json.widgets.add(widget);
-
-            updateBluePrint(bluePrint);
-
-            return true;
-        }
-        return false;
-    }
-
-    public boolean removeWidget(String email, String blueprint_id, long widgetId) {
-        BluePrint bluePrint = bluePrints.get(blueprint_id);
-        if (bluePrint != null && bluePrint.email.equals(email)) {
-            if (!bluePrint.json.widgets.removeIf(w -> w.id == widgetId)) {
-                return false;
-            }
-            updateBluePrint(bluePrint);
-            return true;
-        }
-        return false;
+        return true;
     }
 
     public ArrayList<BluePrint> getAllBluePrints() {

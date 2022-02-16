@@ -11,6 +11,7 @@ import BluePrints from "./pages/dashboard/BluePrints";
 import BluePrint from "./pages/dashboard/BluePrint";
 import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
+import Device from "./pages/dashboard/Device";
 
 export const UserContext = React.createContext<AuthContextInterface>(
   {} as AuthContextInterface
@@ -53,6 +54,7 @@ function App() {
               <Route path="blueprints" element={<BluePrints />} />
               <Route path="devices" element={<Devices />} />
               <Route path="blueprint" element={<BluePrint />} />
+              <Route path="device" element={<Device />} />
             </Route>
           </Route>
           <Route path="*" element={<NotFound />} />

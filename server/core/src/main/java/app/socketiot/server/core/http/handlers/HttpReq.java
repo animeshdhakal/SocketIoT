@@ -51,6 +51,10 @@ public class HttpReq {
         return JsonParser.parse(clazz, content);
     }
 
+    public String getContent() {
+        return req.content().toString(CharsetUtil.US_ASCII);
+    }
+
     public Map<String, List<String>> getAllQueryParam() {
         return querydecoder.parameters();
     }

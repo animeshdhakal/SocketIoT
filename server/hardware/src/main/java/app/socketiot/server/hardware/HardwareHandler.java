@@ -26,6 +26,8 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
     private final static AttributeKey<String> tokenKey = AttributeKey.valueOf("token");
     private static ConcurrentHashMap<String, Set<Channel>> groups = new ConcurrentHashMap<>();
     private final QuotaLimitChecker limitChecker;
+    private boolean isDash = false;
+    
 
     public HardwareHandler(Holder holder) {
         this.holder = holder;
@@ -123,6 +125,8 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
             if (isHardware) {
                 device.online = true;
                 device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
+            }else{
+                isDash = true;            
             }
 
             holder.deviceDao.updateDevice(device);
@@ -171,6 +175,7 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
                 handleSync(ctx);
                 break;
             case MsgType.PING:
+                sendMessage(ctx, createMessage(MsgType.PING));
                 break;
             default:
                 break;
@@ -190,7 +195,7 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
                     group.remove(ctx.channel());
                 }
             }
-            if (device != null) {
+            if (device != null && !isDash) {
                 device.online = false;
                 holder.deviceDao.updateDevice(device);
             }

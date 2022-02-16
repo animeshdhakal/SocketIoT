@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
     <Appenders>
-        <File name="File" fileName="logs/server.log" append="false">
-            <PatternLayout pattern="[%d{ISO8601} %-5level] %logger{36} - %msg%n"/>
+        <File name="log" fileName="${sys:logsFolder}/logs/server.log" append="false">
+            <PatternLayout>
+                <pattern>[%d{ISO8601} %-5level] %logger{36} - %msg%n</pattern>
+            </PatternLayout>
         </File>
     </Appenders>
     <Loggers>
@@ -15,7 +17,7 @@
         <Logger name="org.jose4j" level="INFO" additivity="false" />
 
         <Root level="all">
-            <AppenderRef ref="File"/>
+            <AppenderRef ref="log"/>
         </Root>
     </Loggers>
 </Configuration>

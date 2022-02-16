@@ -22,6 +22,10 @@ public class UserDao {
         users.put(user.email, user);
     }
 
+    public void putUser(User user) {
+        users.put(user.email, user);
+    }
+
     public void removeUser(String email) {
         users.remove(email);
     }
