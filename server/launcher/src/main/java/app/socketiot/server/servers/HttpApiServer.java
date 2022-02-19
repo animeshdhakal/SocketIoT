@@ -18,9 +18,11 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.HttpServerKeepAliveHandler;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.ssl.SslContext;
+import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 
 public class HttpApiServer extends BaseServer {
@@ -65,6 +67,8 @@ public class HttpApiServer extends BaseServer {
                 pipeline.addLast(new WebSocketHandler());
                 pipeline.addLast(new WSEncoder());
                 pipeline.addLast(new HardwareHandler(holder));
+                pipeline.remove(ChunkedWriteHandler.class);
+                pipeline.remove(StaticFileHandler.class);
                 pipeline.remove(this);
             }
 
@@ -82,7 +86,9 @@ public class HttpApiServer extends BaseServer {
                     @Override
                     public ChannelPipeline buildHttpPipeline(ChannelPipeline p) {
                         p.addLast(new HttpServerCodec());
+                        p.addLast(new HttpServerKeepAliveHandler());
                         p.addLast(new HttpObjectAggregator(512 * 1024, true));
+                        p.addLast(new ChunkedWriteHandler());
                         p.addLast(webSocketMerger);
                         return p;
                     }
