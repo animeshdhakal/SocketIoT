@@ -38,14 +38,22 @@ function App() {
 
     setLoading(false);
 
-    getToken(messaging, {
-      vapidKey,
-    })
-      .then((val) => {
-        console.log(val);
-      })
-      .catch((err) => {
-        console.log(err);
+    const development: boolean =
+      !process.env.NODE_ENV || process.env.NODE_ENV === "development";
+
+    navigator.serviceWorker
+      .register(development ? "/fsw.js" : "/static/fsw.js")
+      .then((registration) => {
+        getToken(messaging, {
+          vapidKey,
+          serviceWorkerRegistration: registration,
+        })
+          .then((val) => {
+            console.log(val);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
       });
   }, []);
 
