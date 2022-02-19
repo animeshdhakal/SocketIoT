@@ -54,7 +54,6 @@ public class HttpApiServer extends BaseServer {
                 pipeline.addLast(new DeviceApiHandler(holder));
                 pipeline.addLast(new BluePrintApiHandler(holder));
                 pipeline.addLast(new WidgetApiHandler(holder));
-                pipeline.addLast(new FileUploadHandler(holder.jarPath, "/upload", "/static"));
                 pipeline.addLast(new LetsEncryptHandler(holder.sslprovider.acmeClient));
                 pipeline.addLast(new ReactHandler(holder, "/static/index.html"));
                 pipeline.addLast(this);
@@ -68,7 +67,7 @@ public class HttpApiServer extends BaseServer {
                 pipeline.addLast(new WSEncoder());
                 pipeline.addLast(new HardwareHandler(holder));
                 pipeline.remove(ChunkedWriteHandler.class);
-                pipeline.remove(StaticFileHandler.class);
+                pipeline.remove(FileUploadHandler.class);
                 pipeline.remove(this);
             }
 
@@ -87,6 +86,7 @@ public class HttpApiServer extends BaseServer {
                     public ChannelPipeline buildHttpPipeline(ChannelPipeline p) {
                         p.addLast(new HttpServerCodec());
                         p.addLast(new HttpServerKeepAliveHandler());
+                        p.addLast(new FileUploadHandler(holder.jarPath, "/upload", "/static"));
                         p.addLast(new HttpObjectAggregator(512 * 1024, true));
                         p.addLast(new ChunkedWriteHandler());
                         p.addLast(webSocketMerger);
