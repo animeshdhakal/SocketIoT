@@ -6,8 +6,9 @@ import {
   HEARTBEAT_INTERVAL,
 } from "../../config/Protocol";
 import axios from "axios";
-import UniversalWidget from "../../interfaces/UniversalWidget";
+import UniversalWidget from "../../interfaces/IUniversalWidget";
 import Loader from "../../components/Loader";
+import Button from "../../components/widgets/Button";
 
 const Device = () => {
   const location: any = useLocation();
@@ -112,7 +113,7 @@ const Device = () => {
     return <Loader text="Connecting" />;
   }
 
-  return <div>Device</div>;
+  return <div>Devices</div>;
 };
 
 export default Device;

@@ -176,7 +176,7 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
         if (token != null) {
             Device device = holder.deviceDao.getDeviceByToken(token);
             device.group.remove(ctx.channel());
-            if (device != null && !isDash) {
+            if (device != null && !isDash && device.group.size() == 0) {
                 device.online = false;
                 holder.deviceDao.updateDevice(device);
             }

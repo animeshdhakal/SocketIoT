@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
 import Device from "./pages/dashboard/Device";
 import { messaging, getToken, vapidKey } from "./firebase";
+import Button from "./components/widgets/Button";
 
 export const UserContext = React.createContext<AuthContextInterface>(
   {} as AuthContextInterface
@@ -65,7 +66,6 @@ function App() {
     <UserContext.Provider value={{ user, setUser }}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<h1>SocketIoT</h1>} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route element={<ProtectedRoute isLoggedIn={Boolean(user.email)} />}>
