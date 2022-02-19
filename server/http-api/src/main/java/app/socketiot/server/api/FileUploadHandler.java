@@ -2,6 +2,8 @@ package app.socketiot.server.api;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import app.socketiot.server.core.exceptions.ExceptionHandler;
 import app.socketiot.server.core.http.handlers.StatusMsg;
 import io.netty.channel.ChannelHandlerContext;
@@ -26,10 +28,12 @@ public class FileUploadHandler extends SimpleChannelInboundHandler<HttpObject> {
 
     private static final HttpDataFactory factory = new DefaultHttpDataFactory(true);
     private HttpPostRequestDecoder decoder = null;
-    private String uploadUri;
-    private String uploadFolder;
+    private final String uploadUri;
+    private final String uploadFolder;
+    private final String staticFolderPath;
 
-    public FileUploadHandler(String uploadUri, String uploadFolder) {
+    public FileUploadHandler(String staticFolderPath, String uploadUri, String uploadFolder) {
+        this.staticFolderPath = staticFolderPath;
         this.uploadUri = uploadUri;
         this.uploadFolder = uploadFolder.endsWith("/") ? uploadFolder : uploadFolder + "/";
     }
@@ -71,7 +75,7 @@ public class FileUploadHandler extends SimpleChannelInboundHandler<HttpObject> {
                 String path = completeUpload();
                 if (path != null) {
                     afterUpload(path);
-                    ctx.writeAndFlush(StatusMsg.ok("Uploaded"));
+                    ctx.writeAndFlush(StatusMsg.ok(path));
                 } else {
                     ctx.writeAndFlush(StatusMsg.badRequest("Invalid Upload"));
                 }
@@ -102,7 +106,7 @@ public class FileUploadHandler extends SimpleChannelInboundHandler<HttpObject> {
                     if (fileUpload.isCompleted()) {
                         try {
                             Path tempFile = fileUpload.getFile().toPath();
-                            Path uploadPath = Path.of(uploadFolder);
+                            Path uploadPath = Paths.get(staticFolderPath, uploadFolder);
                             if (!Files.exists(uploadPath)) {
                                 Files.createDirectories(uploadPath);
                             }
@@ -116,7 +120,7 @@ public class FileUploadHandler extends SimpleChannelInboundHandler<HttpObject> {
 
                             String fileName = tempFile.getFileName().toString() + extension;
 
-                            Files.move(tempFile, Path.of(uploadFolder, fileName));
+                            Files.move(tempFile, Paths.get(staticFolderPath, uploadFolder, fileName));
 
                             uploadedFile = uploadFolder + fileName;
 

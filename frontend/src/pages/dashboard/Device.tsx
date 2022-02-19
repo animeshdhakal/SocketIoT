@@ -7,11 +7,13 @@ import {
 } from "../../config/Protocol";
 import axios from "axios";
 import UniversalWidget from "../../interfaces/UniversalWidget";
+import Loader from "../../components/Loader";
 
 const Device = () => {
   const location: any = useLocation();
   const navigate = useNavigate();
   const [device, setDevice] = useState<any>({});
+  const [loading, setLoading] = useState<boolean>(true);
   let socket = useRef<WebSocket | null>(null);
 
   const create_message = (msg_type: number, ...args: any) => {
@@ -29,6 +31,7 @@ const Device = () => {
   };
 
   const onOpen = () => {
+    setLoading(false);
     socket.current?.send(create_message(MsgType.AUTH, device.token, "1"));
   };
 
@@ -88,7 +91,8 @@ const Device = () => {
   useEffect(() => {
     if (device.token) {
       socket.current = new WebSocket(
-        window.location.origin.replace("http", "ws") + "/websocket"
+        "ws://localhost:4444/websocket" ||
+          window.location.origin.replace("http", "ws") + "/websocket"
       );
       socket.current.binaryType = "arraybuffer";
       socket.current.onclose = onClose;
@@ -103,6 +107,10 @@ const Device = () => {
         .then((res) => {});
     }
   }, [device]);
+
+  if (loading) {
+    return <Loader text="Connecting" />;
+  }
 
   return <div>Device</div>;
 };

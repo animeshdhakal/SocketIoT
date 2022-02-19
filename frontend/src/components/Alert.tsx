@@ -35,6 +35,7 @@ const Alert: React.FC<Props> = ({ alert, setAlert }) => {
       className={`p-2 bg-indigo-800 items-center text-indigo-100 leading-none lg:rounded-full absolute transition-all duration-500 ease-in-out -top-0 mx-auto left-[51%] ${
         alert ? "flex" : "hidden"
       }`}
+      style={{ transform: "translateY(-45px)" }}
       role="alert"
       ref={alertRef}
     >
