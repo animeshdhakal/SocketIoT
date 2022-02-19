@@ -1,4 +1,4 @@
-package app.socketiot.server.core.db.model;
+package app.socketiot.server.core.model.auth;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

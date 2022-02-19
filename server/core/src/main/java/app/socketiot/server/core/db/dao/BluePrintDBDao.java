@@ -6,9 +6,9 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import app.socketiot.server.core.db.DB;
-import app.socketiot.server.core.db.model.BluePrint;
 import app.socketiot.server.core.json.JsonParser;
 import app.socketiot.server.core.json.model.BluePrintJson;
+import app.socketiot.server.core.model.blueprint.BluePrint;
 
 public class BluePrintDBDao {
     private final DB db;

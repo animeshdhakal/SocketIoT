@@ -11,7 +11,7 @@ import app.socketiot.server.core.cli.ArgParser;
 import app.socketiot.server.servers.BaseServer;
 import app.socketiot.server.servers.HttpApiServer;
 import app.socketiot.server.workers.CertificateWorker;
-import app.socketiot.server.workers.DBWorker;;
+import app.socketiot.server.workers.DBWorker;
 
 public class Launcher {
     public static void main(String[] args) {
@@ -21,7 +21,7 @@ public class Launcher {
 
         String logsFolder = argParser.getArg("-logsFolder");
 
-        System.setProperty("logsFolder", logsFolder == null ? "./" : logsFolder);
+        System.setProperty("logsFolder", logsFolder == null ? "./logs" : logsFolder);
 
         Holder holder = new Holder(argParser);
 
@@ -34,8 +34,8 @@ public class Launcher {
             scheduler.scheduleAtFixedRate(new DBWorker(holder), 6000, 6000, TimeUnit.MILLISECONDS);
             scheduler.scheduleAtFixedRate(new CertificateWorker(holder.sslprovider), 1, 1, TimeUnit.DAYS);
             Runtime.getRuntime().addShutdownHook(new Thread(new ExitLauncher(servers, holder, scheduler)));
-            System.out.println("Server Started");
             holder.sslprovider.generateInitialCertificates(holder.props);
+            System.out.println("Server Started");
         }
     }
 

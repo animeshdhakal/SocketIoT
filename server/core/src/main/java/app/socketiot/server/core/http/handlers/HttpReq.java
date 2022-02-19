@@ -2,8 +2,9 @@ package app.socketiot.server.core.http.handlers;
 
 import java.util.List;
 import java.util.Map;
-import app.socketiot.server.core.db.model.User;
+
 import app.socketiot.server.core.json.JsonParser;
+import app.socketiot.server.core.model.auth.User;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;

@@ -2,7 +2,7 @@ package app.socketiot.server.api.model;
 
 import java.util.List;
 
-import app.socketiot.server.core.db.model.BluePrint;
+import app.socketiot.server.core.model.blueprint.BluePrint;
 
 public class BluePrintList {
     public List<BluePrint> bluePrints;

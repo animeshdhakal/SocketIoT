@@ -3,9 +3,9 @@ package app.socketiot.server.core.http;
 import java.lang.reflect.Method;
 
 import app.socketiot.server.core.Holder;
-import app.socketiot.server.core.db.model.User;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
+import app.socketiot.server.core.model.auth.User;
 
 public class JwtHttpHandler extends BaseHttpHandler {
 

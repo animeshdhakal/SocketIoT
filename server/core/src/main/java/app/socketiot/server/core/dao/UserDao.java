@@ -3,7 +3,7 @@ package app.socketiot.server.core.dao;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentMap;
 
-import app.socketiot.server.core.db.model.User;
+import app.socketiot.server.core.model.auth.User;
 
 public class UserDao {
 

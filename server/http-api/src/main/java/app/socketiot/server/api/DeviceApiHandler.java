@@ -3,8 +3,6 @@ package app.socketiot.server.api;
 import java.util.concurrent.ConcurrentHashMap;
 import app.socketiot.server.api.model.DevicesList;
 import app.socketiot.server.core.Holder;
-import app.socketiot.server.core.db.model.BluePrint;
-import app.socketiot.server.core.db.model.Device;
 import app.socketiot.server.core.http.JwtHttpHandler;
 import app.socketiot.server.core.http.annotations.POST;
 import app.socketiot.server.core.http.annotations.Path;
@@ -14,6 +12,8 @@ import app.socketiot.server.core.http.handlers.StatusMsg;
 import app.socketiot.server.core.json.JsonParser;
 import app.socketiot.server.core.json.model.DeviceJson;
 import app.socketiot.server.core.json.model.Widget;
+import app.socketiot.server.core.model.blueprint.BluePrint;
+import app.socketiot.server.core.model.device.Device;
 import app.socketiot.server.utils.RandomUtil;
 import io.netty.channel.ChannelHandler;
 

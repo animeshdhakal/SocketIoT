@@ -12,6 +12,7 @@ import BluePrint from "./pages/dashboard/BluePrint";
 import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
 import Device from "./pages/dashboard/Device";
+import { messaging, getToken, vapidKey } from "./firebase";
 
 export const UserContext = React.createContext<AuthContextInterface>(
   {} as AuthContextInterface
@@ -34,7 +35,18 @@ function App() {
     if (localUser) {
       setUser(JSON.parse(localUser));
     }
+
     setLoading(false);
+
+    getToken(messaging, {
+      vapidKey,
+    })
+      .then((val) => {
+        console.log(val);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, []);
 
   if (loading) {

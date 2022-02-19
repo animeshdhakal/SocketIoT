@@ -47,14 +47,14 @@ public class HttpApiServer extends BaseServer {
 
             public void initHttpPipeline(ChannelHandlerContext ctx) {
                 ChannelPipeline pipeline = ctx.pipeline();
-                pipeline.addLast(new StaticFileHandler(UserApiHandler.class, "/static"));
+                pipeline.addLast(new StaticFileHandler(holder, "/static", "/static/static"));
                 pipeline.addLast(new UserApiHandler(holder));
                 pipeline.addLast(new DeviceApiHandler(holder));
                 pipeline.addLast(new BluePrintApiHandler(holder));
                 pipeline.addLast(new WidgetApiHandler(holder));
                 pipeline.addLast(new FileUploadHandler("/upload", "./static/"));
                 pipeline.addLast(new LetsEncryptHandler(holder.sslprovider.acmeClient));
-                pipeline.addLast(new ReactHandler(UserApiHandler.class, "/index.html"));
+                pipeline.addLast(new ReactHandler(holder, "/static/index.html"));
                 pipeline.addLast(this);
             }
 

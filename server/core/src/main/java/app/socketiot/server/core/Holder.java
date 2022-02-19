@@ -2,6 +2,9 @@ package app.socketiot.server.core;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClientConfig;
 import app.socketiot.server.core.cli.ArgParser;
 import app.socketiot.server.core.cli.properties.ServerProperties;
 import app.socketiot.server.core.dao.BluePrintDao;
@@ -12,6 +15,8 @@ import app.socketiot.server.core.db.dao.BluePrintDBDao;
 import app.socketiot.server.core.db.dao.DeviceDBDao;
 import app.socketiot.server.core.db.dao.UserDBDao;
 import app.socketiot.server.core.mail.Mail;
+import app.socketiot.server.core.notification.FCMNotification;
+import app.socketiot.server.utils.JarUtil;
 import app.socketiot.server.utils.JwtUtil;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
@@ -39,6 +44,10 @@ public class Holder {
     public final BlockingIOHandler blockingIOHandler;
     public final JwtUtil jwtUtil;
     public final Mail mail;
+    public final AsyncHttpClient httpClient;
+    public final FCMNotification notification;
+    public final boolean isUnpacked;
+    public final String jarPath;
 
     public Holder(ArgParser args) {
         this.args = args;
@@ -62,10 +71,20 @@ public class Holder {
         this.userDao = new UserDao(userDBDao.getAllUsers());
         this.deviceDao = new DeviceDao(deviceDBDao.getAllDevices());
         this.bluePrintDao = new BluePrintDao(bluePrintDBDao.getAllBluePrints());
-        this.blockingIOHandler = new BlockingIOHandler();
+        this.blockingIOHandler = new BlockingIOHandler(
+                props.getIntProperty("server.blocking.io.threads", 4));
         this.jwtUtil = new JwtUtil(props.getProperty("server.jwt.secret"));
-        this.mail = new Mail(props);
+        this.mail = new Mail(props, blockingIOHandler);
         this.sslprovider = new SSLHandlerProvider(this);
+        this.httpClient = new DefaultAsyncHttpClient(new DefaultAsyncHttpClientConfig.Builder()
+                .setUserAgent(null)
+                .setKeepAlive(true)
+                .setUseOpenSsl(SSLHandlerProvider.isOpenSslAvailable())
+                .setUseNativeTransport(Epoll.isAvailable())
+                .build());
+        this.notification = new FCMNotification(props, httpClient);
+        this.jarPath = JarUtil.getJarPath();
+        this.isUnpacked = JarUtil.unpackStaticFiles(jarPath, "static");
     }
 
     public void close() {

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
-import app.socketiot.server.core.db.model.Device;
+import app.socketiot.server.core.model.device.Device;
 
 public class DeviceDao {
 

@@ -1,7 +1,11 @@
 package app.socketiot.server.api;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import app.socketiot.server.core.Holder;
+import app.socketiot.server.core.exceptions.ExceptionHandler;
+import app.socketiot.server.core.http.StaticFileHandler;
 import app.socketiot.server.core.http.handlers.HttpRes;
-import app.socketiot.server.core.http.handlers.StaticFile;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -9,26 +13,46 @@ import io.netty.handler.codec.http.FullHttpRequest;
 
 @ChannelHandler.Sharable
 public class ReactHandler extends ChannelInboundHandlerAdapter {
-    private String indexFilePath;
-    private Class<?> clazz;
+    private final String indexFilePath;
+    private final boolean isUnpacked;
+    private final String jarPath;
 
-    public ReactHandler(Class<?> clazz, String indexFilePath) {
+    public ReactHandler(Holder holder, String indexFilePath) {
         this.indexFilePath = indexFilePath;
-        this.clazz = clazz;
+        this.isUnpacked = holder.isUnpacked;
+        this.jarPath = holder.jarPath;
+    }
+
+    private void sendNotFound(ChannelHandlerContext ctx) {
+        ctx.writeAndFlush(HttpRes.notFound("Not Found"));
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof FullHttpRequest) {
-            HttpRes res = new StaticFile(clazz, indexFilePath);
-            if (res.content() == null || res.content().readableBytes() == 0) {
-                res = HttpRes.notFound("Not Found");
+            if (isUnpacked) {
+                Path path = Paths.get(jarPath, indexFilePath);
+                StaticFileHandler.sendStaticFile(ctx, (FullHttpRequest) msg, path);
+                return;
+            } else {
+                try {
+                    HttpRes res;
+                    res = new HttpRes(this.getClass().getResourceAsStream(indexFilePath).readAllBytes());
+                    ctx.writeAndFlush(res);
+                    return;
+                } catch (Exception e) {
+                    sendNotFound(ctx);
+                    return;
+                }
             }
-            ctx.writeAndFlush(res);
-            return;
         }
 
         ctx.fireChannelRead(msg);
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        ExceptionHandler.handleException(ctx, cause);
     }
 
 }

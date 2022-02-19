@@ -52,6 +52,12 @@
       <artifactId>acme4j-utils</artifactId>
       <version>${acme4j.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.asynchttpclient</groupId>
+      <artifactId>async-http-client</artifactId>
+      <version>${async-http-client.version}</version>
+    </dependency>
+
 
 
   </dependencies>

@@ -60,23 +60,25 @@ public class FileUploadHandler extends SimpleChannelInboundHandler<HttpObject> {
         }
 
         if (decoder != null && msg instanceof HttpContent) {
-            
-                HttpContent chunk = (HttpContent) msg;
-                try {
-                    decoder.offer(chunk);
-                } catch (ErrorDataDecoderException e1) {
-                }
 
-                if (chunk instanceof LastHttpContent) {
-                    String path = completeUpload();
-                    if (path != null) {
-                        afterUpload(path);
-                        ctx.writeAndFlush(StatusMsg.ok("Uploaded"));
-                    } else {
-                        ctx.writeAndFlush(StatusMsg.badRequest("Invalid Upload"));
-                    }
+            HttpContent chunk = (HttpContent) msg;
+            try {
+                decoder.offer(chunk);
+            } catch (ErrorDataDecoderException e1) {
+            }
+
+            if (chunk instanceof LastHttpContent) {
+                String path = completeUpload();
+                if (path != null) {
+                    afterUpload(path);
+                    ctx.writeAndFlush(StatusMsg.ok("Uploaded"));
+                } else {
+                    ctx.writeAndFlush(StatusMsg.badRequest("Invalid Upload"));
                 }
-            
+            }
+
+        } else {
+            ctx.fireChannelRead(msg);
         }
 
     }

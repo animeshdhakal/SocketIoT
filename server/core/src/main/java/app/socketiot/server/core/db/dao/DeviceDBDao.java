@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import app.socketiot.server.core.db.DB;
-import app.socketiot.server.core.db.model.Device;
 import app.socketiot.server.core.json.JsonParser;
 import app.socketiot.server.core.json.model.DeviceJson;
+import app.socketiot.server.core.model.device.Device;
 
 public class DeviceDBDao {
     private final DB db;

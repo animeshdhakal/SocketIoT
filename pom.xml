@@ -22,6 +22,7 @@
     <javax.mail.version>1.6.2</javax.mail.version>
     <acme4j.version>2.12</acme4j.version>
     <bouncycastle.version>1.70</bouncycastle.version>
+    <async-http-client.version>2.12.3</async-http-client.version>
   </properties>
   <dependencies>
     <dependency>

@@ -35,6 +35,11 @@ public class HttpRes extends DefaultFullHttpResponse {
         super(HttpVersion.HTTP_1_1, status);
     }
 
+    public HttpRes(byte[] content) {
+        super(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(content));
+        addRequiredHeaders();
+    }
+
     public static HttpRes ok(String content) {
         return new HttpRes(HttpResponseStatus.OK, content);
     }

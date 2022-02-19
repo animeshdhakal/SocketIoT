@@ -1,12 +1,9 @@
 package app.socketiot.server.hardware;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import app.socketiot.server.core.Holder;
-import app.socketiot.server.core.db.model.Device;
 import app.socketiot.server.core.exceptions.ExceptionHandler;
 import app.socketiot.server.core.metrics.QuotaLimitChecker;
+import app.socketiot.server.core.model.device.Device;
 import app.socketiot.server.hardware.message.MsgType;
 import app.socketiot.server.utils.IPUtil;
 import io.netty.buffer.ByteBuf;
@@ -24,10 +21,8 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
     private final Holder holder;
     private final static int HEADER_SIZE = 4;
     private final static AttributeKey<String> tokenKey = AttributeKey.valueOf("token");
-    private static ConcurrentHashMap<String, Set<Channel>> groups = new ConcurrentHashMap<>();
     private final QuotaLimitChecker limitChecker;
     private boolean isDash = false;
-    
 
     public HardwareHandler(Holder holder) {
         this.holder = holder;
@@ -93,14 +88,13 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
     }
 
     public void broadCastMessage(ChannelHandlerContext ctx, ByteBuf msg, String token) {
-        var group = groups.get(token);
-        if (group != null) {
-            for (Channel c : group) {
-                if (!c.equals(ctx.channel())) {
-                    c.writeAndFlush(msg.retainedDuplicate());
-                }
+        Device device = holder.deviceDao.getDeviceByToken(token);
+        for (Channel c : device.group) {
+            if (!c.equals(ctx.channel())) {
+                c.writeAndFlush(msg.retainedDuplicate());
             }
         }
+
     }
 
     public void broadCastMessage(ChannelHandlerContext ctx, ByteBuf msg) {
@@ -113,20 +107,14 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
         Device device = holder.deviceDao.getDeviceByToken(token);
         if (device != null) {
             ctx.channel().attr(tokenKey).set(token);
-            var group = groups.get(token);
-            if (group == null) {
-                group = new HashSet<>();
-                group.add(ctx.channel());
-                groups.put(token, group);
-            } else {
-                group.add(ctx.channel());
-            }
+
+            device.group.add(ctx.channel());
 
             if (isHardware) {
                 device.online = true;
                 device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
-            }else{
-                isDash = true;            
+            } else {
+                isDash = true;
             }
 
             holder.deviceDao.updateDevice(device);
@@ -186,15 +174,8 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         String token = ctx.channel().attr(tokenKey).get();
         if (token != null) {
-            var group = groups.get(token);
             Device device = holder.deviceDao.getDeviceByToken(token);
-            if (group != null) {
-                if (group.size() == 1) {
-                    groups.remove(token);
-                } else {
-                    group.remove(ctx.channel());
-                }
-            }
+            device.group.remove(ctx.channel());
             if (device != null && !isDash) {
                 device.online = false;
                 holder.deviceDao.updateDevice(device);

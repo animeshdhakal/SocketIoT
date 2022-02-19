@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import app.socketiot.server.core.db.DB;
-import app.socketiot.server.core.db.model.User;
+import app.socketiot.server.core.model.auth.User;
 
 public class UserDBDao {
     private final DB db;

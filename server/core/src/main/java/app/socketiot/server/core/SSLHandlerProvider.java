@@ -128,7 +128,7 @@ public class SSLHandlerProvider {
         this.sslCtx = initSslContext(certPath, keyPath, null);
     }
 
-    boolean isOpenSslAvailable() {
+    public static boolean isOpenSslAvailable() {
         return PlatformDependent.bitMode() != 32 && OpenSsl.isAvailable();
     }
 
