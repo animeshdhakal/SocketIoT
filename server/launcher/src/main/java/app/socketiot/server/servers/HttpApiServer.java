@@ -57,7 +57,7 @@ public class HttpApiServer extends BaseServer {
                 pipeline.addLast(new FileUploadHandler(holder.jarPath, "/upload", "/static"));
                 pipeline.addLast(new LetsEncryptHandler(holder.sslprovider.acmeClient));
                 pipeline.addLast(new ReactHandler(holder, "/static/index.html"));
-                pipeline.addLast(this);
+                pipeline.remove(this);
             }
 
             public void initWebSocketPipeline(ChannelHandlerContext ctx) {
