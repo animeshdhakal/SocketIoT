@@ -92,8 +92,7 @@ const Device = () => {
   useEffect(() => {
     if (device.token) {
       socket.current = new WebSocket(
-        "ws://localhost:4444/websocket" ||
-          window.location.origin.replace("http", "ws") + "/websocket"
+        window.location.origin.replace("http", "ws") + "/websocket"
       );
       socket.current.binaryType = "arraybuffer";
       socket.current.onclose = onClose;

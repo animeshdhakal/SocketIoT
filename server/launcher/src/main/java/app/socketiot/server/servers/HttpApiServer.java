@@ -11,15 +11,16 @@ import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.http.StaticFileHandler;
 import app.socketiot.server.hardware.HardwareHandler;
 import app.socketiot.server.hardware.WebSocketHandler;
+import app.socketiot.server.hardware.message.HardwareMessageDecoder;
+import app.socketiot.server.hardware.message.HardwareMessageEncoder;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerKeepAliveHandler;
-import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.stream.ChunkedWriteHandler;
@@ -38,7 +39,7 @@ public class HttpApiServer extends BaseServer {
         WebSocketMerger webSocketMerger = new WebSocketMerger() {
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) {
-                if (msg instanceof WebSocketFrame || ((FullHttpRequest) msg).uri().startsWith(webSocketPath)) {
+                if (((HttpRequest) msg).uri().startsWith(webSocketPath)) {
                     initWebSocketPipeline(ctx);
                 } else {
                     initHttpPipeline(ctx);
@@ -57,18 +58,19 @@ public class HttpApiServer extends BaseServer {
                 pipeline.addLast(new FileUploadHandler(holder.jarPath, "/upload", "/static"));
                 pipeline.addLast(new LetsEncryptHandler(holder.sslprovider.acmeClient));
                 pipeline.addLast(new ReactHandler(holder, "/static/index.html"));
-                pipeline.addLast(this);
+                pipeline.remove(this);
             }
 
             public void initWebSocketPipeline(ChannelHandlerContext ctx) {
                 ChannelPipeline pipeline = ctx.pipeline();
-                pipeline.addLast(new IdleStateHandler(hardwareIdleTimeout, 0, 0));
+                pipeline.addFirst(new IdleStateHandler(hardwareIdleTimeout, 0, 0));
                 pipeline.addLast(new WebSocketServerProtocolHandler(webSocketPath, null, true));
                 pipeline.addLast(new WebSocketHandler());
+                pipeline.addLast(new HardwareMessageDecoder(10));
                 pipeline.addLast(new WSEncoder());
+                pipeline.addLast(new HardwareMessageEncoder());
                 pipeline.addLast(new HardwareHandler(holder));
                 pipeline.remove(ChunkedWriteHandler.class);
-                pipeline.remove(StaticFileHandler.class);
                 pipeline.remove(this);
             }
 
@@ -95,7 +97,9 @@ public class HttpApiServer extends BaseServer {
 
                     @Override
                     public ChannelPipeline buildHardwarePipeline(ChannelPipeline p) {
-                        p.addLast(new IdleStateHandler(hardwareIdleTimeout, 0, 0));
+                        p.addFirst(new IdleStateHandler(hardwareIdleTimeout, 0, 0));
+                        p.addLast(new HardwareMessageDecoder(10));
+                        p.addLast(new HardwareMessageEncoder());
                         p.addLast(new HardwareHandler(holder));
                         return p;
                     }
