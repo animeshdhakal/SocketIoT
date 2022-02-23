@@ -14,9 +14,9 @@ const Button: React.FC<IButton> = ({
   return (
     <div
       className="bg-gray-500 w-40 h-24 flex justify-center items-center"
-      onClick={() => setState(state == onValue ? offValue : onValue)}
+      onClick={() => setState(state === onValue ? offValue : onValue)}
     >
-      <div className="border border-green-200 w-36 h-20 rounded-l-full rounded-r-full flex justify-center items-center">
+      <div className="border border-green-200 w-36 h-20 rounded-l-full rounded-r-full flex justify-center items-center select-none">
         {state === onValue ? offLabel : onLabel}
       </div>
     </div>
@@ -24,6 +24,7 @@ const Button: React.FC<IButton> = ({
 };
 
 Button.defaultProps = {
+  type: "BUTTON",
   onValue: "1",
   offValue: "0",
   onLabel: "ON",

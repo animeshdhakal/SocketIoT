@@ -1,6 +1,7 @@
 package app.socketiot.server.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 
 import app.socketiot.server.api.model.WidgetReq;
 import app.socketiot.server.core.Holder;
@@ -15,7 +16,11 @@ import io.netty.channel.ChannelHandler;
 @Path("/api/widget")
 @ChannelHandler.Sharable
 public class WidgetApiHandler extends JwtHttpHandler {
-    ObjectMapper mapper = new ObjectMapper();
+    static final ObjectMapper mapper = new ObjectMapper();
+
+    static {
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);    
+    }
 
     public WidgetApiHandler(Holder holder) {
         super(holder);

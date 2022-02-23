@@ -3,12 +3,16 @@ package app.socketiot.server.core.json.model;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = Button.class)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.EXISTING_PROPERTY,
+    property = "type",
+    visible = true)
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = Button.class, name = "button"),
+    @JsonSubTypes.Type(value = Button.class, name = "BUTTON"),
 })
 
 public abstract class Widget {
+    public String type;
     public int x = 0;
     public int y = 0;
     public int pin = -1;

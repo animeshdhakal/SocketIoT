@@ -8,13 +8,15 @@ import {
 import axios from "axios";
 import UniversalWidget from "../../interfaces/IUniversalWidget";
 import Loader from "../../components/Loader";
-import Button from "../../components/widgets/Button";
+import Widget from "../../components/widgets/Widget";
+import Draggable from "react-draggable";
 
 const Device = () => {
   const location: any = useLocation();
   const navigate = useNavigate();
   const [device, setDevice] = useState<any>({});
   const [loading, setLoading] = useState<boolean>(true);
+  const [widgets, setWidgets] = useState<UniversalWidget[]>([]);
   let socket = useRef<WebSocket | null>(null);
 
   const create_message = (msg_type: number, ...args: any) => {
@@ -104,7 +106,9 @@ const Device = () => {
         .post<{ widgets: UniversalWidget[] }>("/api/blueprint/get", {
           id: device.blueprint_id,
         })
-        .then((res) => {});
+        .then((res) => {
+          setWidgets(res.data.widgets);
+        });
     }
   }, [device]);
 
@@ -112,7 +116,23 @@ const Device = () => {
     return <Loader text="Connecting" />;
   }
 
-  return <div>Devices</div>;
+  return (
+    <div className="w-full h-full">
+      {widgets.map((widget: UniversalWidget, index) => {
+        return (
+          <Draggable
+            bounds="parent"
+            disabled={true}
+            position={{ x: widget.x || 0, y: widget.y || 0 }}
+          >
+            <div className="inline-block group">
+              <Widget {...widget} />
+            </div>
+          </Draggable>
+        );
+      })}
+    </div>
+  );
 };
 
 export default Device;

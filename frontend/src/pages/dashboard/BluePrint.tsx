@@ -2,9 +2,12 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 import { useLocation, useNavigate } from "react-router-dom";
+import Alert from "../../components/Alert";
+import WidgetSettingModal from "../../components/modals/WidgetSettingModal";
 import Button from "../../components/widgets/Button";
 import Widget from "../../components/widgets/Widget";
 import UniversalWidget from "../../interfaces/IUniversalWidget";
+import { IWidgetSettingWidget } from "../../interfaces/IWidgetSetting";
 
 interface WidgetRes {
   widgets: UniversalWidget[];
@@ -14,10 +17,13 @@ const BluePrint = () => {
   const location: any = useLocation();
   const navigate = useNavigate();
   const [id, setID] = useState<string>("");
+  const [alert, setAlert] = useState<string>("");
   const [widgets, setWidgets] = useState<UniversalWidget[]>([]);
+  const [widget, setWidget] = useState<IWidgetSettingWidget>(
+    {} as IWidgetSettingWidget
+  );
 
   useEffect(() => {
-    console.log(Button.defaultProps);
     if (location.state.id) {
       setID(location.state.id);
       axios
@@ -29,6 +35,17 @@ const BluePrint = () => {
       navigate("/dashboard/blueprints");
     }
   }, []);
+
+  const saveBluePrint = () => {
+    axios
+      .post("/api/widget/add", { blueprint_id: id, widgets })
+      .then((e) => {
+        setAlert("BluePrint Saved");
+      })
+      .catch((e) => {
+        setAlert("Error Saving Blueprint");
+      });
+  };
 
   const removeWidget = (index: number) => {
     const newWidgets = [...widgets];
@@ -53,6 +70,12 @@ const BluePrint = () => {
         >
           Add
         </button>
+        <button
+          className="w-32 h-10 bg-green-400 rounded-md hover:bg-green-300"
+          onClick={() => saveBluePrint()}
+        >
+          Save
+        </button>
       </div>
       <div className="w-full h-screen relative">
         {widgets.map((widget: UniversalWidget, index) => {
@@ -70,6 +93,10 @@ const BluePrint = () => {
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
+                    onClick={() => {
+                      console.log(widget.type);
+                      setWidget({ type: widget.type || "", index });
+                    }}
                   >
                     <path
                       strokeLinecap="round"
@@ -100,6 +127,13 @@ const BluePrint = () => {
           );
         })}
       </div>
+      <Alert setAlert={setAlert} alert={alert} />
+      <WidgetSettingModal
+        widget={widget}
+        setWidget={setWidget}
+        widgets={widgets}
+        setWidgets={setWidgets}
+      />
     </div>
   );
 };

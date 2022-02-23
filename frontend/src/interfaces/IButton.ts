@@ -1,7 +1,7 @@
 import Widget from "./IWidget";
 
 export default interface IButton extends Widget {
-  type?: "button";
+  type?: string;
   onLabel?: string;
   offLabel?: string;
   onValue?: string;
