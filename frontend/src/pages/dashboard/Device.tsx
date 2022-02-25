@@ -16,7 +16,7 @@ const Device = () => {
   const location: any = useLocation();
   const navigate = useNavigate();
   const [device, setDevice] = useState<any>({});
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [widgets, setWidgets] = useState<UniversalWidget[]>([]);
 
   const setValue = (pin: number, value: string) => {
@@ -44,7 +44,6 @@ const Device = () => {
       case MsgType.AUTH:
         if (body[0] === "1") {
           console.log("Authenticated");
-          setLoading(false);
           setTimeout(syncWidgets, 100);
         } else {
           console.log("Authentication failed");
