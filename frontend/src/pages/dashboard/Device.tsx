@@ -8,7 +8,9 @@ import Widget from "../../components/widgets/Widget";
 import Draggable from "react-draggable";
 import { create_message, parse_message } from "../../utils/MsgUtil";
 
-const socket = new WebSocket("ws://localhost:4444/websocket");
+const socket = new WebSocket(
+  window.location.origin.replace("http", "ws") + "/websocket"
+);
 
 const Device = () => {
   const location: any = useLocation();

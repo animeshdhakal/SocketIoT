@@ -8,6 +8,11 @@ export default defineConfig({
       "/api": {
         target: "http://localhost:4444",
       },
+      "/websocket": {
+        target: "ws://localhost:4444",
+        ws: true,
+        changeOrigin: true,
+      },
     },
   },
   publicDir: "public",
