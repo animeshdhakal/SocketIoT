@@ -8,16 +8,13 @@ import Widget from "../../components/widgets/Widget";
 import Draggable from "react-draggable";
 import { create_message, parse_message } from "../../utils/MsgUtil";
 
-const socket = new WebSocket(
-  window.location.origin.replace("http", "ws") + "/websocket"
-);
-
 const Device = () => {
   const location: any = useLocation();
   const navigate = useNavigate();
   const [device, setDevice] = useState<any>({});
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [widgets, setWidgets] = useState<UniversalWidget[]>([]);
+  const socket = useRef<WebSocket | null>(null);
 
   const setValue = (pin: number, value: string) => {
     const newWidgets = [...widgets];
@@ -27,15 +24,15 @@ const Device = () => {
       }
     });
     setWidgets(newWidgets);
-    socket.send(create_message(MsgType.WRITE, pin, value));
+    socket.current?.send(create_message(MsgType.WRITE, pin, value));
   };
 
   const syncWidgets = () => {
-    socket.send(create_message(MsgType.SYNC));
+    socket.current?.send(create_message(MsgType.SYNC));
   };
 
   const sendPing = () => {
-    socket.send(create_message(MsgType.PING));
+    socket.current?.send(create_message(MsgType.PING));
   };
 
   const processMsg = (msg: ArrayBuffer) => {
@@ -77,20 +74,30 @@ const Device = () => {
     } else {
       navigate("/dashboard/devices");
     }
+    let intervalId = setInterval(sendPing, HEARTBEAT_INTERVAL);
 
-    socket.binaryType = "arraybuffer";
-    socket.onmessage = (e) => {
-      if (e.data instanceof ArrayBuffer) {
-        processMsg(e.data);
-      }
+    return () => {
+      clearInterval(intervalId);
+      socket.current?.close();
     };
-
-    setInterval(sendPing, HEARTBEAT_INTERVAL);
   }, []);
 
   useEffect(() => {
-    if (device.token && socket.readyState === WebSocket.OPEN) {
-      socket.send(create_message(MsgType.AUTH, device.token, "1"));
+    let intervalId: NodeJS.Timeout;
+    if (device.token) {
+      socket.current = new WebSocket(
+        window.location.origin.replace("http", "ws") + "/websocket"
+      );
+      socket.current.binaryType = "arraybuffer";
+      socket.current.onmessage = (e) => {
+        if (e.data instanceof ArrayBuffer) {
+          processMsg(e.data);
+        }
+      };
+      socket.current.onopen = () => {
+        setLoading(false);
+        socket.current?.send(create_message(MsgType.AUTH, device.token, "1"));
+      };
     }
     if (device.blueprint_id) {
       axios
