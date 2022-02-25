@@ -6,4 +6,5 @@ export default interface IButton extends Widget {
   offLabel?: string;
   onValue?: string;
   offValue?: string;
+  setValue?: (pin: number, value: string) => void;
 }

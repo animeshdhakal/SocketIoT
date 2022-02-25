@@ -6,9 +6,9 @@ export interface IWidgetSettingWidget {
   index: number;
 }
 
-export default interface IWidgetSetting {
+export default interface IWidgetSetting<T> {
   widget: IWidgetSettingWidget;
-  widgets: IUniversalWidget[];
+  widgets: T[];
   setWidgets: React.Dispatch<React.SetStateAction<IUniversalWidget[]>>;
   setWidget: React.Dispatch<React.SetStateAction<IWidgetSettingWidget>>;
 }

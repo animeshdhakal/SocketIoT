@@ -3,6 +3,7 @@ enum MsgType {
   WRITE = 2,
   READ = 3,
   PING = 4,
+  SYNC = 5,
 }
 
 let HEARTBEAT_INTERVAL = 10000;

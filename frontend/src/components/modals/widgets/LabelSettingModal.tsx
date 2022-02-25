@@ -3,9 +3,9 @@ import IUniversalWidget from "../../../interfaces/IUniversalWidget";
 import IWidgetSetting, {
   IWidgetSettingWidget,
 } from "../../../interfaces/IWidgetSetting";
-import IButton from "../../../interfaces/IButton";
+import ILabel from "../../../interfaces/ILabel";
 
-const ButtonSettingModal: React.FC<IWidgetSetting<IButton>> = ({
+const ButtonSettingModal: React.FC<IWidgetSetting<ILabel>> = ({
   widget: { index },
   setWidget,
   setWidgets,
@@ -50,56 +50,14 @@ const ButtonSettingModal: React.FC<IWidgetSetting<IButton>> = ({
         <div className="content flex flex-col justify-center items-center">
           <div className="flex flex-col justify-center my-4">
             <label htmlFor="onValue" className="font-mono text-md">
-              ON Value
+              Title
             </label>
             <input
               type="text"
-              id="onValue"
-              value={widgets[index].onValue}
+              id="title"
+              value={widgets[index].title}
               onChange={setIVal}
               placeholder="On Value"
-              autoComplete="off"
-              className="outline-none bg-none p-1 rounded-md w-70 outline-1 outline-gray-300 focus:ring focus:ring-blue-300 focus:outline-2"
-            />
-          </div>
-          <div className="flex flex-col justify-center my-4">
-            <label htmlFor="offValue" className="font-mono text-md">
-              OFF Value
-            </label>
-            <input
-              type="text"
-              id="offValue"
-              value={widgets[index].offValue}
-              onChange={setIVal}
-              placeholder="Off Value"
-              autoComplete="off"
-              className="outline-none bg-none p-1 rounded-md w-70 outline-1 outline-gray-300 focus:ring focus:ring-blue-300 focus:outline-2"
-            />
-          </div>
-          <div className="flex flex-col justify-center my-4">
-            <label htmlFor="onLabel" className="font-mono text-md">
-              ON Label
-            </label>
-            <input
-              type="text"
-              id="onLabel"
-              value={widgets[index].onLabel}
-              onChange={setIVal}
-              placeholder="On Label"
-              autoComplete="off"
-              className="outline-none bg-none p-1 rounded-md w-70 outline-1 outline-gray-300 focus:ring focus:ring-blue-300 focus:outline-2"
-            />
-          </div>
-          <div className="flex flex-col justify-center my-4">
-            <label htmlFor="offLabel" className="font-mono text-md">
-              OFF Label
-            </label>
-            <input
-              type="text"
-              id="offLabel"
-              value={widgets[index].offLabel}
-              onChange={setIVal}
-              placeholder="Off Label"
               autoComplete="off"
               className="outline-none bg-none p-1 rounded-md w-70 outline-1 outline-gray-300 focus:ring focus:ring-blue-300 focus:outline-2"
             />

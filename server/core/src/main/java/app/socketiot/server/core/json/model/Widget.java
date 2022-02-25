@@ -3,12 +3,10 @@ package app.socketiot.server.core.json.model;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.EXISTING_PROPERTY,
-    property = "type",
-    visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible = true)
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = Button.class, name = "BUTTON"),
+        @JsonSubTypes.Type(value = Button.class, name = "BUTTON"),
+        @JsonSubTypes.Type(value = Label.class, name = "LABEL")
 })
 
 public abstract class Widget {

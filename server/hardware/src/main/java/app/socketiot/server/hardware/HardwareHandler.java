@@ -45,7 +45,12 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
 
     public void broadCastMessage(ChannelHandlerContext ctx, HardwareMessage msg, String token) {
         Device device = holder.deviceDao.getDeviceByToken(token);
-        for (Channel c : device.group) {
+        for (Channel c : device.hardGroup) {
+            if (!c.equals(ctx.channel())) {
+                c.writeAndFlush(msg);
+            }
+        }
+        for (Channel c : device.dashGroup) {
             if (!c.equals(ctx.channel())) {
                 c.writeAndFlush(msg);
             }
@@ -64,12 +69,12 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
         if (device != null) {
             ctx.channel().attr(tokenKey).set(token);
 
-            device.group.add(ctx.channel());
-
             if (isHardware) {
+                device.hardGroup.add(ctx.channel());
                 device.online = true;
                 device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
             } else {
+                device.dashGroup.add(ctx.channel());
                 isDash = true;
             }
 
@@ -131,8 +136,12 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
         String token = ctx.channel().attr(tokenKey).get();
         if (token != null) {
             Device device = holder.deviceDao.getDeviceByToken(token);
-            device.group.remove(ctx.channel());
-            if (device != null && !isDash && device.group.size() == 0) {
+            if (isDash) {
+                device.dashGroup.remove(ctx.channel());
+            } else {
+                device.hardGroup.remove(ctx.channel());
+            }
+            if (device != null && !isDash && device.hardGroup.size() == 0) {
                 device.online = false;
                 holder.deviceDao.updateDevice(device);
             }

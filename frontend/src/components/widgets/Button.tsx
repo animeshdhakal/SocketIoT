@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import IButton from "../../interfaces/IButton";
 import { PinMode } from "../../interfaces/IWidget";
 
@@ -8,16 +8,19 @@ const Button: React.FC<IButton> = ({
   onLabel,
   onValue,
   offValue,
+  pin,
+  setValue,
 }) => {
-  const [state, setState] = useState<string | undefined>(value || "0");
-
   return (
     <div
       className="bg-gray-500 w-40 h-24 flex justify-center items-center"
-      onClick={() => setState(state === onValue ? offValue : onValue)}
+      onClick={() => {
+        if (setValue && pin && onValue && offValue)
+          setValue(pin, value == onValue ? offValue : onValue);
+      }}
     >
       <div className="border border-green-200 w-36 h-20 rounded-l-full rounded-r-full flex justify-center items-center select-none">
-        {state === onValue ? offLabel : onLabel}
+        {value === onValue ? offLabel : onLabel}
       </div>
     </div>
   );

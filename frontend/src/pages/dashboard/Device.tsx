@@ -1,15 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  MsgType,
-  HEADER_SIZE,
-  HEARTBEAT_INTERVAL,
-} from "../../config/Protocol";
+import { HEARTBEAT_INTERVAL, MsgType } from "../../config/Protocol";
 import axios from "axios";
 import UniversalWidget from "../../interfaces/IUniversalWidget";
 import Loader from "../../components/Loader";
 import Widget from "../../components/widgets/Widget";
 import Draggable from "react-draggable";
+import { create_message, parse_message } from "../../utils/MsgUtil";
+
+const socket = new WebSocket("ws://localhost:4444/websocket");
 
 const Device = () => {
   const location: any = useLocation();
@@ -17,62 +16,59 @@ const Device = () => {
   const [device, setDevice] = useState<any>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [widgets, setWidgets] = useState<UniversalWidget[]>([]);
-  let socket = useRef<WebSocket | null>(null);
 
-  const create_message = (msg_type: number, ...args: any) => {
-    let msg = args.map(String).join("\0");
-    let msgBuff = new ArrayBuffer(msg.length + HEADER_SIZE);
-    let msgDataView = new DataView(msgBuff);
-
-    msgDataView.setInt16(0, msg.length);
-    msgDataView.setInt16(2, msg_type);
-
-    for (var i = 0; i < msg.length; i++) {
-      msgDataView.setUint8(i + HEADER_SIZE, msg.charCodeAt(i));
-    }
-    return msgBuff;
-  };
-
-  const onOpen = () => {
-    setLoading(false);
-    socket.current?.send(create_message(MsgType.AUTH, device.token, "1"));
-  };
-
-  const onClose = () => {};
-
-  const onMessage = (e: MessageEvent) => {
-    if (e.data instanceof ArrayBuffer) {
-      let dataView = new DataView(e.data);
-      let msg_length = dataView.getInt16(0);
-      let msg_type = dataView.getInt16(2);
-      let decodedMessage = String.fromCharCode.apply(
-        null,
-        Array.from(new Uint8Array(e.data, HEADER_SIZE, msg_length))
-      );
-
-      let parsedMsg = decodedMessage.split("\0");
-
-      switch (msg_type) {
-        case MsgType.AUTH:
-          if (parsedMsg[0] === "1") {
-            console.log("Auth Success");
-          } else {
-            console.log("Auth Failed");
-          }
-          break;
-        case MsgType.WRITE:
-          console.log("Write Message", parsedMsg);
-          break;
-        case MsgType.PING:
-          break;
-        default:
-          console.log("Unknown Message", parsedMsg);
+  const setValue = (pin: number, value: string) => {
+    const newWidgets = [...widgets];
+    newWidgets.forEach((widget) => {
+      if (widget.pin === pin) {
+        widget.value = value;
       }
+    });
+    setWidgets(newWidgets);
+    socket.send(create_message(MsgType.WRITE, pin, value));
+  };
+
+  const syncWidgets = () => {
+    socket.send(create_message(MsgType.SYNC));
+  };
+
+  const sendPing = () => {
+    socket.send(create_message(MsgType.PING));
+  };
+
+  const processMsg = (msg: ArrayBuffer) => {
+    const { type, body } = parse_message(msg);
+    switch (type) {
+      case MsgType.AUTH:
+        if (body[0] === "1") {
+          console.log("Authenticated");
+          setLoading(false);
+          setTimeout(syncWidgets, 100);
+        } else {
+          console.log("Authentication failed");
+        }
+        break;
+      case MsgType.WRITE:
+        const pin = parseInt(body[0]);
+        const value = body[1];
+        setWidgets((prevState) => {
+          const newWidgets = [...prevState];
+          newWidgets.forEach((widget) => {
+            if (widget.pin === pin) {
+              let val = value;
+              widget.value = `${val}`;
+            }
+          });
+          return newWidgets;
+        });
+        break;
+      case MsgType.PING:
+        break;
     }
   };
 
   useEffect(() => {
-    if (location.state && location.state.token) {
+    if (location.state.token) {
       setDevice({
         token: location.state.token,
         blueprint_id: location.state.blueprint_id,
@@ -81,25 +77,19 @@ const Device = () => {
       navigate("/dashboard/devices");
     }
 
-    let intervalID = setInterval(() => {
-      socket.current?.send(create_message(MsgType.PING));
-    }, HEARTBEAT_INTERVAL);
-
-    return () => {
-      clearInterval(intervalID);
-      socket.current?.close();
+    socket.binaryType = "arraybuffer";
+    socket.onmessage = (e) => {
+      if (e.data instanceof ArrayBuffer) {
+        processMsg(e.data);
+      }
     };
+
+    setInterval(sendPing, HEARTBEAT_INTERVAL);
   }, []);
 
   useEffect(() => {
-    if (device.token) {
-      socket.current = new WebSocket(
-        window.location.origin.replace("http", "ws") + "/websocket"
-      );
-      socket.current.binaryType = "arraybuffer";
-      socket.current.onclose = onClose;
-      socket.current.onopen = onOpen;
-      socket.current.onmessage = onMessage;
+    if (device.token && socket.readyState === WebSocket.OPEN) {
+      socket.send(create_message(MsgType.AUTH, device.token, "1"));
     }
     if (device.blueprint_id) {
       axios
@@ -123,10 +113,11 @@ const Device = () => {
           <Draggable
             bounds="parent"
             disabled={true}
+            key={index}
             position={{ x: widget.x || 0, y: widget.y || 0 }}
           >
             <div className="inline-block group">
-              <Widget {...widget} />
+              <Widget {...widget} setValue={setValue} />
             </div>
           </Draggable>
         );

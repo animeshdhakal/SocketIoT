@@ -32,6 +32,12 @@ public class DeviceDao {
         return devices.values().stream().filter(device -> device.name.equals(name)).findFirst().orElse(null);
     }
 
+    public List<Device> getAllDevicesByBluePrint(String id) {
+        List<Device> devicesList = devices.values().stream().filter(device -> device.blueprint_id.equals(id))
+                .collect(Collectors.toList());
+        return devicesList;
+    }
+
     public List<Device> getAllDevicesByEmail(String email) {
         List<Device> devicesList = devices.values().stream().filter(device -> device.email.equals(email))
                 .collect(Collectors.toList());

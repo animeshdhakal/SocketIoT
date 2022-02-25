@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Alert from "../../components/Alert";
 import WidgetSettingModal from "../../components/modals/WidgetSettingModal";
 import Button from "../../components/widgets/Button";
+import Label from "../../components/widgets/Label";
 import Widget from "../../components/widgets/Widget";
 import UniversalWidget from "../../interfaces/IUniversalWidget";
 import { IWidgetSettingWidget } from "../../interfaces/IWidgetSetting";
@@ -62,20 +63,29 @@ const BluePrint = () => {
 
   return (
     <div className="flex">
-      <div className="w-40 h-screen bg-red-300">
+      <div className="w-44 h-screen bg-red-300">
         <button
-          onClick={() =>
-            setWidgets([...widgets, Object.assign({}, Button.defaultProps)])
-          }
-        >
-          Add
-        </button>
-        <button
-          className="w-32 h-10 bg-green-400 rounded-md hover:bg-green-300"
+          className="w-40 h-10 bg-green-400 rounded-md hover:bg-green-300 m-1"
           onClick={() => saveBluePrint()}
         >
           Save
         </button>
+        <div
+          className="m-1"
+          onClick={() =>
+            setWidgets([...widgets, Object.assign({}, Label.defaultProps)])
+          }
+        >
+          <Label />
+        </div>
+        <div
+          className="m-1"
+          onClick={() =>
+            setWidgets([...widgets, Object.assign({}, Button.defaultProps)])
+          }
+        >
+          <Button />
+        </div>
       </div>
       <div className="w-full h-screen relative">
         {widgets.map((widget: UniversalWidget, index) => {
@@ -94,7 +104,6 @@ const BluePrint = () => {
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                     onClick={() => {
-                      console.log(widget.type);
                       setWidget({ type: widget.type || "", index });
                     }}
                   >

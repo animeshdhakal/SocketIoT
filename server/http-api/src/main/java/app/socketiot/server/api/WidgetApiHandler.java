@@ -1,8 +1,9 @@
 package app.socketiot.server.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-
 import app.socketiot.server.api.model.WidgetReq;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.http.JwtHttpHandler;
@@ -11,6 +12,9 @@ import app.socketiot.server.core.http.annotations.Path;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
+import app.socketiot.server.core.json.model.DeviceJson;
+import app.socketiot.server.core.json.model.Widget;
+import app.socketiot.server.core.model.device.Device;
 import io.netty.channel.ChannelHandler;
 
 @Path("/api/widget")
@@ -19,7 +23,7 @@ public class WidgetApiHandler extends JwtHttpHandler {
     static final ObjectMapper mapper = new ObjectMapper();
 
     static {
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);    
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     public WidgetApiHandler(Holder holder) {
@@ -36,7 +40,20 @@ public class WidgetApiHandler extends JwtHttpHandler {
             }
 
             if (holder.bluePrintDao.replaceWidgets(req.user.email, widget.blueprint_id, widget.widgets)) {
-
+                List<Device> devices = holder.deviceDao.getAllDevicesByBluePrint(widget.blueprint_id);
+                for (Device device : devices) {
+                    DeviceJson deviceJson = new DeviceJson();
+                    deviceJson.pins = new ConcurrentHashMap<>();
+                    for (Widget awidget : widget.widgets) {
+                        String pin = Integer.toString(awidget.pin);
+                        if (device.json.pins.get(pin) != null) {
+                            deviceJson.pins.put(pin, device.json.pins.get(pin));
+                        } else {
+                            deviceJson.pins.put(pin, "");
+                        }
+                    }
+                    device.json = deviceJson;
+                }
                 return StatusMsg.ok("Widgets Added Successfully");
             } else {
                 return StatusMsg.badRequest("Invalid Blueprint Id");

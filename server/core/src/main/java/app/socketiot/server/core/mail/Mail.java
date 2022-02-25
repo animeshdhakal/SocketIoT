@@ -17,10 +17,10 @@ public class Mail {
     }
 
     public void sendText(String to, String sub, String body) {
-        blockingIOHandler.executeMessage(() -> mail.send(to, sub, body, BaseMail.PLAIN_TEXT));
+        blockingIOHandler.execute(() -> mail.send(to, sub, body, BaseMail.PLAIN_TEXT));
     }
 
     public void sendHtml(String to, String sub, String body) {
-        blockingIOHandler.executeMessage(() -> mail.send(to, sub, body, BaseMail.HTML_TEXT));
+        blockingIOHandler.execute(() -> mail.send(to, sub, body, BaseMail.HTML_TEXT));
     }
 }

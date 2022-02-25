@@ -24,7 +24,7 @@ public class BlockingIOHandler {
         dbExecutor.execute(runnable);
     }
 
-    public void executeMessage(Runnable runnable) {
+    public void execute(Runnable runnable) {
         messageExecutor.execute(runnable);
     }
 }
