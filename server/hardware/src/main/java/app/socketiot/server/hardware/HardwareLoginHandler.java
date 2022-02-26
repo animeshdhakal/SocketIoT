@@ -22,7 +22,7 @@ public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
             if (message.body.length != 0) {
                 Device device = holder.deviceDao.getDeviceByToken(message.body[0]);
                 if (device != null) {
-                    boolean isHardware = message.body.length > 1;
+                    boolean isHardware = message.body.length == 1;
                     if (isHardware) {
                         device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
                         device.online = true;
