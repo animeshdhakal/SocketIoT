@@ -1,7 +1,8 @@
 package app.socketiot.server.hardware.message;
 
 import java.util.List;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import app.socketiot.server.core.metrics.QuotaLimitChecker;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -9,6 +10,7 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.util.CharsetUtil;
 
 public class HardwareMessageDecoder extends ByteToMessageDecoder {
+    public final static Logger log = LogManager.getLogger(HardwareMessageDecoder.class);
     public final QuotaLimitChecker quotaLimitChecker;
 
     public HardwareMessageDecoder(int limit) {
@@ -25,7 +27,8 @@ public class HardwareMessageDecoder extends ByteToMessageDecoder {
         int msgtype = in.readUnsignedShort();
 
         if (quotaLimitChecker.quotaExceeded()) {
-            System.out.println("Quota exceeded");
+            log.trace("Quota Exceeded {}", quotaLimitChecker.getRequestsPerSecond());
+            ctx.close();
             return;
         }
 

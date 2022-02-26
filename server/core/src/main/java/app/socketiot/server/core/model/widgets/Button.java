@@ -1,4 +1,4 @@
-package app.socketiot.server.core.json.model;
+package app.socketiot.server.core.model.widgets;
 
 public class Button extends Widget {
     public String onValue;

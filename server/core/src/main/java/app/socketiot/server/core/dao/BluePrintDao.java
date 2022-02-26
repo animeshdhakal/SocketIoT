@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import app.socketiot.server.core.json.model.Widget;
 import app.socketiot.server.core.model.blueprint.BluePrint;
+import app.socketiot.server.core.model.widgets.Widget;
 
 public class BluePrintDao {
     private ConcurrentHashMap<String, BluePrint> bluePrints;

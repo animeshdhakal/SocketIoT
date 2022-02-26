@@ -8,12 +8,15 @@ import java.util.concurrent.TimeUnit;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.cli.ArgParser;
+import app.socketiot.server.core.cli.properties.ServerProperties;
 import app.socketiot.server.servers.BaseServer;
 import app.socketiot.server.servers.HttpApiServer;
+import app.socketiot.server.utils.LoggerUtil;
 import app.socketiot.server.workers.CertificateWorker;
 import app.socketiot.server.workers.DBWorker;
 
 public class Launcher {
+
     public static void main(String[] args) {
         ArgParser argParser = new ArgParser(args);
 
@@ -23,7 +26,15 @@ public class Launcher {
 
         System.setProperty("logsFolder", logsFolder == null ? "./logs" : logsFolder);
 
-        Holder holder = new Holder(argParser);
+        ServerProperties props = new ServerProperties();
+
+        String logLevel = props.getProperty("server.log.level", "info");
+        System.setProperty("log4j2.contextSelector", "org.apache.logging.log4j.core.async.AsyncLoggerContextSelector");
+        System.setProperty("AsyncLogger.RingBufferSize",
+                props.getProperty("async.logger.ring.buffer.size", "2048"));
+        LoggerUtil.changeLogLevel(logLevel);
+
+        Holder holder = new Holder(argParser, props);
 
         BaseServer[] servers = new BaseServer[] {
                 new HttpApiServer(holder),

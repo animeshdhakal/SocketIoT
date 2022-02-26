@@ -11,9 +11,9 @@ import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
 import app.socketiot.server.core.json.JsonParser;
 import app.socketiot.server.core.json.model.DeviceJson;
-import app.socketiot.server.core.json.model.Widget;
 import app.socketiot.server.core.model.blueprint.BluePrint;
 import app.socketiot.server.core.model.device.Device;
+import app.socketiot.server.core.model.widgets.Widget;
 import app.socketiot.server.utils.RandomUtil;
 import io.netty.channel.ChannelHandler;
 
@@ -84,6 +84,9 @@ public class DeviceApiHandler extends JwtHttpHandler {
         if (dbDevice == null) {
             return StatusMsg.badRequest("Device Not Found");
         }
+
+        dbDevice.dashGroup.forEach(channel -> channel.close());
+        dbDevice.hardGroup.forEach(channel -> channel.close());
 
         holder.db.removeDevice(dbDevice.token);
 

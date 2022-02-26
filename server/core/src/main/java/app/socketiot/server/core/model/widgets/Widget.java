@@ -1,4 +1,4 @@
-package app.socketiot.server.core.json.model;
+package app.socketiot.server.core.model.widgets;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;

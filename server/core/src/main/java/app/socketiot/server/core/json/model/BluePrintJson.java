@@ -2,6 +2,8 @@ package app.socketiot.server.core.json.model;
 
 import java.util.List;
 
+import app.socketiot.server.core.model.widgets.Widget;
+
 public class BluePrintJson {
     public List<Widget> widgets;
 

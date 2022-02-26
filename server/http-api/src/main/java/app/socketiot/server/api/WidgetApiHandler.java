@@ -13,8 +13,8 @@ import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
 import app.socketiot.server.core.json.model.DeviceJson;
-import app.socketiot.server.core.json.model.Widget;
 import app.socketiot.server.core.model.device.Device;
+import app.socketiot.server.core.model.widgets.Widget;
 import io.netty.channel.ChannelHandler;
 
 @Path("/api/widget")

@@ -1,6 +1,8 @@
 package app.socketiot.server.api;
 
 import java.util.ArrayList;
+import java.util.List;
+
 import app.socketiot.server.api.model.BluePrintList;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.http.JwtHttpHandler;
@@ -11,8 +13,9 @@ import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
 import app.socketiot.server.core.json.JsonParser;
 import app.socketiot.server.core.json.model.BluePrintJson;
-import app.socketiot.server.core.json.model.Widget;
 import app.socketiot.server.core.model.blueprint.BluePrint;
+import app.socketiot.server.core.model.device.Device;
+import app.socketiot.server.core.model.widgets.Widget;
 import app.socketiot.server.utils.RandomUtil;
 import io.netty.channel.ChannelHandler;
 
@@ -64,6 +67,12 @@ public class BluePrintApiHandler extends JwtHttpHandler {
         }
 
         holder.db.removeBluePrint(blueprint.id);
+
+        List<Device> bluePrintDevices = holder.deviceDao.getAllDevicesByBluePrint(blueprint.id);
+
+        for (Device device : bluePrintDevices) {
+            holder.db.removeDevice(device.token);
+        }
 
         return StatusMsg.ok("BluePrint Deleted Successfully");
     }

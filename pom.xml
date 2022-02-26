@@ -7,6 +7,14 @@
   <version>1.0</version>
   <name>socketiot</name>
   <packaging>pom</packaging>
+
+  <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+  </repositories>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
@@ -23,6 +31,8 @@
     <acme4j.version>2.12</acme4j.version>
     <bouncycastle.version>1.70</bouncycastle.version>
     <async-http-client.version>2.12.3</async-http-client.version>
+    <qrgen.version>2.6.0</qrgen.version>
+    <disruptor.version>3.4.4</disruptor.version>
   </properties>
   <dependencies>
     <dependency>
@@ -66,6 +76,12 @@
       <artifactId>bcpg-jdk15on</artifactId>
       <version>${bouncycastle.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.lmax</groupId>
+      <artifactId>disruptor</artifactId>
+      <version>${disruptor.version}</version>
+    </dependency>
+
   </dependencies>
   <modules>
     <module>server</module>

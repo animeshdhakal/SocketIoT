@@ -9,10 +9,11 @@ import app.socketiot.server.api.UserApiHandler;
 import app.socketiot.server.api.WidgetApiHandler;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.http.StaticFileHandler;
-import app.socketiot.server.hardware.HardwareHandler;
+import app.socketiot.server.hardware.HardwareLoginHandler;
 import app.socketiot.server.hardware.WebSocketHandler;
 import app.socketiot.server.hardware.message.HardwareMessageDecoder;
 import app.socketiot.server.hardware.message.HardwareMessageEncoder;
+import app.socketiot.server.utils.NumberUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -33,7 +34,9 @@ public class HttpApiServer extends BaseServer {
         super(holder, holder.props.getProperty("server.http.host"),
                 holder.props.getIntProperty("server.http.port", 4444));
 
-        int hardwareIdleTimeout = 15;
+        int hardwareIdleTimeout = NumberUtil
+                .calculateHeartBeat(holder.props.getIntProperty("server.hardware.heartbeat", 10));
+        int quotaLimit = holder.props.getIntProperty("server.hardware.quotalimit", 10);
         String webSocketPath = "/websocket";
 
         WebSocketMerger webSocketMerger = new WebSocketMerger() {
@@ -66,10 +69,10 @@ public class HttpApiServer extends BaseServer {
                 pipeline.addFirst(new IdleStateHandler(hardwareIdleTimeout, 0, 0));
                 pipeline.addLast(new WebSocketServerProtocolHandler(webSocketPath, null, true));
                 pipeline.addLast(new WebSocketHandler());
-                pipeline.addLast(new HardwareMessageDecoder(10));
+                pipeline.addLast(new HardwareMessageDecoder(quotaLimit));
                 pipeline.addLast(new WSEncoder());
                 pipeline.addLast(new HardwareMessageEncoder());
-                pipeline.addLast(new HardwareHandler(holder));
+                pipeline.addLast(new HardwareLoginHandler(holder));
                 pipeline.remove(ChunkedWriteHandler.class);
                 pipeline.remove(this);
             }
@@ -98,9 +101,9 @@ public class HttpApiServer extends BaseServer {
                     @Override
                     public ChannelPipeline buildHardwarePipeline(ChannelPipeline p) {
                         p.addFirst(new IdleStateHandler(hardwareIdleTimeout, 0, 0));
-                        p.addLast(new HardwareMessageDecoder(10));
+                        p.addLast(new HardwareMessageDecoder(quotaLimit));
                         p.addLast(new HardwareMessageEncoder());
-                        p.addLast(new HardwareHandler(holder));
+                        p.addLast(new HardwareLoginHandler(holder));
                         return p;
                     }
 

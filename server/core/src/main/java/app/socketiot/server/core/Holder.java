@@ -49,9 +49,9 @@ public class Holder {
     public final boolean isUnpacked;
     public final String jarPath;
 
-    public Holder(ArgParser args) {
+    public Holder(ArgParser args, ServerProperties props) {
         this.args = args;
-        this.props = new ServerProperties();
+        this.props = props;
         int workerThreads = props.getIntProperty("server.worker.threads",
                 Runtime.getRuntime().availableProcessors() * 2);
         if (Epoll.isAvailable()) {

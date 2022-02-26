@@ -21,4 +21,8 @@ public class QuotaLimitChecker {
         return count > limit;
     }
 
+    public int getRequestsPerSecond() {
+        return (int) (count / (System.currentTimeMillis() - lastTick) * 1000);
+    }
+
 }
