@@ -4,18 +4,7 @@ import AreYouSureModal from "../../components/modals/AreYouSureModal";
 import AddDeviceModal from "../../components/modals/AddDeviceModal";
 import { Link } from "react-router-dom";
 import Alert from "../../components/Alert";
-
-interface DeviceInterface {
-  name: string;
-  token: string;
-  blueprint_id: string;
-  online: boolean;
-  lastIP: string;
-}
-
-interface DeviceRes {
-  devices: DeviceInterface[];
-}
+import { DeviceInterface, DeviceRes } from "../../interfaces/IDevice";
 
 export const Devices = () => {
   const [devices, setDevices] = useState<DeviceInterface[]>([]);

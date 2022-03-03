@@ -2,6 +2,7 @@ package app.socketiot.server.api;
 
 import java.util.concurrent.ConcurrentHashMap;
 import app.socketiot.server.api.model.DevicesList;
+import app.socketiot.server.api.model.WidgetReq;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.http.JwtHttpHandler;
 import app.socketiot.server.core.http.annotations.POST;
@@ -96,7 +97,15 @@ public class DeviceApiHandler extends JwtHttpHandler {
     @POST
     @Path("/all")
     public HttpRes all(HttpReq req) {
-        DevicesList devices = new DevicesList(holder.deviceDao.getAllDevicesByEmail(req.user.email));
+        WidgetReq widgetreq = req.getContentAs(WidgetReq.class);
+
+        DevicesList devices;
+
+        if (widgetreq != null) {
+            devices = new DevicesList(holder.deviceDao.getAllDevicesByBluePrint(widgetreq.blueprint_id));
+        } else {
+            devices = new DevicesList(holder.deviceDao.getAllDevicesByEmail(req.user.email));
+        }
 
         return new HttpRes(JsonParser.toString(devices, "DeviceJsonFilter", "json"));
     }

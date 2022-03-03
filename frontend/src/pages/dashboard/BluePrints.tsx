@@ -4,15 +4,7 @@ import AreYouSureModal from "../../components/modals/AreYouSureModal";
 import CreateBluePrintModal from "../../components/modals/CreateBluePrintModal";
 import { Link } from "react-router-dom";
 import Alert from "../../components/Alert";
-
-interface BluePrintInterface {
-  name: string;
-  id: string;
-}
-
-interface BluePrintRes {
-  bluePrints: BluePrintInterface[];
-}
+import { BluePrintInterface, BluePrintRes } from "../../interfaces/IBluePrint";
 
 const BluePrints = () => {
   const [bluePrints, setBluePrints] = useState<BluePrintInterface[]>([]);

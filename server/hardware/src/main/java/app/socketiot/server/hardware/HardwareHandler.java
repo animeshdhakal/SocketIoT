@@ -4,9 +4,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.exceptions.ExceptionHandler;
+import app.socketiot.server.core.model.HardwareInfo;
+import app.socketiot.server.core.model.HardwareMessage;
+import app.socketiot.server.core.model.MsgType;
 import app.socketiot.server.core.model.device.Device;
-import app.socketiot.server.hardware.message.HardwareMessage;
-import app.socketiot.server.hardware.message.MsgType;
 import app.socketiot.server.utils.NumberUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -70,7 +71,6 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
         if (device != null) {
             if (device.json != null && device.json.pins.get(params[0]) != null) {
                 device.json.pins.put(params[0], params[1]);
-                holder.deviceDao.updateDevice(device);
                 broadCastMessage(ctx, new HardwareMessage(MsgType.WRITE, params[0], params[1]));
             }
         }

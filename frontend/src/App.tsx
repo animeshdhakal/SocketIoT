@@ -14,6 +14,7 @@ import Register from "./pages/Register";
 import Device from "./pages/dashboard/Device";
 import { messaging, getToken, vapidKey } from "./firebase";
 import Button from "./components/widgets/Button";
+import OTA from "./pages/dashboard/OTA";
 
 export const UserContext = React.createContext<AuthContextInterface>(
   {} as AuthContextInterface
@@ -75,6 +76,7 @@ function App() {
               <Route path="devices" element={<Devices />} />
               <Route path="blueprint" element={<BluePrint />} />
               <Route path="device" element={<Device />} />
+              <Route path="ota" element={<OTA />} />
             </Route>
           </Route>
           <Route path="*" element={<NotFound />} />

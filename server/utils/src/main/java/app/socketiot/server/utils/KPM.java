@@ -2,7 +2,7 @@ package app.socketiot.server.utils;
 
 // Knuth Morris Pratt algorithm
 // for pattern matching
-class KPM {
+public class KPM {
     /**
      * Search the data byte array for the first occurrence
      * of the byte array pattern.

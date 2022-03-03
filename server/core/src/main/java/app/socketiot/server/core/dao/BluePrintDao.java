@@ -21,6 +21,9 @@ public class BluePrintDao {
 
     public BluePrint getBluePrintByEmailAndID(String email, String blueprintId) {
         BluePrint bluePrint = this.getBluePrint(blueprintId);
+        if (bluePrint == null) {
+            return null;
+        }
         return bluePrint.email.equals(email) ? bluePrint : null;
     }
 

@@ -1,5 +1,6 @@
 package app.socketiot.server.hardware.message;
 
+import app.socketiot.server.core.model.HardwareMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;

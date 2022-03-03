@@ -1,4 +1,4 @@
-package app.socketiot.server.hardware;
+package app.socketiot.server.core.model;
 
 public class HardwareInfo {
     public String firmwareVersion;

@@ -1,9 +1,9 @@
 package app.socketiot.server.hardware;
 
 import app.socketiot.server.core.Holder;
+import app.socketiot.server.core.model.HardwareMessage;
+import app.socketiot.server.core.model.MsgType;
 import app.socketiot.server.core.model.device.Device;
-import app.socketiot.server.hardware.message.HardwareMessage;
-import app.socketiot.server.hardware.message.MsgType;
 import app.socketiot.server.utils.IPUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;

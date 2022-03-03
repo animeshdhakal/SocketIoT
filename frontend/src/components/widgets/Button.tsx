@@ -13,13 +13,13 @@ const Button: React.FC<IButton> = ({
 }) => {
   return (
     <div
-      className="bg-gray-500 w-40 h-24 flex justify-center items-center"
+      className="bg-white w-40 h-24 flex justify-center items-center text-xl shadow-gray-600 shadow-sm"
       onClick={() => {
         if (setValue && pin && onValue && offValue)
           setValue(pin, value == onValue ? offValue : onValue);
       }}
     >
-      <div className="border border-green-200 w-36 h-20 rounded-l-full rounded-r-full flex justify-center items-center select-none">
+      <div className="border border-green-700 w-36 h-20 rounded-l-full rounded-r-full flex justify-center items-center select-none">
         {value === onValue ? offLabel : onLabel}
       </div>
     </div>

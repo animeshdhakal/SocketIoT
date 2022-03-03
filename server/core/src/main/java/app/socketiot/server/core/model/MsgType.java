@@ -1,4 +1,4 @@
-package app.socketiot.server.hardware.message;
+package app.socketiot.server.core.model;
 
 public class MsgType {
     public static final short AUTH = 1;

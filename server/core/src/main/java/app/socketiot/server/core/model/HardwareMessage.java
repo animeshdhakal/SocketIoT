@@ -1,4 +1,4 @@
-package app.socketiot.server.hardware.message;
+package app.socketiot.server.core.model;
 
 public class HardwareMessage {
     public int type;
