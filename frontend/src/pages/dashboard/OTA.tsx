@@ -84,7 +84,7 @@ const OTA = () => {
   };
 
   const onUpdate = () => {
-    axios.post("/api/ota", {
+    axios.post("/api/ota/begin", {
       devices: checkedDevices,
       firmwarePath: binPath,
     });

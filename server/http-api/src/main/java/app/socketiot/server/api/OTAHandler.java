@@ -52,7 +52,7 @@ public class OTAHandler extends JwtHttpHandler {
 
         String otaUrl = "https://" + host + otaBegin.firmwarePath;
 
-        HardwareMessage otaMessage = new HardwareMessage(MsgType.WRITE, "2321", otaUrl);
+        HardwareMessage otaMessage = new HardwareMessage(MsgType.SYS, "ota", otaUrl);
 
         for (String deviceToken : otaBegin.devices) {
             Device device = holder.deviceDao.getDeviceByToken(deviceToken);
