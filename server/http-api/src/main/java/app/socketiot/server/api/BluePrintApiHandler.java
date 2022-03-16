@@ -2,8 +2,6 @@ package app.socketiot.server.api;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import app.socketiot.server.api.model.BluePrintList;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.http.JwtHttpHandler;
 import app.socketiot.server.core.http.annotations.POST;
@@ -80,10 +78,8 @@ public class BluePrintApiHandler extends JwtHttpHandler {
     @Path("/all")
     @POST
     public HttpRes all(HttpReq req) {
-        BluePrintList bluePrintList = new BluePrintList(
-                holder.bluePrintDao.getAllBluePrintsByEmail(req.user.email));
-
-        return new HttpRes(JsonParser.toString(bluePrintList, "BluePrintJsonFilter", "json"));
+        return new HttpRes(JsonParser.toString(holder.bluePrintDao.getAllBluePrintsByEmail(req.user.email),
+                "BluePrintJsonFilter", "json"));
     }
 
     @Path("/get")

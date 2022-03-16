@@ -1,7 +1,7 @@
 package app.socketiot.server.api;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import app.socketiot.server.api.model.DevicesList;
 import app.socketiot.server.api.model.WidgetReq;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.http.JwtHttpHandler;
@@ -58,7 +58,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
         deviceJson.pins = new ConcurrentHashMap<>();
 
         for (Widget widget : bluePrint.json.widgets) {
-            deviceJson.pins.put(Integer.toString(widget.pin), "");
+            deviceJson.pins.put(widget.pin, "");
         }
 
         device.json = deviceJson;
@@ -99,12 +99,12 @@ public class DeviceApiHandler extends JwtHttpHandler {
     public HttpRes all(HttpReq req) {
         WidgetReq widgetreq = req.getContentAs(WidgetReq.class);
 
-        DevicesList devices;
+        List<Device> devices;
 
         if (widgetreq != null) {
-            devices = new DevicesList(holder.deviceDao.getAllDevicesByBluePrint(widgetreq.blueprint_id));
+            devices = holder.deviceDao.getAllDevicesByBluePrint(widgetreq.blueprint_id);
         } else {
-            devices = new DevicesList(holder.deviceDao.getAllDevicesByEmail(req.user.email));
+            devices = holder.deviceDao.getAllDevicesByEmail(req.user.email);
         }
 
         return new HttpRes(JsonParser.toString(devices, "DeviceJsonFilter", "json"));

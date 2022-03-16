@@ -3,7 +3,6 @@ package app.socketiot.server.core.http;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.regex.Matcher;
-
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.exceptions.ExceptionHandler;
 import app.socketiot.server.core.http.annotations.POST;

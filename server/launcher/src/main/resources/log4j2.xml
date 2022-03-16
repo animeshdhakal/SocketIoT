@@ -18,7 +18,7 @@
 
          <Logger name="org.asynchttpclient" level="OFF" additivity="false" />
 
-        <Root level="all">
+        <Root level="info">
             <AppenderRef ref="log"/>
         </Root>
     </Loggers>

@@ -45,11 +45,10 @@ public class WidgetApiHandler extends JwtHttpHandler {
                     DeviceJson deviceJson = new DeviceJson();
                     deviceJson.pins = new ConcurrentHashMap<>();
                     for (Widget awidget : widget.widgets) {
-                        String pin = Integer.toString(awidget.pin);
-                        if (device.json.pins.get(pin) != null) {
-                            deviceJson.pins.put(pin, device.json.pins.get(pin));
+                        if (device.json.pins.get(awidget.pin) != null) {
+                            deviceJson.pins.put(awidget.pin, device.json.pins.get(awidget.pin));
                         } else {
-                            deviceJson.pins.put(pin, "");
+                            deviceJson.pins.put(awidget.pin, "");
                         }
                     }
                     device.json = deviceJson;

@@ -7,11 +7,15 @@ import app.socketiot.server.core.json.model.BluePrintJson;
 
 @JsonFilter("BluePrintJsonFilter")
 public class BluePrint {
-    public String name;
+    public volatile String name;
+
     @JsonIgnore
-    public String email;
-    public String id;
+    public volatile String email;
+
+    public volatile String id;
+
     public BluePrintJson json;
+
     @JsonIgnore
     public volatile boolean isUpdated = false;
 

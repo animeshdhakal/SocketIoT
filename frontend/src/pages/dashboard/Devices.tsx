@@ -4,7 +4,7 @@ import AreYouSureModal from "../../components/modals/AreYouSureModal";
 import AddDeviceModal from "../../components/modals/AddDeviceModal";
 import { Link } from "react-router-dom";
 import Alert from "../../components/Alert";
-import { DeviceInterface, DeviceRes } from "../../interfaces/IDevice";
+import { DeviceInterface } from "../../interfaces/IDevice";
 
 export const Devices = () => {
   const [devices, setDevices] = useState<DeviceInterface[]>([]);
@@ -14,8 +14,8 @@ export const Devices = () => {
   let alerRef = useRef<HTMLDivElement>(null);
 
   const fetchBluePrints = () => {
-    axios.post<DeviceRes>("/api/device/all").then((res) => {
-      setDevices(res.data.devices);
+    axios.post<DeviceInterface[]>("/api/device/all").then((res) => {
+      setDevices(res.data);
     });
   };
 
@@ -73,6 +73,10 @@ export const Devices = () => {
                   <th className="px-6 py-2 text-md text-gray-500">Last IP</th>
 
                   <th className="px-6 py-2 text-md text-gray-500">
+                    Last Online
+                  </th>
+
+                  <th className="px-6 py-2 text-md text-gray-500">
                     Device Token
                   </th>
                   <th className="px-6 py-2 text-md text-gray-500">
@@ -117,11 +121,19 @@ export const Devices = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900 flex items-center">
+                          {new Date(device.lastOnline).toLocaleString() || "-"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
                         <div
                           className="text-sm text-gray-500 select-none cursor-pointer"
-                          onClick={clickToCopy}
+                          onClick={(e) => {
+                            clickToCopy(e);
+                            navigator.clipboard.writeText(device.token);
+                          }}
                         >
-                          {device.token}
+                          {device.token.substring(0, 10) + "*".repeat(10)}
                         </div>
                       </td>
                       <td className="px-6 py-4">

@@ -59,6 +59,9 @@ const Device = () => {
           });
           return newWidgets;
         });
+        if (loading) {
+          setLoading(false);
+        }
         break;
       case MsgType.PING:
         break;
@@ -95,7 +98,6 @@ const Device = () => {
         }
       };
       socket.current.onopen = () => {
-        setLoading(false);
         socket.current?.send(create_message(MsgType.AUTH, device.token, "1"));
       };
     }

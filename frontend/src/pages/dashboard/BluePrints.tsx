@@ -4,7 +4,7 @@ import AreYouSureModal from "../../components/modals/AreYouSureModal";
 import CreateBluePrintModal from "../../components/modals/CreateBluePrintModal";
 import { Link } from "react-router-dom";
 import Alert from "../../components/Alert";
-import { BluePrintInterface, BluePrintRes } from "../../interfaces/IBluePrint";
+import { BluePrintInterface } from "../../interfaces/IBluePrint";
 
 const BluePrints = () => {
   const [bluePrints, setBluePrints] = useState<BluePrintInterface[]>([]);
@@ -18,15 +18,17 @@ const BluePrints = () => {
   };
 
   const fetchBluePrints = () => {
-    axios.post<BluePrintRes>("/api/blueprint/all").then((res) => {
-      setBluePrints(res.data.bluePrints);
+    axios.post<BluePrintInterface[]>("/api/blueprint/all").then((res) => {
+      setBluePrints(res.data);
     });
   };
 
   const deleteBluePrint = (id: string) => {
-    axios.post<BluePrintRes>("/api/blueprint/delete", { id }).then((res) => {
-      fetchBluePrints();
-    });
+    axios
+      .post<BluePrintInterface[]>("/api/blueprint/delete", { id })
+      .then((res) => {
+        fetchBluePrints();
+      });
   };
 
   useEffect(() => {

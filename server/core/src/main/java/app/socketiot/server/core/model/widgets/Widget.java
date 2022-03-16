@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 public abstract class Widget {
     public int x = 0;
     public int y = 0;
-    public int pin = -1;
+    public short pin = -1;
     public int pinMode = -1;
 
     public Widget() {

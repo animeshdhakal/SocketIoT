@@ -8,8 +8,8 @@ import app.socketiot.server.core.model.HardwareInfo;
 import app.socketiot.server.core.model.HardwareMessage;
 import app.socketiot.server.core.model.MsgType;
 import app.socketiot.server.core.model.device.Device;
+import app.socketiot.server.hardware.handler.HardwareLogicHandler;
 import app.socketiot.server.utils.NumberUtil;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
@@ -23,11 +23,13 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
     private final Device device;
     private final boolean isHardware;
     private final Holder holder;
+    private final HardwareLogicHandler hardware;
 
     public HardwareHandler(Holder holder, Device device, boolean isHardware) {
         this.device = device;
         this.isHardware = isHardware;
         this.holder = holder;
+        this.hardware = new HardwareLogicHandler(device);
     }
 
     @Override
@@ -50,39 +52,6 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    public void broadCastMessage(ChannelHandlerContext ctx, HardwareMessage msg) {
-        for (Channel c : device.hardGroup) {
-            if (!c.equals(ctx.channel())) {
-                c.writeAndFlush(msg);
-            }
-        }
-        for (Channel c : device.dashGroup) {
-            if (!c.equals(ctx.channel())) {
-                c.writeAndFlush(msg);
-            }
-        }
-
-    }
-
-    public void handleWrite(ChannelHandlerContext ctx, String[] params) {
-        if (params.length < 2)
-            return;
-
-        if (device != null) {
-            if (device.json != null && device.json.pins.get(params[0]) != null) {
-                device.json.pins.put(params[0], params[1]);
-                broadCastMessage(ctx, new HardwareMessage(MsgType.WRITE, params[0], params[1]));
-            }
-        }
-
-    }
-
-    public void handleSync(ChannelHandlerContext ctx) {
-        for (String key : device.json.pins.keySet()) {
-            ctx.writeAndFlush(new HardwareMessage(MsgType.WRITE, key, device.json.pins.get(key)));
-        }
-    }
-
     public void handleInfo(ChannelHandlerContext ctx, String[] body) {
         HardwareInfo info = new HardwareInfo(body);
         if (info.heartbeat > 0) {
@@ -96,10 +65,10 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
     public void process(ChannelHandlerContext ctx, HardwareMessage msg) {
         switch (msg.type) {
             case MsgType.WRITE:
-                handleWrite(ctx, msg.body);
+                hardware.handleWrite(ctx, msg);
                 break;
             case MsgType.SYNC:
-                handleSync(ctx);
+                hardware.handleSync(ctx);
                 break;
             case MsgType.PING:
                 ctx.writeAndFlush(msg);
@@ -121,6 +90,7 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
         }
         if (device != null && isHardware && device.hardGroup.size() == 0) {
             device.online = false;
+            device.lastOnline = System.currentTimeMillis();
             holder.deviceDao.updateDevice(device);
         }
     }

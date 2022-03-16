@@ -15,14 +15,14 @@ public class JwtUtil {
         if (secret == null) {
             secret = RandomUtil.unique();
         }
-        key = Keys.hmacShaKeyFor(Sha512Util.createHash(secret, secret).getBytes(StandardCharsets.UTF_8));
+        key = Keys.hmacShaKeyFor(Sha256Util.createHash(secret, secret).getBytes(StandardCharsets.UTF_8));
     }
 
     public String createToken(String email, long seconds) {
         return Jwts.builder()
                 .setSubject(email)
                 .setExpiration(seconds != 0 ? new Date(System.currentTimeMillis() + seconds * 1000) : null)
-                .signWith(key, SignatureAlgorithm.HS512)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
