@@ -21,6 +21,7 @@ const OTA = () => {
   const [firmwareInfo, setFirmwareInfo] = useState<FirmwareInfo>(
     {} as FirmwareInfo
   );
+  const [blueprintID, setBluePrintID] = useState<string>("");
 
   useEffect(() => {
     axios.post<BluePrintInterface[]>("/api/blueprint/all").then((res) => {
@@ -44,11 +45,18 @@ const OTA = () => {
   };
 
   const onBluePrintSelect = (blueprint_id: string) => {
+<<<<<<< HEAD
     axios
       .post<DeviceInterface[]>("/api/device/all", { blueprint_id })
       .then((res) => {
         setDevices(res.data);
       });
+=======
+    axios.post<DeviceRes>("/api/device/all", { blueprint_id }).then((res) => {
+      setBluePrintID(blueprint_id);
+      setDevices(res.data.devices);
+    });
+>>>>>>> b8d70c7db8e6585c5d33a1442fe0bd248d1c476d
   };
 
   const onSelectDevice = (checked: boolean, token: string) => {
@@ -86,9 +94,10 @@ const OTA = () => {
   };
 
   const onUpdate = () => {
-    axios.post("/api/ota", {
+    axios.post("/api/ota/begin", {
       devices: checkedDevices,
       firmwarePath: binPath,
+      blueprint_id: blueprintID
     });
   };
 
