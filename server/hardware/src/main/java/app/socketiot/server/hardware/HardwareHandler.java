@@ -59,7 +59,7 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
             ctx.pipeline().replace(IdleStateHandler.class, "IdleStateHandler",
                     new IdleStateHandler(NumberUtil.calculateHeartBeat(info.heartbeat), 0, 0));
         }
-
+        device.info = info;
     }
 
     public void process(ChannelHandlerContext ctx, HardwareMessage msg) {

@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import app.socketiot.server.core.json.model.DeviceJson;
+import app.socketiot.server.core.model.HardwareInfo;
 import app.socketiot.server.core.model.HardwareMessage;
 import app.socketiot.server.core.model.MsgType;
 import app.socketiot.server.utils.NumberUtil;
@@ -23,6 +24,8 @@ public class Device {
     public volatile String token;
 
     public DeviceJson json;
+
+    public volatile HardwareInfo info;
 
     public volatile Boolean online = false;
 
