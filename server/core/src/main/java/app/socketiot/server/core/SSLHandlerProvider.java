@@ -26,7 +26,7 @@ public class SSLHandlerProvider {
 
     public SSLHandlerProvider(
             Holder holder) {
-        if (holder.args.hasArg("--ssl")) {
+        if (holder.args.hasArg("-ssl")) {
             log.info("SSL Enabled");
 
             String certPath = holder.props.getProperty("ssl.cert");
