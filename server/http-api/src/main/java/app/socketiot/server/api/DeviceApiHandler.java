@@ -30,7 +30,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
     public HttpRes add(HttpReq req) {
         Device device = req.getContentAs(Device.class);
 
-        if (device == null || device.name == null || device.blueprint_id == null) {
+        if (device == null || device.name == null || device.blueprint_id == null || device.id == -1) {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
@@ -80,13 +80,12 @@ public class DeviceApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        Device dbDevice = holder.deviceDao.getDeviceByToken(device.token);
+        Device dbDevice = holder.deviceDao.getDeviceByEmailAndToken(req.user.email, device.token);
 
         if (dbDevice == null) {
             return StatusMsg.badRequest("Device Not Found");
         }
 
-        dbDevice.dashGroup.forEach(channel -> channel.close());
         dbDevice.hardGroup.forEach(channel -> channel.close());
 
         holder.db.removeDevice(dbDevice.token);

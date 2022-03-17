@@ -16,6 +16,8 @@ import io.netty.channel.ChannelHandlerContext;
 public class Device {
     public volatile String name;
 
+    public volatile int id = -1;
+
     @JsonIgnore
     public volatile String email;
 
@@ -40,9 +42,9 @@ public class Device {
     public Set<Channel> hardGroup = ConcurrentHashMap.newKeySet();
 
     @JsonIgnore
-    public Set<Channel> dashGroup = ConcurrentHashMap.newKeySet();
+    public Set<Channel> appGroup = ConcurrentHashMap.newKeySet();
 
-    public Device(String name, String email, String blueprint_id, String token, DeviceJson json) {
+    public Device(String name, String email, String blueprint_id, String token, int id, DeviceJson json) {
         this.name = name;
         this.email = email;
         this.blueprint_id = blueprint_id;
@@ -57,15 +59,18 @@ public class Device {
     public Device() {
     }
 
-    public void broadCastMessage(ChannelHandlerContext ctx, HardwareMessage msg) {
-        for (Channel c : hardGroup) {
-            if (!c.equals(ctx.channel())) {
-                c.writeAndFlush(msg);
+    public void sendToApps(ChannelHandlerContext ctx, HardwareMessage message) {
+        for (Channel channel : appGroup) {
+            if(!ctx.channel().equals(channel)){
+                channel.writeAndFlush(message);
             }
         }
-        for (Channel c : dashGroup) {
-            if (!c.equals(ctx.channel())) {
-                c.writeAndFlush(msg);
+    }
+
+    public void sendToHardware(ChannelHandlerContext ctx, HardwareMessage message) {
+        for (Channel channel : hardGroup) {
+            if(!ctx.channel().equals(channel)){
+                channel.writeAndFlush(message);
             }
         }
     }
@@ -75,7 +80,8 @@ public class Device {
         if (json.pins.containsKey(pin)) {
             json.pins.put(pin, value);
             isUpdated = true;
-            broadCastMessage(ctx, new HardwareMessage(MsgType.WRITE, pinn, value));
+            sendToHardware(ctx, new HardwareMessage(MsgType.WRITE, pinn, value));
+            sendToApps(ctx, new HardwareMessage(MsgType.WRITE, String.valueOf(id), pinn, value));
             return true;
         }
         return false;

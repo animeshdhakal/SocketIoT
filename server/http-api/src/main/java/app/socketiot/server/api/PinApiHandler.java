@@ -8,7 +8,9 @@ import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.model.device.Device;
 import app.socketiot.server.utils.NumberUtil;
+import io.netty.channel.ChannelHandler;
 
+@ChannelHandler.Sharable
 @Path("/api/pin")
 public class PinApiHandler extends BaseHttpHandler {
 

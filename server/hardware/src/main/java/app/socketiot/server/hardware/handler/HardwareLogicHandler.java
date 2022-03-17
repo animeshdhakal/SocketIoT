@@ -18,6 +18,9 @@ public class HardwareLogicHandler {
 
         if (device != null) {
             device.updatePin(ctx, msg.body[0], msg.body[1]);
+            device.sendToHardware(ctx, msg);
+            device.sendToApps(ctx,
+                    new HardwareMessage(MsgType.WRITE, String.valueOf(device.id), msg.body[0], msg.body[1]));
         }
     }
 

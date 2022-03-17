@@ -12,7 +12,10 @@ import app.socketiot.server.core.model.HardwareMessage;
 import app.socketiot.server.core.model.MsgType;
 import app.socketiot.server.core.model.device.Device;
 import app.socketiot.server.utils.HardwareInfoUtil;
+import io.netty.channel.ChannelHandler;
 
+
+@ChannelHandler.Sharable
 @Path("/api/ota")
 public class OTAHandler extends JwtHttpHandler {
     public OTAHandler(Holder holder) {

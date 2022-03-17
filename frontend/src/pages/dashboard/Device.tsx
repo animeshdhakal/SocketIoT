@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { HEARTBEAT_INTERVAL, MsgType } from "../../config/Protocol";
 import axios from "axios";
 import UniversalWidget from "../../interfaces/IUniversalWidget";
 import Loader from "../../components/Loader";
 import Widget from "../../components/widgets/Widget";
 import Draggable from "react-draggable";
-import { create_message, parse_message } from "../../utils/MsgUtil";
+import { wsClient } from "../../WSClient";
 
 const Device = () => {
   const location: any = useLocation();
@@ -14,7 +13,6 @@ const Device = () => {
   const [device, setDevice] = useState<any>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [widgets, setWidgets] = useState<UniversalWidget[]>([]);
-  const socket = useRef<WebSocket | null>(null);
 
   const setValue = (pin: number, value: string) => {
     const newWidgets = [...widgets];
@@ -24,48 +22,22 @@ const Device = () => {
       }
     });
     setWidgets(newWidgets);
-    socket.current?.send(create_message(MsgType.WRITE, pin, value));
+    console.log(device.id);
+    wsClient.sendWrite(device.id, pin, value);
   };
 
-  const syncWidgets = () => {
-    socket.current?.send(create_message(MsgType.SYNC));
-  };
-
-  const sendPing = () => {
-    socket.current?.send(create_message(MsgType.PING));
-  };
-
-  const processMsg = (msg: ArrayBuffer) => {
-    const { type, body } = parse_message(msg);
-    switch (type) {
-      case MsgType.AUTH:
-        if (body[0] === "1") {
-          console.log("Authenticated");
-          setTimeout(syncWidgets, 100);
-        } else {
-          console.log("Authentication failed");
+  const syncWidget = ({ pin: spin, value }: any) => {
+    const pin = parseInt(spin);
+    setWidgets((prevState) => {
+      let newWidgets = [...prevState];
+      newWidgets.forEach((widget) => {
+        if (widget.pin === pin) {
+          let val = value;
+          widget.value = `${val}`;
         }
-        break;
-      case MsgType.WRITE:
-        const pin = parseInt(body[0]);
-        const value = body[1];
-        setWidgets((prevState) => {
-          const newWidgets = [...prevState];
-          newWidgets.forEach((widget) => {
-            if (widget.pin === pin) {
-              let val = value;
-              widget.value = `${val}`;
-            }
-          });
-          return newWidgets;
-        });
-        if (loading) {
-          setLoading(false);
-        }
-        break;
-      case MsgType.PING:
-        break;
-    }
+      });
+      return newWidgets;
+    });
   };
 
   useEffect(() => {
@@ -73,33 +45,37 @@ const Device = () => {
       setDevice({
         token: location.state.token,
         blueprint_id: location.state.blueprint_id,
+        id: location.state.id,
       });
     } else {
       navigate("/dashboard/devices");
     }
-    let intervalId = setInterval(sendPing, HEARTBEAT_INTERVAL);
 
     return () => {
-      clearInterval(intervalId);
-      socket.current?.close();
+      wsClient.removeEventListener("write");
+      wsClient.onAuthenticated = () => {};
     };
   }, []);
 
+  const wsOnOpen = () => {
+    setTimeout(() => wsClient.syncAll(device.id), 100);
+    wsClient.addEventListener("write", ({ deviceID, pin, value }: any) => {
+      if (device.id == deviceID) {
+        syncWidget({ pin, value });
+      }
+      if (loading) {
+        setLoading(false);
+      }
+    });
+  };
+
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-    if (device.token) {
-      socket.current = new WebSocket(
-        window.location.origin.replace("http", "ws") + "/websocket"
-      );
-      socket.current.binaryType = "arraybuffer";
-      socket.current.onmessage = (e) => {
-        if (e.data instanceof ArrayBuffer) {
-          processMsg(e.data);
-        }
-      };
-      socket.current.onopen = () => {
-        socket.current?.send(create_message(MsgType.AUTH, device.token, "1"));
-      };
+    if (device.id) {
+      if (wsClient.connected()) {
+        wsOnOpen();
+      } else {
+        wsClient.onAuthenticated = wsOnOpen;
+      }
     }
     if (device.blueprint_id) {
       axios

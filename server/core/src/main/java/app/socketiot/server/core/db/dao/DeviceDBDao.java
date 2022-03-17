@@ -25,12 +25,13 @@ public class DeviceDBDao {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     devices.put(rs.getString("token"),
-                            new Device(rs.getString("name"), rs.getString("email"), rs.getString("blueprint_id"),
-                                    rs.getString("token"), JsonParser.parse(DeviceJson.class, rs.getString("json"))));
+                            new Device(rs.getString("name"), rs.getString("email"),
+                                    rs.getString("blueprint_id"),
+                                    rs.getString("token"), rs.getInt("id"),
+                                    JsonParser.parse(DeviceJson.class, rs.getString("json"))));
                 }
             }
         } catch (Exception e) {
-
         }
         return devices;
     }
@@ -38,13 +39,14 @@ public class DeviceDBDao {
     public void saveAllDevices(ArrayList<Device> devices) {
         try (Connection connection = db.getConnection()) {
             PreparedStatement stmt = connection.prepareStatement(
-                    "INSERT INTO devices (name, email, blueprint_id, token, json) VALUES (?, ?, ?, ?, ?) ON CONFLICT (token) DO UPDATE SET name = EXCLUDED.name, email = EXCLUDED.email, blueprint_id = EXCLUDED.blueprint_id, json = EXCLUDED.json");
+                    "INSERT INTO devices (name, email, blueprint_id, token, id, json) VALUES (?, ?, ?, ?, ? ?) ON CONFLICT (token) DO UPDATE SET name = EXCLUDED.name, email = EXCLUDED.email, blueprint_id = EXCLUDED.blueprint_id, json = EXCLUDED.json");
             for (Device device : devices) {
                 stmt.setString(1, device.name);
                 stmt.setString(2, device.email);
                 stmt.setString(3, device.blueprint_id);
                 stmt.setString(4, device.token);
-                stmt.setString(5, JsonParser.toString(device.json));
+                stmt.setInt(5, device.id);
+                stmt.setString(6, JsonParser.toString(device.json));
                 stmt.addBatch();
             }
             stmt.executeBatch();

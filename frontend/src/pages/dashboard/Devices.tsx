@@ -5,6 +5,7 @@ import AddDeviceModal from "../../components/modals/AddDeviceModal";
 import { Link } from "react-router-dom";
 import Alert from "../../components/Alert";
 import { DeviceInterface } from "../../interfaces/IDevice";
+import { wsClient } from "../../WSClient";
 
 export const Devices = () => {
   const [devices, setDevices] = useState<DeviceInterface[]>([]);
@@ -21,6 +22,17 @@ export const Devices = () => {
 
   useEffect(() => {
     fetchBluePrints();
+    wsClient.addEventListener("status", ({ deviceID, status }: any) => {
+      setDevices((prevState) => {
+        let newDevices = [...prevState];
+        newDevices.forEach((device) => {
+          if (device.id === parseInt(deviceID)) {
+            device.online = status;
+          }
+        });
+        return newDevices;
+      });
+    });
   }, []);
 
   const deleteDevice = (token: string) => {
@@ -99,6 +111,7 @@ export const Devices = () => {
                             state={{
                               token: device.token,
                               blueprint_id: device.blueprint_id,
+                              id: device.id,
                             }}
                           >
                             {device.name}
@@ -167,6 +180,7 @@ export const Devices = () => {
       </div>
       <Alert setAlert={setAlert} alert={alert} />
       <AddDeviceModal
+        id={devices.length + 1}
         show={showAddDeviceModal}
         onCreate={fetchBluePrints}
         onClose={() => setShowAddDeviceModal(false)}

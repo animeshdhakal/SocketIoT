@@ -21,5 +21,6 @@ CREATE TABLE IF NOT EXISTS devices (
     email VARCHAR(255) NOT NULL,
     blueprint_id VARCHAR(255) NOT NULL,
     token VARCHAR(255) NOT NULL UNIQUE,
+    id INTEGER NOT NULL UNIQUE,
     json text
 );

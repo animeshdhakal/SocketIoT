@@ -9,7 +9,9 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpUtil;
+import io.netty.channel.ChannelHandler;
 
+@ChannelHandler.Sharable
 public class LetsEncryptHandler extends ChannelInboundHandlerAdapter {
     private static final String LETS_ENCRYPT_PATH = "/.well-known/acme-challenge/";
     private final AcmeClient acmeClient;

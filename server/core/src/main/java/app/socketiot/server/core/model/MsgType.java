@@ -8,4 +8,7 @@ public class MsgType {
     public static final short SYNC = 5;
     public static final short INFO = 6;
     public static final short SYS = 7;
+
+    // For App Only
+    public static final short DEVICE_STATUS = 60;
 }

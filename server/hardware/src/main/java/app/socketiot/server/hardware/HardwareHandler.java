@@ -21,13 +21,11 @@ import io.netty.channel.ChannelHandler;
 public class HardwareHandler extends ChannelInboundHandlerAdapter {
     private static final Logger log = LogManager.getLogger(HardwareHandler.class);
     private final Device device;
-    private final boolean isHardware;
     private final Holder holder;
     private final HardwareLogicHandler hardware;
 
-    public HardwareHandler(Holder holder, Device device, boolean isHardware) {
+    public HardwareHandler(Holder holder, Device device) {
         this.device = device;
-        this.isHardware = isHardware;
         this.holder = holder;
         this.hardware = new HardwareLogicHandler(device);
     }
@@ -83,15 +81,12 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        if (isHardware) {
-            device.hardGroup.remove(ctx.channel());
-        } else {
-            device.dashGroup.remove(ctx.channel());
-        }
-        if (device != null && isHardware && device.hardGroup.size() == 0) {
+        device.hardGroup.remove(ctx.channel());
+        if (device != null && device.hardGroup.size() == 0) {
             device.online = false;
             device.lastOnline = System.currentTimeMillis();
             holder.deviceDao.updateDevice(device);
+            device.sendToApps(ctx, new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(device.id), "0"));
         }
     }
 

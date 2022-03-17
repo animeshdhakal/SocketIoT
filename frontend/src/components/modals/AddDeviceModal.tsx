@@ -3,6 +3,7 @@ import React, { useState } from "react";
 
 interface Props {
   show: boolean;
+  id: number;
   onClose: () => void;
   onCreate: () => void;
 }
@@ -11,7 +12,7 @@ interface DeviceRes {
   token: string;
 }
 
-const AddDeviceModal: React.FC<Props> = ({ show, onClose, onCreate }) => {
+const AddDeviceModal: React.FC<Props> = ({ show, onClose, onCreate, id }) => {
   const [deviceName, setDeviceName] = useState<string>("");
   const [deviceNameError, setDeviceNameError] = useState<string>("");
   const [bluePrintID, setBluePrintID] = useState<string>("");
@@ -52,6 +53,7 @@ const AddDeviceModal: React.FC<Props> = ({ show, onClose, onCreate }) => {
         .post<DeviceRes>("/api/device/add", {
           name: deviceName,
           blueprint_id: bluePrintID,
+          id,
         })
         .then((res) => {
           setToken(res.data.token);

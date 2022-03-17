@@ -1,52 +1,71 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-      
+        
+  
   
   <modelVersion>4.0.0</modelVersion>
-      
+        
+  
   
   <parent>
-            
+                
+    
     
     <artifactId>socketiot</artifactId>
-            
+                
+    
     
     <groupId>app.socketiot</groupId>
-            
+                
+    
     
     <version>1.0</version>
-          
+              
+  
   
   </parent>
-      
+        
+  
   
   <packaging>pom</packaging>
-      
+        
+  
   
   <groupId>app.socketiot.server</groupId>
-      
+        
+  
   
   <artifactId>server</artifactId>
-      
+        
+  
   
   <modules>
-            
+                
+    
     
     <module>core</module>
-            
+                
+    
     
     <module>launcher</module>
-            
+                
+    
     
     <module>http-api</module>
-            
+                
+    
     
     <module>utils</module>
-          
+              
+    
     
     <module>hardware</module>
+          
+    
+    <module>app</module>
       
   </modules>
-    
+      
+
 
 </project>

@@ -4,6 +4,8 @@ enum MsgType {
   READ = 3,
   PING = 4,
   SYNC = 5,
+
+  DEVICE_STATUS = 60,
 }
 
 let HEARTBEAT_INTERVAL = 10000;

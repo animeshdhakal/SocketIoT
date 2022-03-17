@@ -5,4 +5,5 @@ export interface DeviceInterface {
   online: boolean;
   lastIP: string;
   lastOnline: string;
+  id: number;
 }

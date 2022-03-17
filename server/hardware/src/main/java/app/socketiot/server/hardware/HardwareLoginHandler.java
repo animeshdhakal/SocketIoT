@@ -7,7 +7,9 @@ import app.socketiot.server.core.model.device.Device;
 import app.socketiot.server.utils.IPUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelHandler;
 
+@ChannelHandler.Sharable
 public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
     private final Holder holder;
 
@@ -22,17 +24,13 @@ public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
             if (message.body.length != 0) {
                 Device device = holder.deviceDao.getDeviceByToken(message.body[0]);
                 if (device != null) {
-                    boolean isHardware = message.body.length == 1;
-                    if (isHardware) {
-                        device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
-                        device.online = true;
-                        device.hardGroup.add(ctx.channel());
-                    } else {
-                        device.dashGroup.add(ctx.channel());
-                    }
+                    device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
+                    device.online = true;
+                    device.hardGroup.add(ctx.channel());
                     holder.deviceDao.updateDevice(device);
-                    ctx.pipeline().replace(this, "HardWareHandler", new HardwareHandler(holder, device, isHardware));
+                    ctx.pipeline().replace(this, "HardWareHandler", new HardwareHandler(holder, device));
                     ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "1"));
+                    device.sendToApps(ctx, new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(device.id), "1"));
                 } else {
                     ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "0"));
                 }

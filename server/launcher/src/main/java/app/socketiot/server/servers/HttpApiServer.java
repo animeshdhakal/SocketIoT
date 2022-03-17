@@ -9,6 +9,7 @@ import app.socketiot.server.api.PinApiHandler;
 import app.socketiot.server.api.ReactHandler;
 import app.socketiot.server.api.UserApiHandler;
 import app.socketiot.server.api.WidgetApiHandler;
+import app.socketiot.server.app.AppLoginHandler;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.http.StaticFileHandler;
 import app.socketiot.server.hardware.HardwareLoginHandler;
@@ -39,13 +40,31 @@ public class HttpApiServer extends BaseServer {
         int hardwareIdleTimeout = NumberUtil
                 .calculateHeartBeat(holder.props.getIntProperty("server.hardware.heartbeat", 10));
         int quotaLimit = holder.props.getIntProperty("server.hardware.quotalimit", 10);
-        String webSocketPath = "/websocket";
+        String webSocketPath = "/ws";
+        String appPath = "/appws";
+
+        var staticFileHandler = new StaticFileHandler(holder, "/static");
+        var userApiHandler = new UserApiHandler(holder);
+        var bluePrintApiHandler = new BluePrintApiHandler(holder);
+        var deviceApiHandler = new DeviceApiHandler(holder);
+        var pinApiHandler = new PinApiHandler(holder);
+        var widgetApiHandler = new WidgetApiHandler(holder);
+        var otaHandler = new OTAHandler(holder);
+        var fileUploadHandler = new FileUploadHandler(holder.jarPath, "/api/upload", "/static");
+        var letsEncryptHandler = new LetsEncryptHandler(holder.sslprovider.acmeClient);
+        var reactHandler = new ReactHandler(holder, "/static/index.html");
+
+        var hardwareLoginHandler = new HardwareLoginHandler(holder);
+        var appLoginHandler = new AppLoginHandler(holder);
 
         WebSocketMerger webSocketMerger = new WebSocketMerger() {
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) {
-                if (((HttpRequest) msg).uri().startsWith(webSocketPath)) {
+                String uri = ((HttpRequest) msg).uri();
+                if (uri.startsWith(webSocketPath)) {
                     initWebSocketPipeline(ctx);
+                } else if (uri.startsWith(appPath)) {
+                    initAppWebSocketPipeline(ctx);
                 } else {
                     initHttpPipeline(ctx);
                 }
@@ -55,16 +74,16 @@ public class HttpApiServer extends BaseServer {
 
             public void initHttpPipeline(ChannelHandlerContext ctx) {
                 ChannelPipeline pipeline = ctx.pipeline();
-                pipeline.addLast(new StaticFileHandler(holder, "/static"));
-                pipeline.addLast(new UserApiHandler(holder));
-                pipeline.addLast(new DeviceApiHandler(holder));
-                pipeline.addLast(new BluePrintApiHandler(holder));
-                pipeline.addLast(new WidgetApiHandler(holder));
-                pipeline.addLast(new PinApiHandler(holder));
-                pipeline.addLast(new OTAHandler(holder));
-                pipeline.addLast(new FileUploadHandler(holder.jarPath, "/api/upload", "/static"));
-                pipeline.addLast(new LetsEncryptHandler(holder.sslprovider.acmeClient));
-                pipeline.addLast(new ReactHandler(holder, "/static/index.html"));
+                pipeline.addLast(staticFileHandler);
+                pipeline.addLast(userApiHandler);
+                pipeline.addLast(deviceApiHandler);
+                pipeline.addLast(bluePrintApiHandler);
+                pipeline.addLast(widgetApiHandler);
+                pipeline.addLast(pinApiHandler);
+                pipeline.addLast(otaHandler);
+                pipeline.addLast(fileUploadHandler);
+                pipeline.addLast(letsEncryptHandler);
+                pipeline.addLast(reactHandler);
                 pipeline.remove(this);
             }
 
@@ -76,7 +95,20 @@ public class HttpApiServer extends BaseServer {
                 pipeline.addLast(new HardwareMessageDecoder(quotaLimit));
                 pipeline.addLast(new WSEncoder());
                 pipeline.addLast(new HardwareMessageEncoder());
-                pipeline.addLast(new HardwareLoginHandler(holder));
+                pipeline.addLast(hardwareLoginHandler);
+                pipeline.remove(ChunkedWriteHandler.class);
+                pipeline.remove(this);
+            }
+
+            public void initAppWebSocketPipeline(ChannelHandlerContext ctx) {
+                ChannelPipeline pipeline = ctx.pipeline();
+                pipeline.addFirst(new IdleStateHandler(hardwareIdleTimeout, 0, 0));
+                pipeline.addLast(new WebSocketServerProtocolHandler(appPath, null, true));
+                pipeline.addLast(new WebSocketHandler());
+                pipeline.addLast(new HardwareMessageDecoder(quotaLimit));
+                pipeline.addLast(new WSEncoder());
+                pipeline.addLast(new HardwareMessageEncoder());
+                pipeline.addLast(appLoginHandler);
                 pipeline.remove(ChunkedWriteHandler.class);
                 pipeline.remove(this);
             }
@@ -107,7 +139,7 @@ public class HttpApiServer extends BaseServer {
                         p.addFirst(new IdleStateHandler(hardwareIdleTimeout, 0, 0));
                         p.addLast(new HardwareMessageDecoder(quotaLimit));
                         p.addLast(new HardwareMessageEncoder());
-                        p.addLast(new HardwareLoginHandler(holder));
+                        p.addLast(hardwareLoginHandler);
                         return p;
                     }
 
