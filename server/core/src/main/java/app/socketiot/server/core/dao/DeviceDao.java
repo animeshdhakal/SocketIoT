@@ -2,75 +2,58 @@ package app.socketiot.server.core.dao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
-
+import app.socketiot.server.core.model.HardwareMessage;
+import app.socketiot.server.core.model.auth.User;
 import app.socketiot.server.core.model.device.Device;
+import app.socketiot.server.core.model.device.UserDevice;
 
 public class DeviceDao {
 
-    private ConcurrentMap<String, Device> devices;
+    private ConcurrentMap<String, UserDevice> devices;
 
-    public DeviceDao(ConcurrentMap<String, Device> devices) {
-        this.devices = devices;
+    public DeviceDao(ConcurrentMap<String, User> users) {
+        this.devices = new ConcurrentHashMap<>();
+        for (User user : users.values()) {
+            for (Device device : user.json.devices) {
+                devices.put(device.token, new UserDevice(user, device));
+            }
+        }
     }
 
-    public Device getDeviceByToken(String token) {
+    public List<Device> getAllDevicesByBlueprint(String blueprintId) {
+        ArrayList<Device> data = new ArrayList<>();
+        for (UserDevice userDevice : devices.values()) {
+            if (userDevice.device.blueprint_id.equals(blueprintId)) {
+                data.add(userDevice.device);
+            }
+        }
+        return data;
+    }
+
+    public void addDevice(User user, Device device) {
+        devices.put(device.token, new UserDevice(user, device));
+    }
+
+    public Device getDevice(String token) {
+        return devices.get(token).device;
+    }
+
+    public UserDevice getUserDevice(String token) {
         return devices.get(token);
-    }
-
-    public Device getDeviceByEmail(String email) {
-        return devices.values().stream().filter(device -> device.email.equals(email)).findFirst().orElse(null);
-    }
-
-    public Device getDeviceByEmailAndToken(String email, String token) {
-        Device device = devices.get(token);
-        return device.email.equals(email) ? device : null;
-    }
-
-    public Device getDeviceByName(String name) {
-        return devices.values().stream().filter(device -> device.name.equals(name)).findFirst().orElse(null);
-    }
-
-    public Device getDeviceByEmailAndID(String email, int id) {
-        Device device = devices.values().stream().filter(dev -> dev.email.equals(email) && dev.id == id)
-                .findFirst().orElse(null);
-        return device;
-    }
-
-    public List<Device> getAllDevicesByBluePrint(String id) {
-        List<Device> devicesList = devices.values().stream().filter(device -> device.blueprint_id.equals(id))
-                .collect(Collectors.toList());
-        return devicesList;
-    }
-
-    public List<Device> getAllDevicesByEmail(String email) {
-        List<Device> devicesList = devices.values().stream().filter(device -> device.email.equals(email))
-                .collect(Collectors.toList());
-        return devicesList;
-    }
-
-    public void addDevice(Device device) {
-        device.isUpdated = true;
-        devices.put(device.token, device);
     }
 
     public void removeDevice(String token) {
         devices.remove(token);
     }
 
-    public void updateDevice(Device device) {
-        device.isUpdated = true;
-    }
-
-    public ArrayList<Device> getAllDevices() {
-        ArrayList<Device> data = new ArrayList<>();
-        for (Device device : devices.values()) {
-            if (device.isUpdated) {
-                data.add(device);
-                device.isUpdated = false;
+    public void sendToHardware(int deviceId, HardwareMessage message) {
+        for (UserDevice userDevice : devices.values()) {
+            if (userDevice.device.id == deviceId) {
+                userDevice.user.json.sendToHardware(null, deviceId, message);
             }
         }
-        return data;
     }
+
 }

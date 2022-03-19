@@ -13,10 +13,8 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 @ChannelHandler.Sharable
 public class AppHandler extends ChannelInboundHandlerAdapter {
     private final User user;
-    private final Holder holder;
 
     public AppHandler(Holder holder, User user) {
-        this.holder = holder;
         this.user = user;
     }
 
@@ -29,33 +27,41 @@ public class AppHandler extends ChannelInboundHandlerAdapter {
                 case MsgType.WRITE:
                     if (message.body.length > 2) {
                         int deviceId = Integer.parseInt(message.body[0]);
-                        Device device = holder.deviceDao.getDeviceByEmailAndID(user.email, deviceId);
-                        device.updatePin(ctx, message.body[1], message.body[2]);
+                        Device device = user.json.getDevice(deviceId);
+                        if (device != null) {
+                            device.updatePin(ctx, message.body[1], message.body[2]);
+                            user.json.sendToHardware(ctx, deviceId,
+                                    new HardwareMessage(MsgType.WRITE, message.body[1], message.body[2]));
+                            user.json.sendToApps(ctx, message);
+                            user.isUpdated = true;
+                        }
                     }
-                    break;
-                case MsgType.PING:
                     break;
                 case MsgType.SYNC:
                     if (message.body.length > 0) {
                         int deviceId = Integer.parseInt(message.body[0]);
-                        Device device = holder.deviceDao.getDeviceByEmailAndID(user.email, deviceId);
-                        if(device == null){
-                            System.out.println("Device Not Found " + deviceId);
-                            return;                        
-                        }
-                        for (short key : device.json.pins.keySet()) {
-                            ctx.writeAndFlush(new HardwareMessage(MsgType.WRITE, message.body[0], Integer.toString(key), device.json.pins.get(key)));
+                        Device device = user.json.getDevice(deviceId);
+                        if (device != null) {
+                            for (short key : device.pins.keySet()) {
+                                ctx.writeAndFlush(new HardwareMessage(MsgType.WRITE, message.body[0],
+                                        Integer.toString(key),
+                                        device.pins.get(key)));
+                            }
+                            if (device.pins.size() == 0) {
+                                ctx.writeAndFlush(message);
+                            }
                         }
                     }
+                case MsgType.PING:
+                    break;
             }
         }
+
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        for (Device device : holder.deviceDao.getAllDevicesByEmail(user.email)) {
-            device.appGroup.remove(ctx.channel());
-        }
+        user.json.removeAppChannel(ctx.channel());
     }
 
     @Override

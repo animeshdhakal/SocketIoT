@@ -1,6 +1,5 @@
 package app.socketiot.server.api;
 
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import app.socketiot.server.api.model.WidgetReq;
 import app.socketiot.server.core.Holder;
@@ -11,7 +10,6 @@ import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
 import app.socketiot.server.core.json.JsonParser;
-import app.socketiot.server.core.json.model.DeviceJson;
 import app.socketiot.server.core.model.blueprint.BluePrint;
 import app.socketiot.server.core.model.device.Device;
 import app.socketiot.server.core.model.widgets.Widget;
@@ -34,13 +32,12 @@ public class DeviceApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        Device dbDevice = holder.deviceDao.getDeviceByEmail(req.user.email);
+        Device dbDevice = req.user.json.getLastDevice();
 
         if (dbDevice != null && dbDevice.name.equals(device.name)) {
             return StatusMsg.badRequest("Name should be unique");
         }
 
-        device.email = req.user.email;
         device.token = RandomUtil.unique();
 
         BluePrint bluePrint = holder.bluePrintDao.getBluePrint(device.blueprint_id);
@@ -53,20 +50,17 @@ public class DeviceApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Invalid Blueprint");
         }
 
-        DeviceJson deviceJson = new DeviceJson();
-
-        deviceJson.pins = new ConcurrentHashMap<>();
+        device.pins = new ConcurrentHashMap<>();
 
         for (Widget widget : bluePrint.json.widgets) {
-            deviceJson.pins.put(widget.pin, "");
+            device.pins.put(widget.pin, "");
         }
 
-        device.json = deviceJson;
-
-        holder.deviceDao.addDevice(device);
+        holder.deviceDao.addDevice(req.user, device);
+        req.user.json.addDevice(device);
 
         Device resDevice = new Device(device.token);
-        resDevice.online = null;
+        req.user.isUpdated = true;
 
         return new HttpRes(resDevice);
     }
@@ -80,15 +74,12 @@ public class DeviceApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        Device dbDevice = holder.deviceDao.getDeviceByEmailAndToken(req.user.email, device.token);
-
-        if (dbDevice == null) {
+        if (!req.user.json.removeDevice(device.token)) {
             return StatusMsg.badRequest("Device Not Found");
         }
 
-        dbDevice.hardGroup.forEach(channel -> channel.close());
-
-        holder.db.removeDevice(dbDevice.token);
+        holder.deviceDao.removeDevice(device.token);
+        req.user.isUpdated = true;
 
         return StatusMsg.ok("Device Removed Successfully");
     }
@@ -98,15 +89,13 @@ public class DeviceApiHandler extends JwtHttpHandler {
     public HttpRes all(HttpReq req) {
         WidgetReq widgetreq = req.getContentAs(WidgetReq.class);
 
-        List<Device> devices;
-
         if (widgetreq != null) {
-            devices = holder.deviceDao.getAllDevicesByBluePrint(widgetreq.blueprint_id);
+            return new HttpRes(JsonParser.toString(holder.deviceDao.getAllDevicesByBlueprint(widgetreq.blueprint_id),
+                    "DeviceJsonFilter", "json"));
         } else {
-            devices = holder.deviceDao.getAllDevicesByEmail(req.user.email);
+            return new HttpRes(JsonParser.toString(req.user.json.devices, "DeviceJsonFilter", "json"));
         }
 
-        return new HttpRes(JsonParser.toString(devices, "DeviceJsonFilter", "json"));
     }
 
 }

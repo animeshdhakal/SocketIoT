@@ -11,10 +11,8 @@ import app.socketiot.server.core.Holder;
 public class DB {
     private final HikariDataSource ds;
     private final static Logger log = LogManager.getLogger(DB.class);
-    private final Holder holder;
 
     public DB(Holder holder) {
-        this.holder = holder;
         HikariConfig config = new HikariConfig();
         config.setUsername(holder.props.getProperty("db.username"));
         config.setPassword(holder.props.getProperty("db.password"));
@@ -49,13 +47,4 @@ public class DB {
         return this.ds.getConnection();
     }
 
-    public void removeDevice(String token) {
-        holder.deviceDao.removeDevice(token);
-        holder.blockingIOHandler.executeDB(() -> holder.deviceDBDao.removeDevice(token));
-    }
-
-    public void removeBluePrint(String id) {
-        holder.bluePrintDao.removeBluePrint(id);
-        holder.blockingIOHandler.executeDB(() -> holder.bluePrintDBDao.deleteBluePrint(id));
-    }
 }

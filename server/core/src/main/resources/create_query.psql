@@ -6,21 +6,6 @@
 CREATE TABLE IF NOT EXISTS users (
     sn SERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL
-);
-CREATE TABLE IF NOT EXISTS blueprints (
-    sn SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    id VARCHAR(255) NOT NULL UNIQUE,
-    json text 
-);
-CREATE TABLE IF NOT EXISTS devices (
-    sn SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    blueprint_id VARCHAR(255) NOT NULL,
-    token VARCHAR(255) NOT NULL UNIQUE,
-    id INTEGER NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
     json text
 );

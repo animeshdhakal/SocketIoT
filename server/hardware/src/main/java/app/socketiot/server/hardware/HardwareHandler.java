@@ -7,27 +7,25 @@ import app.socketiot.server.core.exceptions.ExceptionHandler;
 import app.socketiot.server.core.model.HardwareInfo;
 import app.socketiot.server.core.model.HardwareMessage;
 import app.socketiot.server.core.model.MsgType;
-import app.socketiot.server.core.model.device.Device;
+import app.socketiot.server.core.model.device.UserDevice;
+import app.socketiot.server.core.statebase.HardwareStateBase;
 import app.socketiot.server.hardware.handler.HardwareLogicHandler;
 import app.socketiot.server.utils.NumberUtil;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.channel.ChannelHandler;
 
 @ChannelHandler.Sharable
-public class HardwareHandler extends ChannelInboundHandlerAdapter {
+public class HardwareHandler extends HardwareStateBase {
     private static final Logger log = LogManager.getLogger(HardwareHandler.class);
-    private final Device device;
-    private final Holder holder;
+    public final UserDevice userDevice;
     private final HardwareLogicHandler hardware;
 
-    public HardwareHandler(Holder holder, Device device) {
-        this.device = device;
-        this.holder = holder;
-        this.hardware = new HardwareLogicHandler(device);
+    public HardwareHandler(Holder holder, UserDevice userDevice) {
+        this.userDevice = userDevice;
+        this.hardware = new HardwareLogicHandler(userDevice);
     }
 
     @Override
@@ -35,7 +33,7 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
         if (evt instanceof IdleStateEvent) {
             IdleStateEvent event = (IdleStateEvent) evt;
             if (event.state() == IdleState.READER_IDLE) {
-                log.trace("Device Closed Due to InActivity {}", device);
+                log.trace("Device Closed Due to InActivity {}", userDevice.device);
                 ctx.close();
             }
         } else {
@@ -57,7 +55,7 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
             ctx.pipeline().replace(IdleStateHandler.class, "IdleStateHandler",
                     new IdleStateHandler(NumberUtil.calculateHeartBeat(info.heartbeat), 0, 0));
         }
-        device.info = info;
+        userDevice.device.info = info;
     }
 
     public void process(ChannelHandlerContext ctx, HardwareMessage msg) {
@@ -81,13 +79,17 @@ public class HardwareHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        device.hardGroup.remove(ctx.channel());
-        if (device != null && device.hardGroup.size() == 0) {
-            device.online = false;
-            device.lastOnline = System.currentTimeMillis();
-            holder.deviceDao.updateDevice(device);
-            device.sendToApps(ctx, new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(device.id), "0"));
+        userDevice.user.json.removeHardChannel(ctx.channel());
+        if (userDevice.user.json.hardChannels.size() == 0) {
+            userDevice.device.online = false;
+            userDevice.device.lastOnline = System.currentTimeMillis();
+            userDevice.user.json.sendToApps(ctx,
+                    new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(userDevice.device.id), "0"));
         }
+    }
+
+    public UserDevice getUserDevice() {
+        return userDevice;
     }
 
     @Override

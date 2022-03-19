@@ -11,8 +11,6 @@ import app.socketiot.server.core.dao.BluePrintDao;
 import app.socketiot.server.core.dao.DeviceDao;
 import app.socketiot.server.core.dao.UserDao;
 import app.socketiot.server.core.db.DB;
-import app.socketiot.server.core.db.dao.BluePrintDBDao;
-import app.socketiot.server.core.db.dao.DeviceDBDao;
 import app.socketiot.server.core.db.dao.UserDBDao;
 import app.socketiot.server.core.mail.Mail;
 import app.socketiot.server.core.notification.FCMNotification;
@@ -37,10 +35,8 @@ public class Holder {
     public final DB db;
     public final UserDBDao userDBDao;
     public final UserDao userDao;
-    public final DeviceDBDao deviceDBDao;
     public final DeviceDao deviceDao;
     public final BluePrintDao bluePrintDao;
-    public final BluePrintDBDao bluePrintDBDao;
     public final BlockingIOHandler blockingIOHandler;
     public final JwtUtil jwtUtil;
     public final Mail mail;
@@ -66,11 +62,11 @@ public class Holder {
         }
         this.db = new DB(this);
         this.userDBDao = new UserDBDao(db);
-        this.deviceDBDao = new DeviceDBDao(db);
-        this.bluePrintDBDao = new BluePrintDBDao(db);
+
         this.userDao = new UserDao(userDBDao.getAllUsers());
-        this.deviceDao = new DeviceDao(deviceDBDao.getAllDevices());
-        this.bluePrintDao = new BluePrintDao(bluePrintDBDao.getAllBluePrints());
+        this.deviceDao = new DeviceDao(userDao.users);
+        this.bluePrintDao = new BluePrintDao(userDao.users);
+
         this.blockingIOHandler = new BlockingIOHandler(
                 props.getIntProperty("server.blocking.io.threads", 4));
         this.jwtUtil = new JwtUtil(props.getProperty("server.jwt.secret"));

@@ -14,7 +14,6 @@ import app.socketiot.server.core.model.device.Device;
 import app.socketiot.server.utils.HardwareInfoUtil;
 import io.netty.channel.ChannelHandler;
 
-
 @ChannelHandler.Sharable
 @Path("/api/ota")
 public class OTAHandler extends JwtHttpHandler {
@@ -31,8 +30,7 @@ public class OTAHandler extends JwtHttpHandler {
                 || otaBegin.devices.size() == 0) {
             return StatusMsg.badRequest("Incomplete Fields");
         }
-        if (holder.bluePrintDao.getBluePrintByEmailAndID(req.user.email, otaBegin.blueprint_id) == null) {
-            System.out.println("Blueprint not found");
+        if (req.user.json.getBlueprint(otaBegin.blueprint_id) == null) {
             return StatusMsg.badRequest("BluePrint Not Found");
         }
 
@@ -58,17 +56,14 @@ public class OTAHandler extends JwtHttpHandler {
         HardwareMessage otaMessage = new HardwareMessage(MsgType.SYS, "ota", otaUrl);
 
         for (String deviceToken : otaBegin.devices) {
-            Device device = holder.deviceDao.getDeviceByToken(deviceToken);
+            Device device = holder.deviceDao.getDevice(deviceToken);
             if (device == null) {
                 return StatusMsg.badRequest("Device Not Found");
             }
             if (!device.blueprint_id.equals(otaBegin.blueprint_id)) {
                 return StatusMsg.badRequest("Device Not Found");
             }
-
-            device.hardGroup.forEach(channel -> {
-                channel.writeAndFlush(otaMessage);
-            });
+            holder.deviceDao.sendToHardware(device.id, otaMessage);
         }
 
         return StatusMsg.ok("OTA Begins");

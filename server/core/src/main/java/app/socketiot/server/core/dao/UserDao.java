@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentMap;
 
 import app.socketiot.server.core.model.auth.User;
+import app.socketiot.server.core.model.device.Device;
 
 public class UserDao {
 
-    private ConcurrentMap<String, User> users;
+    public final ConcurrentMap<String, User> users;
 
     public UserDao(ConcurrentMap<String, User> users) {
         this.users = users;
@@ -34,12 +35,24 @@ public class UserDao {
         user.isUpdated = true;
     }
 
+    public void removeDevice(String token) {
+        for (User user : users.values()) {
+            for (Device device : user.json.devices) {
+                if (device.token.equals(token)) {
+                    user.json.removeDevice(device.token);
+                    return;
+                }
+            }
+        }
+    }
+
     public ArrayList<User> getAllUsers() {
         ArrayList<User> data = new ArrayList<>();
         for (User user : users.values()) {
-            if (user.isUpdated) {
+            if (user.isUpdated || user.json.isUpdated) {
                 data.add(user);
                 user.isUpdated = false;
+                user.json.isUpdated = false;
             }
         }
         return data;

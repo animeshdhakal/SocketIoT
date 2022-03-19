@@ -6,7 +6,10 @@ import app.socketiot.server.core.http.annotations.GET;
 import app.socketiot.server.core.http.annotations.Path;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
+import app.socketiot.server.core.model.HardwareMessage;
+import app.socketiot.server.core.model.MsgType;
 import app.socketiot.server.core.model.device.Device;
+import app.socketiot.server.core.model.device.UserDevice;
 import app.socketiot.server.utils.NumberUtil;
 import io.netty.channel.ChannelHandler;
 
@@ -19,7 +22,7 @@ public class PinApiHandler extends BaseHttpHandler {
     }
 
     @GET
-    @Path("/put")
+    @Path("/set")
     public HttpRes put(HttpReq req) {
         String token = req.getQueryParam("token");
         String pin = req.getQueryParam("pin");
@@ -29,15 +32,22 @@ public class PinApiHandler extends BaseHttpHandler {
             return HttpRes.badRequest("Incomplete Fields");
         }
 
-        Device device = holder.deviceDao.getDeviceByToken(token);
+        UserDevice userDevice = holder.deviceDao.getUserDevice(token);
 
-        if (device == null) {
+        if (userDevice == null) {
             return HttpRes.badRequest("Device Not Found");
         }
 
-        if (!device.updatePin(req.getCtx(), pin, value)) {
+        if (!userDevice.device.updatePin(req.getCtx(), pin, value)) {
             return HttpRes.badRequest("Invalid Pin");
         }
+
+        userDevice.user.json.sendToApps(req.getCtx(),
+                new HardwareMessage(MsgType.WRITE, String.valueOf(userDevice.device.id), pin, value));
+        userDevice.user.json.sendToHardware(req.getCtx(), userDevice.device.id,
+                new HardwareMessage(MsgType.WRITE, pin, value));
+
+        userDevice.user.isUpdated = true;
 
         return HttpRes.ok("OK");
     }
@@ -52,13 +62,13 @@ public class PinApiHandler extends BaseHttpHandler {
             return HttpRes.badRequest("Incomplete Fields");
         }
 
-        Device device = holder.deviceDao.getDeviceByToken(token);
+        Device device = holder.deviceDao.getDevice(token);
 
         if (device == null) {
             return HttpRes.badRequest("Device Not Found");
         }
 
-        String value = device.json.pins.get(NumberUtil.parsePin(pin));
+        String value = device.pins.get(NumberUtil.parsePin(pin));
 
         return HttpRes.ok(value);
     }

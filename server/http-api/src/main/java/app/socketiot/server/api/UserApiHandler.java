@@ -10,6 +10,7 @@ import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
 import app.socketiot.server.core.model.auth.User;
+import app.socketiot.server.core.model.auth.UserJson;
 import app.socketiot.server.utils.Sha256Util;
 import io.netty.channel.ChannelHandler;
 
@@ -37,6 +38,7 @@ public class UserApiHandler extends BaseHttpHandler {
         }
 
         user.password = Sha256Util.createHash(user.password, user.email);
+        user.json = new UserJson();
 
         userDao.addUser(user);
 

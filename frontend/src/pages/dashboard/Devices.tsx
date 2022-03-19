@@ -33,6 +33,9 @@ export const Devices = () => {
         return newDevices;
       });
     });
+    return () => {
+      wsClient.removeEventListener("status");
+    };
   }, []);
 
   const deleteDevice = (token: string) => {

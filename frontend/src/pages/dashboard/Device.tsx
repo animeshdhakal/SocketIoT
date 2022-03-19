@@ -53,6 +53,7 @@ const Device = () => {
 
     return () => {
       wsClient.removeEventListener("write");
+      wsClient.removeEventListener("sync");
       wsClient.onAuthenticated = () => {};
     };
   }, []);
@@ -66,6 +67,9 @@ const Device = () => {
       if (loading) {
         setLoading(false);
       }
+    });
+    wsClient.addEventListener("sync", ({}) => {
+      setLoading(false);
     });
   };
 

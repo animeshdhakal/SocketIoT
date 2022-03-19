@@ -4,7 +4,6 @@ import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.model.HardwareMessage;
 import app.socketiot.server.core.model.MsgType;
 import app.socketiot.server.core.model.auth.User;
-import app.socketiot.server.core.model.device.Device;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelHandler;
@@ -27,16 +26,14 @@ public class AppLoginHandler extends ChannelInboundHandlerAdapter {
                     String email = holder.jwtUtil.getEmail(token);
                     User user = holder.userDao.getUser(email);
                     if (user != null) {
-                        for (Device device : holder.deviceDao.getAllDevicesByEmail(user.email)) {
-                            device.appGroup.add(ctx.channel());
-                        }
-                        ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "1"));
+                        user.json.addAppChannel(ctx.channel());
                         ctx.pipeline().replace(this, "AppHandler", new AppHandler(holder, user));
+                        ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "1"));
                         return;
                     }
                 }
-                ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "0"));
             }
+            ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "0"));
         }
     }
 }

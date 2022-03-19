@@ -2,31 +2,31 @@ package app.socketiot.server.hardware.handler;
 
 import app.socketiot.server.core.model.HardwareMessage;
 import app.socketiot.server.core.model.MsgType;
-import app.socketiot.server.core.model.device.Device;
+import app.socketiot.server.core.model.device.UserDevice;
 import io.netty.channel.ChannelHandlerContext;
 
 public class HardwareLogicHandler {
-    public final Device device;
+    public final UserDevice userDevice;
 
-    public HardwareLogicHandler(Device device) {
-        this.device = device;
+    public HardwareLogicHandler(UserDevice userDevice) {
+        this.userDevice = userDevice;
     }
 
     public void handleWrite(ChannelHandlerContext ctx, HardwareMessage msg) {
         if (msg.body.length < 2)
             return;
 
-        if (device != null) {
-            device.updatePin(ctx, msg.body[0], msg.body[1]);
-            device.sendToHardware(ctx, msg);
-            device.sendToApps(ctx,
-                    new HardwareMessage(MsgType.WRITE, String.valueOf(device.id), msg.body[0], msg.body[1]));
-        }
+        userDevice.device.updatePin(ctx, msg.body[0], msg.body[1]);
+        userDevice.user.json.sendToHardware(ctx, userDevice.device.id, msg);
+        userDevice.user.json.sendToApps(ctx,
+                new HardwareMessage(MsgType.WRITE, String.valueOf(userDevice.device.id), msg.body[0], msg.body[1]));
+        userDevice.user.isUpdated = true;
     }
 
     public void handleSync(ChannelHandlerContext ctx) {
-        for (short key : device.json.pins.keySet()) {
-            ctx.writeAndFlush(new HardwareMessage(MsgType.WRITE, Integer.toString(key), device.json.pins.get(key)));
+        for (short key : userDevice.device.pins.keySet()) {
+            ctx.writeAndFlush(
+                    new HardwareMessage(MsgType.WRITE, Integer.toString(key), userDevice.device.pins.get(key)));
         }
     }
 

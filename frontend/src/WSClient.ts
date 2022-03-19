@@ -64,6 +64,15 @@ class WSClient {
     this.socket.onopen = () => {
       this.login();
     };
+    this.socket.onclose = () => {
+      let interval = setInterval(() => {
+        if (this.connected()) {
+          clearInterval(interval);
+        } else {
+          this.init({ uri, token });
+        }
+      }, 1000);
+    };
   }
 
   handleMessage(message: ArrayBuffer) {
@@ -91,8 +100,14 @@ class WSClient {
 
       case MsgType.DEVICE_STATUS:
         let status = body[1] == "1" ? true : false;
-        this.dispatchEvent("status", { deviceID: body[0], status });
+        this.dispatchEvent("status", {
+          deviceID: body[0],
+          status,
+        });
         break;
+
+      case MsgType.SYNC:
+        this.dispatchEvent("sync", {});
 
       case MsgType.PING:
         break;

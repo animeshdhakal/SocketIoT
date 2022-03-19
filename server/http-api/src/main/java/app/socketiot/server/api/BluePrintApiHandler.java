@@ -33,18 +33,19 @@ public class BluePrintApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        BluePrint bluePrint = holder.bluePrintDao.getBluePrintByEmail(req.user.email);
+        BluePrint bluePrint = req.user.json.getLastBlueprint();
 
         if (bluePrint != null && bluePrint.name.equals(blueprint.name)) {
             return StatusMsg.badRequest("Name should be unique");
         }
 
         blueprint.id = RandomUtil.unique(8);
-        blueprint.email = req.user.email;
         blueprint.json = new BluePrintJson();
         blueprint.json.widgets = new ArrayList<Widget>();
 
         holder.bluePrintDao.addBluePrint(blueprint);
+        req.user.json.addBluePrint(blueprint);
+        req.user.isUpdated = true;
 
         return new HttpRes(new BluePrint(blueprint.id));
     }
@@ -58,19 +59,20 @@ public class BluePrintApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        BluePrint dbBluePrint = holder.bluePrintDao.getBluePrintByEmailAndID(req.user.email, blueprint.id);
-
-        if (dbBluePrint == null) {
+        if (!req.user.json.removeBlueprint(blueprint.id)) {
             return StatusMsg.badRequest("BluePrint Not Found");
         }
 
-        holder.db.removeBluePrint(blueprint.id);
+        holder.bluePrintDao.removeBluePrint(blueprint.id);
 
-        List<Device> bluePrintDevices = holder.deviceDao.getAllDevicesByBluePrint(blueprint.id);
+        List<Device> bluePrintDevices = holder.deviceDao.getAllDevicesByBlueprint(blueprint.id);
 
         for (Device device : bluePrintDevices) {
-            holder.db.removeDevice(device.token);
+            holder.deviceDao.removeDevice(device.token);
+            holder.userDao.removeDevice(device.token);
         }
+
+        req.user.isUpdated = true;
 
         return StatusMsg.ok("BluePrint Deleted Successfully");
     }
@@ -78,8 +80,7 @@ public class BluePrintApiHandler extends JwtHttpHandler {
     @Path("/all")
     @POST
     public HttpRes all(HttpReq req) {
-        return new HttpRes(JsonParser.toString(holder.bluePrintDao.getAllBluePrintsByEmail(req.user.email),
-                "BluePrintJsonFilter", "json"));
+        return new HttpRes(JsonParser.toString(req.user.json.blueprints, "BluePrintJsonFilter", "json"));
     }
 
     @Path("/get")
