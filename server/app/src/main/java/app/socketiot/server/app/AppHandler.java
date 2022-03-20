@@ -42,13 +42,14 @@ public class AppHandler extends ChannelInboundHandlerAdapter {
                         int deviceId = Integer.parseInt(message.body[0]);
                         Device device = user.json.getDevice(deviceId);
                         if (device != null) {
-                            for (short key : device.pins.keySet()) {
-                                ctx.writeAndFlush(new HardwareMessage(MsgType.WRITE, message.body[0],
-                                        Integer.toString(key),
-                                        device.pins.get(key)));
-                            }
                             if (device.pins.size() == 0) {
                                 ctx.writeAndFlush(message);
+                            } else {
+                                for (short key : device.pins.keySet()) {
+                                    ctx.writeAndFlush(new HardwareMessage(MsgType.WRITE, message.body[0],
+                                            Integer.toString(key),
+                                            device.pins.get(key)));
+                                }
                             }
                         }
                     }

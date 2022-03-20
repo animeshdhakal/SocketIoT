@@ -40,7 +40,7 @@ public class FCMNotification {
         this.client
                 .preparePost(url)
                 .setHeader("Authorization", "key=" + token)
-                .setBody(JsonParser.toString(message))
+                .setBody(JsonParser.toJson(message))
                 .setHeader(HttpHeaderNames.CONTENT_TYPE, "application/json; charset=utf-8")
                 .execute(new AsyncCompletionHandler<Response>() {
                     @Override

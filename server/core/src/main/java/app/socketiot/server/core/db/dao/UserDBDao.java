@@ -42,7 +42,7 @@ public class UserDBDao {
             for (User user : users) {
                 stmt.setString(1, user.email);
                 stmt.setString(2, user.password);
-                stmt.setString(3, JsonParser.toString(user.json));
+                stmt.setString(3, JsonParser.toJson(user.json));
                 stmt.addBatch();
             }
             stmt.executeBatch();

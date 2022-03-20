@@ -49,7 +49,7 @@ public class HttpReq {
 
     public <T> T getContentAs(Class<T> clazz) {
         String content = req.content().toString(CharsetUtil.US_ASCII);
-        return JsonParser.parse(clazz, content);
+        return JsonParser.parseLimitedJson(clazz, content);
     }
 
     public String getContent() {

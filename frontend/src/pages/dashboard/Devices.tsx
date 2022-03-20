@@ -23,11 +23,12 @@ export const Devices = () => {
   useEffect(() => {
     fetchBluePrints();
     wsClient.addEventListener("status", ({ deviceID, status }: any) => {
+      console.log(deviceID, status);
       setDevices((prevState) => {
         let newDevices = [...prevState];
         newDevices.forEach((device) => {
           if (device.id === parseInt(deviceID)) {
-            device.online = status;
+            device.status = status;
           }
         });
         return newDevices;
@@ -123,10 +124,12 @@ export const Devices = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900 flex items-center">
-                          {device.online ? "Online" : "Offline"}
+                          {device.status}
                           <div
                             className={`w-3 h-3 ${
-                              device.online ? "bg-green-600" : "bg-red-600"
+                              device.status === "Online"
+                                ? "bg-green-600"
+                                : "bg-red-600"
                             } ml-3 rounded-full`}
                           ></div>
                         </div>
@@ -183,7 +186,6 @@ export const Devices = () => {
       </div>
       <Alert setAlert={setAlert} alert={alert} />
       <AddDeviceModal
-        id={devices.length + 1}
         show={showAddDeviceModal}
         onCreate={fetchBluePrints}
         onClose={() => setShowAddDeviceModal(false)}

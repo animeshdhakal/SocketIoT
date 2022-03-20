@@ -23,7 +23,6 @@ public class BluePrintDao {
     }
 
     public void addBluePrint(BluePrint bluePrint) {
-        bluePrint.isUpdated = true;
         bluePrints.put(bluePrint.id, bluePrint);
     }
 

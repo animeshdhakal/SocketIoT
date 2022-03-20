@@ -15,7 +15,7 @@ public class HttpRes extends DefaultFullHttpResponse {
     }
 
     public HttpRes(HttpResponseStatus status, Object obj) {
-        this(status, HttpVersion.HTTP_1_1, JsonParser.toString(obj));
+        this(status, HttpVersion.HTTP_1_1, JsonParser.toLimitedJson(obj));
         headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json");
     }
 

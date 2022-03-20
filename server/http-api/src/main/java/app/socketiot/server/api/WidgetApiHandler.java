@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import app.socketiot.server.api.model.WidgetReq;
+import app.socketiot.server.api.model.WidgetReqRes;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.http.JwtHttpHandler;
 import app.socketiot.server.core.http.annotations.POST;
@@ -33,7 +33,7 @@ public class WidgetApiHandler extends JwtHttpHandler {
     @POST
     public HttpRes add(HttpReq req) {
         try {
-            WidgetReq widget = mapper.readValue(req.getContent(), WidgetReq.class);
+            WidgetReqRes widget = mapper.readValue(req.getContent(), WidgetReqRes.class);
             if (widget == null || widget.blueprint_id == null || widget.widgets == null) {
                 return StatusMsg.badRequest("Incomplete Fields");
             }

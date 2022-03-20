@@ -3,7 +3,6 @@ package app.socketiot.server.core.model.auth;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import app.socketiot.server.core.model.HardwareMessage;
 import app.socketiot.server.core.model.blueprint.BluePrint;
@@ -127,7 +126,7 @@ public class UserJson {
         if (bluePrint == null) {
             return false;
         }
-        bluePrint.json.widgets = widgets;
+        bluePrint.widgets = widgets;
         return true;
     }
 
@@ -164,6 +163,17 @@ public class UserJson {
                 }
             }
         }
+    }
+
+    public int getHardwareChannelCount(int deviceID) {
+        int i = 0;
+        for (Channel channel : hardChannels) {
+            HardwareStateBase state = channel.pipeline().get(HardwareStateBase.class);
+            if (state != null && state.getUserDevice().device.id == deviceID) {
+                i++;
+            }
+        }
+        return i;
     }
 
 }

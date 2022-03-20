@@ -1,7 +1,7 @@
 package app.socketiot.server.api;
 
 import java.util.concurrent.ConcurrentHashMap;
-import app.socketiot.server.api.model.WidgetReq;
+import app.socketiot.server.api.model.WidgetReqRes;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.http.JwtHttpHandler;
 import app.socketiot.server.core.http.annotations.POST;
@@ -28,7 +28,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
     public HttpRes add(HttpReq req) {
         Device device = req.getContentAs(Device.class);
 
-        if (device == null || device.name == null || device.blueprint_id == null || device.id == -1) {
+        if (device == null || device.name == null || device.blueprint_id == null) {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
@@ -38,21 +38,21 @@ public class DeviceApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Name should be unique");
         }
 
-        device.token = RandomUtil.unique();
-
         BluePrint bluePrint = holder.bluePrintDao.getBluePrint(device.blueprint_id);
 
         if (bluePrint == null) {
             return StatusMsg.badRequest("BluePrint Not Found");
         }
 
-        if (bluePrint.json == null) {
+        if (bluePrint.widgets == null) {
             return StatusMsg.badRequest("Invalid Blueprint");
         }
 
+        device.token = RandomUtil.unique();
         device.pins = new ConcurrentHashMap<>();
+        device.id = dbDevice == null ? 1 : dbDevice.id + 1;
 
-        for (Widget widget : bluePrint.json.widgets) {
+        for (Widget widget : bluePrint.widgets) {
             device.pins.put(widget.pin, "");
         }
 
@@ -87,13 +87,13 @@ public class DeviceApiHandler extends JwtHttpHandler {
     @POST
     @Path("/all")
     public HttpRes all(HttpReq req) {
-        WidgetReq widgetreq = req.getContentAs(WidgetReq.class);
+        WidgetReqRes widgetreq = req.getContentAs(WidgetReqRes.class);
 
-        if (widgetreq != null) {
-            return new HttpRes(JsonParser.toString(holder.deviceDao.getAllDevicesByBlueprint(widgetreq.blueprint_id),
-                    "DeviceJsonFilter", "json"));
+        if (widgetreq != null && widgetreq.blueprint_id != null) {
+            return new HttpRes(
+                    JsonParser.toLimitedJson(holder.deviceDao.getAllDevicesByBlueprint(widgetreq.blueprint_id)));
         } else {
-            return new HttpRes(JsonParser.toString(req.user.json.devices, "DeviceJsonFilter", "json"));
+            return new HttpRes(JsonParser.toLimitedJson(req.user.json.devices));
         }
 
     }

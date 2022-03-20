@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.exceptions.ExceptionHandler;
+import app.socketiot.server.core.json.model.DeviceStatus;
 import app.socketiot.server.core.model.HardwareInfo;
 import app.socketiot.server.core.model.HardwareMessage;
 import app.socketiot.server.core.model.MsgType;
@@ -80,11 +81,12 @@ public class HardwareHandler extends HardwareStateBase {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         userDevice.user.json.removeHardChannel(ctx.channel());
-        if (userDevice.user.json.hardChannels.size() == 0) {
-            userDevice.device.online = false;
+        if (userDevice.user.json.getHardwareChannelCount(userDevice.device.id) == 0) {
+            userDevice.device.status = DeviceStatus.Offline;
             userDevice.device.lastOnline = System.currentTimeMillis();
             userDevice.user.json.sendToApps(ctx,
-                    new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(userDevice.device.id), "0"));
+                    new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(userDevice.device.id),
+                            DeviceStatus.Offline.toString()));
         }
     }
 

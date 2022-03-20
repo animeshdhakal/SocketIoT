@@ -1,25 +1,22 @@
 package app.socketiot.server.core.model.blueprint;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonView;
+import app.socketiot.server.core.json.View;
+import app.socketiot.server.core.model.widgets.Widget;
 
-import app.socketiot.server.core.json.model.BluePrintJson;
-
-@JsonFilter("BluePrintJsonFilter")
 public class BluePrint {
     public volatile String name;
 
     public volatile String id;
 
-    public BluePrintJson json;
+    @JsonView(View.Private.class)
+    public List<Widget> widgets;
 
-    @JsonIgnore
-    public volatile boolean isUpdated = false;
-
-    public BluePrint(String name, String id, BluePrintJson json) {
+    public BluePrint(String name, String id, List<Widget> widgets) {
         this.name = name;
         this.id = id;
-        this.json = json;
+        this.widgets = widgets;
     }
 
     public BluePrint(String id) {

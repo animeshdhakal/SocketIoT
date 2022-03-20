@@ -1,29 +1,29 @@
 package app.socketiot.server.core.model.device;
 
 import java.util.concurrent.ConcurrentMap;
-import com.fasterxml.jackson.annotation.JsonFilter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import com.fasterxml.jackson.annotation.JsonView;
+import app.socketiot.server.core.json.View;
+import app.socketiot.server.core.json.model.DeviceStatus;
 import app.socketiot.server.core.model.HardwareInfo;
 import app.socketiot.server.utils.NumberUtil;
 import io.netty.channel.ChannelHandlerContext;
 
-@JsonFilter("DeviceJsonFilter")
 public class Device {
     public volatile String name;
 
-    public volatile int id = -1;
+    public volatile int id = 0;
 
     public volatile String blueprint_id;
 
     public volatile String token;
 
+    @JsonView(View.Private.class)
     public ConcurrentMap<Short, String> pins;
 
+    @JsonView(View.Private.class)
     public volatile HardwareInfo info;
 
-    @JsonIgnore
-    public volatile Boolean online = false;
+    public volatile DeviceStatus status = DeviceStatus.Offline;
 
     public volatile String lastIP;
 

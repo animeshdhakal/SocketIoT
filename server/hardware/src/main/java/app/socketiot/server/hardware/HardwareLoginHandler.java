@@ -1,6 +1,7 @@
 package app.socketiot.server.hardware;
 
 import app.socketiot.server.core.Holder;
+import app.socketiot.server.core.json.model.DeviceStatus;
 import app.socketiot.server.core.model.HardwareMessage;
 import app.socketiot.server.core.model.MsgType;
 import app.socketiot.server.core.model.device.UserDevice;
@@ -23,17 +24,19 @@ public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
             HardwareMessage message = (HardwareMessage) msg;
             if (message.body.length > 0) {
                 UserDevice userDevice = holder.deviceDao.getUserDevice(message.body[0]);
+
                 if (userDevice != null) {
                     userDevice.device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
-                    userDevice.device.online = true;
+                    userDevice.device.status = DeviceStatus.Online;
 
                     userDevice.user.json.addHardChannel(ctx.channel());
 
-                    ctx.pipeline().replace(HardwareLoginHandler.class, "HardwareLoginHandler",
+                    ctx.pipeline().replace(HardwareLoginHandler.class, "HardwareHandler",
                             new HardwareHandler(holder, userDevice));
 
                     userDevice.user.json.sendToApps(ctx,
-                            new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(userDevice.device.id), "1"));
+                            new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(userDevice.device.id),
+                                    DeviceStatus.Online.toString()));
 
                     ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "1"));
                 } else {

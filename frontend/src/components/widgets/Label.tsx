@@ -6,7 +6,7 @@ const Label: React.FC<ILabel> = ({ title, value }) => {
     <div className="w-40 bg-white border-l-[3px] border-lime-300 flex flex-col">
       <div className="m-1">{title}</div>
       <div className="w-40 h-14 flex justify-center items-center text-full font-bold">
-        {value}
+        {value || "0.0"}
       </div>
     </div>
   );

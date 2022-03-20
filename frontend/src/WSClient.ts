@@ -99,10 +99,9 @@ class WSClient {
         break;
 
       case MsgType.DEVICE_STATUS:
-        let status = body[1] == "1" ? true : false;
         this.dispatchEvent("status", {
           deviceID: body[0],
-          status,
+          status: body[1],
         });
         break;
 
