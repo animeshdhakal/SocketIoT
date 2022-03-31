@@ -19,13 +19,13 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
-    <netty.version>4.1.73.Final</netty.version>
-    <jackson.version>2.13.1</jackson.version>
-    <log4j2.version>2.17.1</log4j2.version>
+    <netty.version>4.1.75.Final</netty.version>
+    <jackson.version>2.13.2</jackson.version>
+    <log4j2.version>2.17.2</log4j2.version>
     <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
     <project.version>1.0</project.version>
-    <HikariCP.version>5.0.0</HikariCP.version>
-    <postgres.version>42.3.1</postgres.version>
+    <HikariCP.version>5.0.1</HikariCP.version>
+    <postgres.version>42.3.3</postgres.version>
     <jjwt.version>0.11.2</jjwt.version>
     <javax.mail.version>1.6.2</javax.mail.version>
     <acme4j.version>2.12</acme4j.version>
@@ -34,6 +34,7 @@
     <qrgen.version>2.6.0</qrgen.version>
     <disruptor.version>3.4.4</disruptor.version>
   </properties>
+  
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
