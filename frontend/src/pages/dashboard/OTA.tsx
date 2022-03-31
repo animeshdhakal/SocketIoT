@@ -102,7 +102,7 @@ const OTA = () => {
       });
 
       devices.forEach((d) => {
-        if (d.online) {
+        if (d.status == "Online") {
           setCheckedDevices([...checkedDevices, d.token]);
         }
       });
@@ -154,7 +154,7 @@ const OTA = () => {
             </thead>
             <tbody className="bg-white">
               {devices.map((device, index) => {
-                if (device.online) {
+                if (device.status == "Online") {
                   return (
                     <tr className="whitespace-nowrap" key={device.token}>
                       <td className="px-6 py-4 text-sm text-gray-500">
@@ -175,11 +175,9 @@ const OTA = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900 flex items-center">
-                          {device.online ? "Online" : "Offline"}
+                          {device.status}
                           <div
-                            className={`w-3 h-3 ${
-                              device.online ? "bg-green-600" : "bg-red-600"
-                            } ml-3 rounded-full`}
+                            className="w-3 h-3 bg-green-600 ml-3 rounded-full"
                           ></div>
                         </div>
                       </td>
