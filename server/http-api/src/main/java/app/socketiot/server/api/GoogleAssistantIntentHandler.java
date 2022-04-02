@@ -1,5 +1,8 @@
 package app.socketiot.server.api;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import app.socketiot.server.api.model.GAIIntent;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.http.JwtHttpHandler;
@@ -12,7 +15,8 @@ import io.netty.channel.ChannelHandler;
 @ChannelHandler.Sharable
 @Path("/api/google-assistant")
 public class GoogleAssistantIntentHandler extends JwtHttpHandler {
-    final Holder holder;
+    private final Holder holder;
+    private static Logger log = LogManager.getLogger(GoogleAssistantIntentHandler.class);
 
     public GoogleAssistantIntentHandler(Holder holder) {
         super(holder);
@@ -26,6 +30,9 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
         if (intentreq == null || intentreq.inputs == null) {
             return HttpRes.badRequest("Invalid request");
         }
+
+        log.info("Google Assistant Intent: {}", intentreq.inputs[0].intent);
+        log.info("Got Intent {}", req.getContent());
 
         for (GAIIntent.Input input : intentreq.inputs) {
             if (input.intent.equals("action.devices.SYNC")) {
