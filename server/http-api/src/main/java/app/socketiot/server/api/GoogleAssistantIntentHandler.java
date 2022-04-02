@@ -2,7 +2,6 @@ package app.socketiot.server.api;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import app.socketiot.server.api.model.GAIIntent;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.http.JwtHttpHandler;
