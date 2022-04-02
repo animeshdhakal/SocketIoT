@@ -1,5 +1,5 @@
-import { HEARTBEAT_INTERVAL, MsgType } from "./config/Protocol";
-import { create_message, parse_message } from "./utils/MsgUtil";
+import { HEARTBEAT_INTERVAL, MsgType } from "./Protocol";
+import { create_message, parse_message } from "../utils/MsgUtil";
 
 class WSClient {
   events: any;

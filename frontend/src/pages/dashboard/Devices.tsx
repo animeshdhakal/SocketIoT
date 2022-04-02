@@ -5,7 +5,7 @@ import AddDeviceModal from "../../components/modals/AddDeviceModal";
 import { Link } from "react-router-dom";
 import Alert from "../../components/Alert";
 import { DeviceInterface } from "../../interfaces/IDevice";
-import { wsClient } from "../../WSClient";
+import { wsClient } from "../../config/WSClient";
 
 export const Devices = () => {
   const [devices, setDevices] = useState<DeviceInterface[]>([]);

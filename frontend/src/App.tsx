@@ -15,6 +15,7 @@ import Device from "./pages/dashboard/Device";
 import { messaging, getToken, vapidKey } from "./firebase";
 import Button from "./components/widgets/Button";
 import OTA from "./pages/dashboard/OTA";
+import ThirdPartyLogin from "./pages/ThirdPartyLogin";
 
 export const UserContext = React.createContext<AuthContextInterface>(
   {} as AuthContextInterface
@@ -69,6 +70,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/thirdparty/login" element={<ThirdPartyLogin />} />
           <Route element={<ProtectedRoute isLoggedIn={Boolean(user.email)} />}>
             <Route path="/dashboard" element={<Dashboard />}>
               <Route path="settings" element={<About />} />

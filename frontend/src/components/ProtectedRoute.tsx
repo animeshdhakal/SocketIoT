@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { wsClient } from "../WSClient";
+import { wsClient } from "../config/WSClient";
 
 const ProtectedRoute: React.FC<{ isLoggedIn: boolean }> = ({ isLoggedIn }) => {
   if (isLoggedIn) {

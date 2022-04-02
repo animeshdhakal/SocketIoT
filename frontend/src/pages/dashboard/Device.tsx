@@ -5,7 +5,7 @@ import UniversalWidget from "../../interfaces/IUniversalWidget";
 import Loader from "../../components/Loader";
 import Widget from "../../components/widgets/Widget";
 import Draggable from "react-draggable";
-import { wsClient } from "../../WSClient";
+import { wsClient } from "../../config/WSClient";
 
 const Device = () => {
   const location: any = useLocation();
