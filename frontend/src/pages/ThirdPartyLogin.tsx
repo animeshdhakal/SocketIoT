@@ -55,6 +55,9 @@ const Login = () => {
         const token = res.data.token;
 
         const url = new URL(redirect_uri);
+        if (state) {
+          url.searchParams.set("state", state);
+        }
         url.searchParams.set("code", token);
 
         window.location.replace(url.toString());
