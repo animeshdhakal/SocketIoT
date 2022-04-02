@@ -56,7 +56,6 @@ const Login = () => {
 
         const url = new URL(redirect_uri);
         url.searchParams.set("code", token);
-        url.searchParams.set("state", state);
 
         window.location.replace(url.toString());
       } catch (e) {
