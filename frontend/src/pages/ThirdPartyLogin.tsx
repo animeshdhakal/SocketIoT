@@ -55,10 +55,10 @@ const Login = () => {
         const token = res.data.token;
 
         const url = new URL(redirect_uri);
+        url.searchParams.append("code", token);
         if (state) {
           url.searchParams.append("state", state);
         }
-        url.searchParams.append("code", token);
 
         window.location.replace(url.toString());
       } catch (e) {
