@@ -4,6 +4,7 @@ import app.socketiot.server.api.BluePrintApiHandler;
 import app.socketiot.server.api.DeviceApiHandler;
 import app.socketiot.server.api.FileUploadHandler;
 import app.socketiot.server.api.GoogleAssistantHandler;
+import app.socketiot.server.api.GoogleAssistantIntentHandler;
 import app.socketiot.server.api.LetsEncryptHandler;
 import app.socketiot.server.api.OTAHandler;
 import app.socketiot.server.api.PinApiHandler;
@@ -55,6 +56,7 @@ public class HttpApiServer extends BaseServer {
         var letsEncryptHandler = new LetsEncryptHandler(holder.sslprovider.acmeClient);
         var reactHandler = new ReactHandler(holder, "/static/index.html");
         var googleassistantHandler = new GoogleAssistantHandler(holder);
+        var googleassistantIntentHandler = new GoogleAssistantIntentHandler(holder);
 
         var hardwareLoginHandler = new HardwareLoginHandler(holder);
         var appLoginHandler = new AppLoginHandler(holder);
@@ -85,6 +87,7 @@ public class HttpApiServer extends BaseServer {
                 pipeline.addLast(otaHandler);
                 pipeline.addLast(fileUploadHandler);
                 pipeline.addLast(googleassistantHandler);
+                pipeline.addLast(googleassistantIntentHandler);
                 pipeline.addLast(letsEncryptHandler);
                 pipeline.addLast(reactHandler);
                 pipeline.remove(this);
