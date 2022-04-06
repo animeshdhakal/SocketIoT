@@ -1,6 +1,5 @@
 package app.socketiot.server.api;
 
-import app.socketiot.server.api.model.GoogleAssistantTokenReq;
 import app.socketiot.server.api.model.GoogleAssistantTokenRes;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.http.BaseHttpHandler;
@@ -24,22 +23,38 @@ public class GoogleAssistantHandler extends BaseHttpHandler {
         this.holder = holder;
     }
 
+    public String getFormData(String body, String key) {
+        try {
+            String[] pairs = body.split("&");
+            for (String pair : pairs) {
+                String[] keyValue = pair.split("=");
+                if (keyValue[0].equals(key)) {
+                    return keyValue[1];
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     @Path("/token")
     @POST
     public HttpRes token(HttpReq req) {
-        GoogleAssistantTokenReq tokenreq = req.getContentAs(GoogleAssistantTokenReq.class);
-        if (tokenreq == null) {
+        String body = req.getContent();
+        String grant_type = getFormData(body, "grant_type");
+        String refresh_token = getFormData(body, "refresh_token");
+        String code = getFormData(body, "code");
+
+        if (grant_type == null) {
             return HttpRes.badRequest("Invalid request");
         }
 
-        log.info("Google Assistant Token: {}", tokenreq.code);
-        log.info("Got Token {}", req.getContent());
-
         String token;
-        if (tokenreq.grant_type.equals("authorization_code")) {
-            token = tokenreq.code;
-        } else if (tokenreq.grant_type.equals("refresh_token")) {
-            token = tokenreq.refresh_token;
+        if (grant_type.equals("authorization_code")) {
+            token = code;
+        } else if (grant_type.equals("refresh_token")) {
+            token = refresh_token;
         } else {
             return HttpRes.badRequest("Invalid grant_type");
         }

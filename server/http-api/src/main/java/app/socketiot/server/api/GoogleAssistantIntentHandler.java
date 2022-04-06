@@ -2,7 +2,7 @@ package app.socketiot.server.api;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import app.socketiot.server.api.model.GAIIntent;
+import app.socketiot.server.api.model.GAIntent;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.http.JwtHttpHandler;
 import app.socketiot.server.core.http.annotations.POST;
@@ -25,7 +25,7 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
     @Path("/fulfillment")
     @POST
     public HttpRes fulfillment(HttpReq req) {
-        GAIIntent intentreq = req.getContentAs(GAIIntent.class);
+        GAIntent intentreq = req.getContentAs(GAIntent.class);
         if (intentreq == null || intentreq.inputs == null) {
             return HttpRes.badRequest("Invalid request");
         }
@@ -33,24 +33,24 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
         log.info("Google Assistant Intent: {}", intentreq.inputs[0].intent);
         log.info("Got Intent {}", req.getContent());
 
-        for (GAIIntent.Input input : intentreq.inputs) {
+        for (GAIntent.Input input : intentreq.inputs) {
             if (input.intent.equals("action.devices.SYNC")) {
-                GAIIntent intentres = new GAIIntent();
+                GAIntent intentres = new GAIntent();
                 intentres.requestId = intentreq.requestId;
-                intentres.inputs = new GAIIntent.Input[] {
-                        new GAIIntent.Input()
+                intentres.inputs = new GAIntent.Input[] {
+                        new GAIntent.Input()
                 };
                 intentres.inputs[0].intent = "action.devices.QUERY";
-                intentres.inputs[0].payload = new GAIIntent.Input.Payload();
-                intentres.inputs[0].payload.devices = new GAIIntent.Input.Payload.Device[] {
-                        new GAIIntent.Input.Payload.Device()
+                intentres.inputs[0].payload = new GAIntent.Input.Payload();
+                intentres.inputs[0].payload.devices = new GAIntent.Input.Payload.Device[] {
+                        new GAIntent.Input.Payload.Device()
                 };
                 intentres.inputs[0].payload.devices[0].id = "123";
                 intentres.inputs[0].payload.devices[0].type = "action.devices.types.LIGHT";
                 intentres.inputs[0].payload.devices[0].traits = new String[] {
                         "action.devices.traits.OnOff"
                 };
-                intentres.inputs[0].payload.devices[0].name = new GAIIntent.Input.Payload.Device.Name();
+                intentres.inputs[0].payload.devices[0].name = new GAIntent.Input.Payload.Device.Name();
                 intentres.inputs[0].payload.devices[0].name.name = "Light";
                 intentres.inputs[0].payload.devices[0].name.nicknames = new String[] {
                         "Light"
