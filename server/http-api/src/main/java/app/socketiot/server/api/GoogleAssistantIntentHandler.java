@@ -37,27 +37,23 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
             if (input.intent.equals("action.devices.SYNC")) {
                 GAIntent intentres = new GAIntent();
                 intentres.requestId = intentreq.requestId;
-                intentres.inputs = new GAIntent.Input[] {
-                        new GAIntent.Input()
-                };
-                intentres.inputs[0].intent = "action.devices.QUERY";
-                intentres.inputs[0].payload = new GAIntent.Input.Payload();
-                intentres.inputs[0].payload.devices = new GAIntent.Input.Payload.Device[] {
-                        new GAIntent.Input.Payload.Device()
-                };
-                intentres.inputs[0].payload.devices[0].id = "123";
-                intentres.inputs[0].payload.devices[0].type = "action.devices.types.LIGHT";
-                intentres.inputs[0].payload.devices[0].traits = new String[] {
-                        "action.devices.traits.OnOff"
-                };
-                intentres.inputs[0].payload.devices[0].name = new GAIntent.Input.Payload.Device.Name();
-                intentres.inputs[0].payload.devices[0].name.name = "Light";
-                intentres.inputs[0].payload.devices[0].name.nicknames = new String[] {
-                        "Light"
-                };
-                intentres.inputs[0].payload.devices[0].name.defaultNames = new String[] {
-                        "Light"
-                };
+                intentres.payload = new GAIntent.Input.Payload();
+                intentres.payload.agentUserId = req.user.email;
+                intentres.payload.devices = new GAIntent.Input.Payload.Device[1];
+                intentres.payload.devices[0] = new GAIntent.Input.Payload.Device();
+                intentres.payload.devices[0].id = "light.bulb";
+                intentres.payload.devices[0].type = "action.devices.types.LIGHT";
+                intentres.payload.devices[0].traits = new String[] { "action.devices.traits.OnOff" };
+                intentres.payload.devices[0].name = new GAIntent.Input.Payload.Device.Name();
+                intentres.payload.devices[0].name.name = "Light";
+                intentres.payload.devices[0].name.defaultNames = new String[] { "Light" };
+                intentres.payload.devices[0].name.nicknames = new String[] { "Light" };
+                intentres.payload.devices[0].deviceInfo = new GAIntent.Input.Payload.Device.DeviceInfo();
+                intentres.payload.devices[0].deviceInfo.manufacturer = "Google";
+                intentres.payload.devices[0].deviceInfo.model = "Google Home";
+                intentres.payload.devices[0].deviceInfo.hwVersion = "1.0";
+                intentres.payload.devices[0].deviceInfo.swVersion = "1.0";
+                intentres.payload.devices[0].willReportState = true;
 
                 return new HttpRes(intentres);
             }

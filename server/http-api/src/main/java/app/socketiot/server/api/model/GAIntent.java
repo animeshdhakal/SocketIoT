@@ -1,5 +1,7 @@
 package app.socketiot.server.api.model;
 
+import app.socketiot.server.api.model.GAIntent.Input.Payload;
+
 public class GAIntent {
     static public class Input {
         static public class Payload {
@@ -20,10 +22,12 @@ public class GAIntent {
                 public String id;
                 public String type;
                 public String traits[];
-
                 public Name name;
+                public DeviceInfo deviceInfo;
+                public Boolean willReportState;
             }
 
+            public String agentUserId;
             public Device[] devices;
         }
 
@@ -33,6 +37,7 @@ public class GAIntent {
 
     public String requestId;
     public Input[] inputs;
+    public Payload payload;
 
     public GAIntent() {
     }
