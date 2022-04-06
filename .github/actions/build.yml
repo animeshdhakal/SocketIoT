@@ -1,0 +1,39 @@
+name: Build SocketIoT 
+on: [push] 
+jobs: 
+    build: 
+        runs-on: ubuntu-latest 
+        steps: 
+            - uses: actions/checkout@v2 
+            - name: Install Node 
+                uses: actions/setup-node@v2.5.1 
+            - name: Install JDK 
+                uses: actions/setup-java@v2 with: java-version: '11' distribution: 'adopt' 
+            - name: Build React App 
+              run: |
+                env: 
+                    CI: false  
+                cd frontend 
+                set PUBLIC_FOLDER=/static 
+                npm i 
+                npm run build 
+            - name: Build Jar 
+              run: | 
+                cd frontend/build 
+                ls -p | grep -v / | grep -v ^index.html | xargs -I{} 
+                mv {} static/ cd ../../ mv frontend/build/static/* frontend/build 
+                mkdir server/http-api/src/main/resources/static 
+                mv frontend/build/* server/http-api/src/main/resources/static 
+                mvn package 
+            - name: Set Release version env variable 
+              run: | 
+                echo "RELEASE_VERSION=$(grep -oPm1 "(?<=<version>)[^<]+" "pom.xml")" >> $GITHUB_ENV 
+            - name: Release 
+              uses: "marvinpinto/action-automatic-releases@latest" 
+                with: 
+                    repo_token: "${{ secrets.GITHUB_TOKEN }}" 
+                    automatic_release_tag: "latest" 
+                    prerelease: true 
+                    title: "Development Build" 
+                    files: | 
+                        ./server/launcher/target/server-${{ env.RELEASE_VERSION }}.jar
