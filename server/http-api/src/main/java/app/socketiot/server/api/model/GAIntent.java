@@ -1,6 +1,6 @@
 package app.socketiot.server.api.model;
 
-public class GAIIntent {
+public class GAIntent {
     static public class Input {
         static public class Payload {
             static public class Device {
@@ -34,7 +34,7 @@ public class GAIIntent {
     public String requestId;
     public Input[] inputs;
 
-    public GAIIntent() {
+    public GAIntent() {
     }
 
 }
