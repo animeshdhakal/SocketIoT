@@ -30,9 +30,9 @@ public class AppHandler extends ChannelInboundHandlerAdapter {
                         Device device = user.json.getDevice(deviceId);
                         if (device != null) {
                             device.updatePin(ctx, message.body[1], message.body[2]);
-                            user.json.sendToHardware(ctx, deviceId,
+                            user.json.sendToHardware(ctx.channel(), deviceId,
                                     new HardwareMessage(MsgType.WRITE, message.body[1], message.body[2]));
-                            user.json.sendToApps(ctx, message);
+                            user.json.sendToApps(ctx.channel(), message);
                             user.isUpdated = true;
                         }
                     }
