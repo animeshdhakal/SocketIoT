@@ -73,7 +73,7 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
                 ndevice.deviceInfo = new DeviceInfo();
                 ndevice.deviceInfo.manufacturer = "SocketIoT";
                 ndevice.deviceInfo.model = "SocketIoT";
-                ndevice.deviceInfo.hwVersion = "1.0";
+                ndevice.deviceInfo.hwVersion = "1.0 Beta";
                 addDevice(res.payload, ndevice);
             }
         }
