@@ -29,6 +29,7 @@ import app.socketiot.server.core.json.model.DeviceStatus;
 import app.socketiot.server.core.model.auth.User;
 import app.socketiot.server.core.model.blueprint.BluePrint;
 import app.socketiot.server.utils.NumberUtil;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 
 @ChannelHandler.Sharable
@@ -118,7 +119,7 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
         return new HttpRes(res);
     }
 
-    public HttpRes handleExecute(IntentReq intentReq, User user) {
+    public HttpRes handleExecute(Channel c, IntentReq intentReq, User user) {
         ExecuteRes res = new ExecuteRes();
         res.requestId = intentReq.requestId;
         res.payload = new ExecutePayload();
@@ -152,11 +153,11 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
                             if (execution.params.on == true) {
                                 d.updatePin(null, parts[1], "0");
                                 ec.states.on = true;
-                                user.json.broadCastWriteMessage(null, d.id, parts[0], "1");
+                                user.json.broadCastWriteMessage(c, d.id, parts[0], "0");
                             } else {
                                 d.updatePin(null, parts[1], "1");
                                 ec.states.on = false;
-                                user.json.broadCastWriteMessage(null, d.id, parts[0], "0");
+                                user.json.broadCastWriteMessage(c, d.id, parts[0], "1");
                             }
                         }
                     }
@@ -184,7 +185,7 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
             } else if (intent.intent.equals("action.devices.QUERY")) {
                 return handleQuery(intentreq, req.user);
             } else if (intent.intent.equals("action.devices.EXECUTE")) {
-                return handleExecute(intentreq, req.user);
+                return handleExecute(req.getCtx().channel(), intentreq, req.user);
             }
         }
 
