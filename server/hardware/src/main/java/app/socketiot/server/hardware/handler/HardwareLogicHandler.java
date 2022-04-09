@@ -17,8 +17,8 @@ public class HardwareLogicHandler {
             return;
 
         userDevice.device.updatePin(ctx, msg.body[0], msg.body[1]);
-        userDevice.user.json.sendToHardware(ctx, userDevice.device.id, msg);
-        userDevice.user.json.sendToApps(ctx,
+        userDevice.user.json.sendToHardware(ctx.channel(), userDevice.device.id, msg);
+        userDevice.user.json.sendToApps(ctx.channel(),
                 new HardwareMessage(MsgType.WRITE, String.valueOf(userDevice.device.id), msg.body[0], msg.body[1]));
         userDevice.user.isUpdated = true;
     }

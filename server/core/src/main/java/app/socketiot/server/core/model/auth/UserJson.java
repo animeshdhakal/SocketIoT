@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import app.socketiot.server.core.model.HardwareMessage;
+import app.socketiot.server.core.model.MsgType;
 import app.socketiot.server.core.model.blueprint.BluePrint;
 import app.socketiot.server.core.model.device.Device;
 import app.socketiot.server.core.model.widgets.Widget;
 import app.socketiot.server.core.statebase.HardwareStateBase;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
 
 public class UserJson {
     public volatile Device[] devices = {};
@@ -146,17 +146,22 @@ public class UserJson {
         appChannels.remove(channel);
     }
 
-    public void sendToApps(ChannelHandlerContext ctx, HardwareMessage message) {
+    public void broadCastWriteMessage(Channel c, int deviceId, String pin, String value) {
+        sendToApps(c, new HardwareMessage(MsgType.WRITE, String.valueOf(deviceId), pin, value));
+        sendToHardware(c, deviceId, new HardwareMessage(MsgType.WRITE, pin, value));
+    }
+
+    public void sendToApps(Channel c, HardwareMessage message) {
         for (Channel channel : appChannels) {
-            if (!channel.equals(ctx.channel())) {
+            if (!channel.equals(c)) {
                 channel.writeAndFlush(message);
             }
         }
     }
 
-    public void sendToHardware(ChannelHandlerContext ctx, int deviceID, HardwareMessage message) {
+    public void sendToHardware(Channel c, int deviceID, HardwareMessage message) {
         for (Channel channel : hardChannels) {
-            if (!channel.equals(ctx.channel())) {
+            if (!channel.equals(c)) {
                 HardwareStateBase state = channel.pipeline().get(HardwareStateBase.class);
                 if (state != null && state.getUserDevice().device.id == deviceID) {
                     channel.writeAndFlush(message);

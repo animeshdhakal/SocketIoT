@@ -13,11 +13,11 @@ public class JsonParser {
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
             .setSerializationInclusion(Include.NON_NULL);
 
-    private static final ObjectReader limitedObjectReader = mapper.readerWithView(View.Public.class);
-    private static final ObjectWriter limitedObjectWriter = mapper.writerWithView(View.Public.class);
+    private static final ObjectReader limitedObjectReader = mapper.readerWithView(View.Protected.class);
+    private static final ObjectWriter limitedObjectWriter = mapper.writerWithView(View.Protected.class);
 
-    private static final ObjectWriter objWriter = mapper.writer();
-    private static final ObjectReader objReader = mapper.reader();
+    private static final ObjectWriter objWriter = mapper.writerWithView(View.Private.class);
+    private static final ObjectReader objReader = mapper.readerWithView(View.Private.class);
 
     public static String toJson(Object obj) {
         try {

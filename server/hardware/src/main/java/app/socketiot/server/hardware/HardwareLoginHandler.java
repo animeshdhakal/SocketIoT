@@ -34,7 +34,7 @@ public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
                     ctx.pipeline().replace(HardwareLoginHandler.class, "HardwareHandler",
                             new HardwareHandler(holder, userDevice));
 
-                    userDevice.user.json.sendToApps(ctx,
+                    userDevice.user.json.sendToApps(ctx.channel(),
                             new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(userDevice.device.id),
                                     DeviceStatus.Online.toString()));
 

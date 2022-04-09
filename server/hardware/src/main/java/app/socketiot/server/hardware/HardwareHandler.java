@@ -84,7 +84,7 @@ public class HardwareHandler extends HardwareStateBase {
         if (userDevice.user.json.getHardwareChannelCount(userDevice.device.id) == 0) {
             userDevice.device.status = DeviceStatus.Offline;
             userDevice.device.lastOnline = System.currentTimeMillis();
-            userDevice.user.json.sendToApps(ctx,
+            userDevice.user.json.sendToApps(ctx.channel(),
                     new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(userDevice.device.id),
                             DeviceStatus.Offline.toString()));
         }

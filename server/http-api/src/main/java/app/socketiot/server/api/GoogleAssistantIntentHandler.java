@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import app.socketiot.server.api.model.GoogleAssistant.Command;
 import app.socketiot.server.api.model.GoogleAssistant.Device;
+import app.socketiot.server.api.model.GoogleAssistant.DeviceInfo;
 import app.socketiot.server.api.model.GoogleAssistant.DeviceName;
 import app.socketiot.server.api.model.GoogleAssistant.ExecuteRes;
 import app.socketiot.server.api.model.GoogleAssistant.Execution;
@@ -63,10 +64,16 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
                 Device ndevice = new Device();
                 ndevice.name = new DeviceName();
                 ndevice.name.name = bluePrint.getWidgetNameByPin(pin);
+                ndevice.name.defaultNames = new String[] { ndevice.name.name };
+                ndevice.name.nicknames = new String[] { ndevice.name.name };
                 ndevice.id = device.token + '\0' + String.valueOf(pin);
                 ndevice.type = "action.devices.types.SWITCH";
                 ndevice.traits = new String[] { "action.devices.traits.OnOff" };
                 ndevice.willReportState = true;
+                ndevice.deviceInfo = new DeviceInfo();
+                ndevice.deviceInfo.manufacturer = "SocketIoT";
+                ndevice.deviceInfo.model = "SocketIoT";
+                ndevice.deviceInfo.hwVersion = "1.0";
                 addDevice(res.payload, ndevice);
             }
         }
@@ -145,9 +152,11 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
                             if (execution.params.on == true) {
                                 d.updatePin(null, parts[1], "0");
                                 ec.states.on = true;
+                                user.json.broadCastWriteMessage(null, d.id, parts[0], "0");
                             } else {
                                 d.updatePin(null, parts[1], "1");
                                 ec.states.on = false;
+                                user.json.broadCastWriteMessage(null, d.id, parts[0], "1");
                             }
                         }
                     }

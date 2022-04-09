@@ -42,9 +42,9 @@ public class PinApiHandler extends BaseHttpHandler {
             return HttpRes.badRequest("Invalid Pin");
         }
 
-        userDevice.user.json.sendToApps(req.getCtx(),
+        userDevice.user.json.sendToApps(req.getCtx().channel(),
                 new HardwareMessage(MsgType.WRITE, String.valueOf(userDevice.device.id), pin, value));
-        userDevice.user.json.sendToHardware(req.getCtx(), userDevice.device.id,
+        userDevice.user.json.sendToHardware(req.getCtx().channel(), userDevice.device.id,
                 new HardwareMessage(MsgType.WRITE, pin, value));
 
         userDevice.user.isUpdated = true;

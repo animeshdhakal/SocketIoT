@@ -23,6 +23,7 @@ public class Device {
     @JsonView(View.Private.class)
     public volatile HardwareInfo info;
 
+    @JsonView(View.Protected.class)
     public volatile DeviceStatus status = DeviceStatus.Offline;
 
     public volatile String lastIP;
