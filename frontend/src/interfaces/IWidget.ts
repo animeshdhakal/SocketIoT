@@ -10,4 +10,5 @@ export default interface IWidget {
   pin?: number;
   type?: string;
   value?: string;
+  name?: string;
 }

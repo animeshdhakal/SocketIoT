@@ -18,6 +18,7 @@ Label.defaultProps = {
   pinMode: PinMode.input,
   pin: 0,
   value: "0.0",
+  name: "Label",
 };
 
 export default Label;

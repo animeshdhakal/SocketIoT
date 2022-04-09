@@ -1,14 +1,33 @@
 package app.socketiot.server.api;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import app.socketiot.server.api.model.GAIntent;
+import app.socketiot.server.api.model.GoogleAssistant.Command;
+import app.socketiot.server.api.model.GoogleAssistant.Device;
+import app.socketiot.server.api.model.GoogleAssistant.DeviceName;
+import app.socketiot.server.api.model.GoogleAssistant.ExecuteRes;
+import app.socketiot.server.api.model.GoogleAssistant.Execution;
+import app.socketiot.server.api.model.GoogleAssistant.Input;
+import app.socketiot.server.api.model.GoogleAssistant.IntentReq;
+import app.socketiot.server.api.model.GoogleAssistant.Payload;
+import app.socketiot.server.api.model.GoogleAssistant.QueryDevice;
+import app.socketiot.server.api.model.GoogleAssistant.QueryRes;
+import app.socketiot.server.api.model.GoogleAssistant.SyncRes;
+import app.socketiot.server.api.model.GoogleAssistant.ExecuteRes.ExecutePayload;
+import app.socketiot.server.api.model.GoogleAssistant.ExecuteRes.ExecutePayload.ExecuteCommand;
+import app.socketiot.server.api.model.GoogleAssistant.QueryRes.QueryPayload;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.http.JwtHttpHandler;
 import app.socketiot.server.core.http.annotations.POST;
 import app.socketiot.server.core.http.annotations.Path;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
+import app.socketiot.server.core.json.model.DeviceStatus;
+import app.socketiot.server.core.model.auth.User;
+import app.socketiot.server.core.model.blueprint.BluePrint;
+import app.socketiot.server.utils.NumberUtil;
 import io.netty.channel.ChannelHandler;
 
 @ChannelHandler.Sharable
@@ -22,40 +41,141 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
         this.holder = holder;
     }
 
+    public void addDevice(Payload payload, Device device) {
+        Device[] ndevice = new Device[payload.devices.length + 1];
+        for (int i = 0; i < payload.devices.length; i++) {
+            ndevice[i] = payload.devices[i];
+        }
+        ndevice[payload.devices.length] = device;
+        payload.devices = ndevice;
+    }
+
+    public HttpRes handleSync(IntentReq intentReq, User user) {
+        SyncRes res = new SyncRes();
+        res.requestId = intentReq.requestId;
+        res.payload = new Payload();
+        res.payload.agentUserId = user.email;
+
+        for (app.socketiot.server.core.model.device.Device device : user.json.devices) {
+            res.payload.devices = new Device[0];
+            BluePrint bluePrint = holder.bluePrintDao.getBluePrint(device.blueprint_id);
+            for (int pin : device.pins.keySet()) {
+                Device ndevice = new Device();
+                ndevice.name = new DeviceName();
+                ndevice.name.name = bluePrint.getWidgetNameByPin(pin);
+                ndevice.id = device.token + '\0' + String.valueOf(pin);
+                ndevice.type = "action.devices.types.SWITCH";
+                ndevice.traits = new String[] { "action.devices.traits.OnOff" };
+                ndevice.willReportState = true;
+                addDevice(res.payload, ndevice);
+            }
+        }
+
+        return new HttpRes(res);
+    }
+
+    public HttpRes handleQuery(IntentReq intentReq, User user) {
+        QueryRes res = new QueryRes();
+        res.requestId = intentReq.requestId;
+        res.payload = new QueryPayload();
+        res.payload.devices = new HashMap<>();
+
+        for (Device gdevice : intentReq.inputs[0].payload.devices) {
+            String id = gdevice.id;
+            String[] parts = id.split("\0");
+            String token = parts[0];
+            QueryDevice qdevice = new QueryDevice();
+
+            if (parts.length < 2) {
+                qdevice.status = "ERROR";
+                res.payload.devices.put(gdevice.id, qdevice);
+                continue;
+            }
+
+            short pin = NumberUtil.parsePin(parts[1]);
+
+            app.socketiot.server.core.model.device.Device device = holder.deviceDao.getDevice(token);
+
+            if (device == null || pin == -1) {
+                qdevice.status = "ERROR";
+                res.payload.devices.put(gdevice.id, qdevice);
+                continue;
+            }
+
+            qdevice.online = device.status == DeviceStatus.Online;
+            qdevice.on = device.pins.get(pin) == "0";
+            qdevice.status = "SUCCESS";
+            res.payload.devices.put(gdevice.id, qdevice);
+        }
+
+        return new HttpRes(res);
+    }
+
+    public HttpRes handleExecute(IntentReq intentReq, User user) {
+        ExecuteRes res = new ExecuteRes();
+        res.requestId = intentReq.requestId;
+        res.payload = new ExecutePayload();
+        res.payload.commands = new ArrayList<>();
+
+        for (Input input : intentReq.inputs) {
+            for (Command command : input.payload.commands) {
+                for (Device device : command.devices) {
+                    String id = device.id;
+                    String[] parts = id.split("\0");
+                    String token = parts[0];
+
+                    app.socketiot.server.core.model.device.Device d = holder.deviceDao.getDevice(token);
+
+                    ExecuteCommand ec = new ExecuteCommand();
+                    ec.ids = new String[] { id };
+
+                    if (d == null) {
+                        ec.status = "ERROR";
+                        ec.errorCode = "deviceNotFound";
+                        res.payload.commands.add(ec);
+                        continue;
+                    }
+
+                    ec.status = "SUCCESS";
+                    ec.states = new QueryDevice();
+                    ec.states.online = d.status == DeviceStatus.Online;
+
+                    for (Execution execution : command.execution) {
+                        if (execution.command.equals("action.devices.commands.OnOff")) {
+                            if (execution.params.on == true) {
+                                d.updatePin(null, parts[1], "0");
+                                ec.states.on = true;
+                            } else {
+                                d.updatePin(null, parts[1], "1");
+                                ec.states.on = false;
+                            }
+                        }
+                    }
+
+                    res.payload.commands.add(ec);
+                }
+            }
+        }
+
+        return new HttpRes(res);
+    }
+
     @Path("/fulfillment")
     @POST
     public HttpRes fulfillment(HttpReq req) {
-        GAIntent intentreq = req.getContentAs(GAIntent.class);
+        IntentReq intentreq = req.getContentAs(IntentReq.class);
+
         if (intentreq == null || intentreq.inputs == null) {
             return HttpRes.badRequest("Invalid request");
         }
 
-        log.info("Google Assistant Intent: {}", intentreq.inputs[0].intent);
-        log.info("Got Intent {}", req.getContent());
-
-        for (GAIntent.Input input : intentreq.inputs) {
-            if (input.intent.equals("action.devices.SYNC")) {
-                GAIntent intentres = new GAIntent();
-                intentres.requestId = intentreq.requestId;
-                intentres.payload = new GAIntent.Input.Payload();
-                intentres.payload.agentUserId = req.user.email;
-                intentres.payload.devices = new GAIntent.Input.Payload.Device[1];
-                intentres.payload.devices[0] = new GAIntent.Input.Payload.Device();
-                intentres.payload.devices[0].id = "light.bulb";
-                intentres.payload.devices[0].type = "action.devices.types.LIGHT";
-                intentres.payload.devices[0].traits = new String[] { "action.devices.traits.OnOff" };
-                intentres.payload.devices[0].name = new GAIntent.Input.Payload.Device.Name();
-                intentres.payload.devices[0].name.name = "Light";
-                intentres.payload.devices[0].name.defaultNames = new String[] { "Light" };
-                intentres.payload.devices[0].name.nicknames = new String[] { "Light" };
-                intentres.payload.devices[0].deviceInfo = new GAIntent.Input.Payload.Device.DeviceInfo();
-                intentres.payload.devices[0].deviceInfo.manufacturer = "Google";
-                intentres.payload.devices[0].deviceInfo.model = "Google Home";
-                intentres.payload.devices[0].deviceInfo.hwVersion = "1.0";
-                intentres.payload.devices[0].deviceInfo.swVersion = "1.0";
-                intentres.payload.devices[0].willReportState = true;
-
-                return new HttpRes(intentres);
+        for (Input intent : intentreq.inputs) {
+            if (intent.intent.equals("action.devices.SYNC")) {
+                return handleSync(intentreq, req.user);
+            } else if (intent.intent.equals("action.devices.QUERY")) {
+                return handleQuery(intentreq, req.user);
+            } else if (intent.intent.equals("action.devices.EXECUTE")) {
+                return handleExecute(intentreq, req.user);
             }
         }
 

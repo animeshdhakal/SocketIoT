@@ -37,7 +37,11 @@ public class DeviceDao {
     }
 
     public Device getDevice(String token) {
-        return devices.get(token).device;
+        UserDevice userDevice = devices.get(token);
+        if (userDevice != null) {
+            return userDevice.device;
+        }
+        return null;
     }
 
     public UserDevice getUserDevice(String token) {

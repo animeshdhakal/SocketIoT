@@ -14,6 +14,7 @@ public abstract class Widget {
     public int y = 0;
     public short pin = -1;
     public int pinMode = -1;
+    public String name;
 
     public Widget() {
     }

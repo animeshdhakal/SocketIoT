@@ -35,6 +35,7 @@ Button.defaultProps = {
   pinMode: PinMode.output,
   pin: 0,
   value: "0",
+  name: "Button",
 };
 
 export default Button;

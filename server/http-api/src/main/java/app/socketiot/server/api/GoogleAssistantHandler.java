@@ -9,14 +9,11 @@ import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.model.auth.User;
 import io.netty.channel.ChannelHandler;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 @ChannelHandler.Sharable
 @Path("/api/google-assistant")
 public class GoogleAssistantHandler extends BaseHttpHandler {
-    final Holder holder;
-    private static Logger log = LogManager.getLogger(GoogleAssistantHandler.class);
+    private final Holder holder;
 
     public GoogleAssistantHandler(Holder holder) {
         super(holder);

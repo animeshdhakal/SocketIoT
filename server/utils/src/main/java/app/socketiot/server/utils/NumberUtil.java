@@ -6,6 +6,10 @@ public class NumberUtil {
     }
 
     public static short parsePin(String pin) {
-        return Short.parseShort(pin);
+        try {
+            return Short.parseShort(pin);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 }

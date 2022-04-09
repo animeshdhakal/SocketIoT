@@ -46,7 +46,7 @@ public class JsonParser {
     public static <T> T parseLimitedJson(Class<T> clazz, String json) {
         try {
             return limitedObjectReader.readValue(json, clazz);
-        } catch (Exception e) {  
+        } catch (Exception e) {
             return null;
         }
     }

@@ -49,6 +49,21 @@ const ButtonSettingModal: React.FC<IWidgetSetting<IButton>> = ({
         </div>
         <div className="content flex flex-col justify-center items-center">
           <div className="flex flex-col justify-center my-4">
+            <label htmlFor="name" className="font-mono text-md">
+              Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              value={widgets[index].name}
+              onChange={setIVal}
+              placeholder="Name"
+              autoComplete="off"
+              className="outline-none bg-none p-1 rounded-md w-70 outline-1 outline-gray-300 focus:ring focus:ring-blue-300 focus:outline-2"
+            />
+          </div>
+
+          <div className="flex flex-col justify-center my-4">
             <label htmlFor="onValue" className="font-mono text-md">
               ON Value
             </label>

@@ -26,4 +26,13 @@ public class BluePrint {
     public BluePrint() {
 
     }
+
+    public String getWidgetNameByPin(int pin) {
+        for (Widget widget : widgets) {
+            if (widget.pin == pin) {
+                return widget.name;
+            }
+        }
+        return null;
+    }
 }
