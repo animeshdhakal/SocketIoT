@@ -152,11 +152,11 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
                             if (execution.params.on == true) {
                                 d.updatePin(null, parts[1], "0");
                                 ec.states.on = true;
-                                user.json.broadCastWriteMessage(null, d.id, parts[0], "0");
+                                user.json.broadCastWriteMessage(null, d.id, parts[0], "1");
                             } else {
                                 d.updatePin(null, parts[1], "1");
                                 ec.states.on = false;
-                                user.json.broadCastWriteMessage(null, d.id, parts[0], "1");
+                                user.json.broadCastWriteMessage(null, d.id, parts[0], "0");
                             }
                         }
                     }
