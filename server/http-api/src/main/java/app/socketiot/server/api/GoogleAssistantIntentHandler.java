@@ -112,7 +112,7 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
             OnOffWidget widget = bluePrint.getOnOffWidgetByPin(parts[1]);
 
             qdevice.online = device.status == DeviceStatus.Online;
-            qdevice.on = device.pins.get(pin) == widget.onValue;
+            qdevice.on = device.pins.get(pin) != widget.onValue;
             qdevice.status = "SUCCESS";
             res.payload.devices.put(gdevice.id, qdevice);
         }
@@ -163,11 +163,11 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
 
                             if (execution.params.on == true) {
                                 d.updatePin(parts[1], widget.offValue);
-                                ec.states.on = true;
+                                ec.states.on = false;
                                 user.json.broadCastWriteMessage(c, d.id, parts[1], widget.onValue);
                             } else {
                                 d.updatePin(parts[1], widget.offValue);
-                                ec.states.on = false;
+                                ec.states.on = true;
                                 user.json.broadCastWriteMessage(c, d.id, parts[1], widget.offValue);
                             }
 
