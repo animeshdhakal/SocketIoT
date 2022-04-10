@@ -29,7 +29,7 @@ public class AppHandler extends ChannelInboundHandlerAdapter {
                         int deviceId = Integer.parseInt(message.body[0]);
                         Device device = user.json.getDevice(deviceId);
                         if (device != null) {
-                            device.updatePin(ctx, message.body[1], message.body[2]);
+                            device.updatePin(message.body[1], message.body[2]);
                             user.json.sendToHardware(ctx.channel(), deviceId,
                                     new HardwareMessage(MsgType.WRITE, message.body[1], message.body[2]));
                             user.json.sendToApps(ctx.channel(), message);

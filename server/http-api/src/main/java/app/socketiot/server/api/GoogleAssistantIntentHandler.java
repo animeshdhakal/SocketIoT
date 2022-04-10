@@ -158,14 +158,14 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
                         if (execution.command.equals("action.devices.commands.OnOff")) {
                             if (execution.params.on == true) {
                                 log.trace("Turning on pin " + parts[1] + " on device " + token);
-                                d.updatePin(null, parts[1], "0");
+                                d.updatePin(parts[1], "0");
                                 ec.states.on = true;
-                                user.json.broadCastWriteMessage(c, d.id, parts[0], "0");
+                                user.json.broadCastWriteMessage(c, d.id, parts[1], "0");
                             } else {
                                 log.trace("Turning off pin " + parts[1] + " on device " + token);
-                                d.updatePin(null, parts[1], "1");
+                                d.updatePin(parts[1], "1");
                                 ec.states.on = false;
-                                user.json.broadCastWriteMessage(c, d.id, parts[0], "1");
+                                user.json.broadCastWriteMessage(c, d.id, parts[1], "1");
                             }
                         }
                     }

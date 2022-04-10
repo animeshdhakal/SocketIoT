@@ -6,7 +6,6 @@ import app.socketiot.server.core.json.View;
 import app.socketiot.server.core.json.model.DeviceStatus;
 import app.socketiot.server.core.model.HardwareInfo;
 import app.socketiot.server.utils.NumberUtil;
-import io.netty.channel.ChannelHandlerContext;
 
 public class Device {
     public volatile String name;
@@ -44,7 +43,7 @@ public class Device {
     public Device() {
     }
 
-    public boolean updatePin(ChannelHandlerContext ctx, String pinn, String value) {
+    public boolean updatePin(String pinn, String value) {
         short pin = NumberUtil.parsePin(pinn);
         if (pins.containsKey(pin)) {
             pins.put(pin, value);
