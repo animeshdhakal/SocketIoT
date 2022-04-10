@@ -3,7 +3,9 @@ package app.socketiot.server.core.model.blueprint;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonView;
 import app.socketiot.server.core.json.View;
+import app.socketiot.server.core.model.widgets.OnOffWidget;
 import app.socketiot.server.core.model.widgets.Widget;
+import app.socketiot.server.utils.NumberUtil;
 
 public class BluePrint {
     public volatile String name;
@@ -31,6 +33,15 @@ public class BluePrint {
         for (Widget widget : widgets) {
             if (widget.pin == pin) {
                 return widget.name;
+            }
+        }
+        return null;
+    }
+
+    public OnOffWidget getOnOffWidgetByPin(String pin) {
+        for (Widget widget : widgets) {
+            if (widget.pin == NumberUtil.parsePin(pin) && widget instanceof OnOffWidget) {
+                return (OnOffWidget) widget;
             }
         }
         return null;

@@ -28,6 +28,7 @@ import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.json.model.DeviceStatus;
 import app.socketiot.server.core.model.auth.User;
 import app.socketiot.server.core.model.blueprint.BluePrint;
+import app.socketiot.server.core.model.widgets.OnOffWidget;
 import app.socketiot.server.utils.NumberUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
@@ -150,22 +151,33 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
                         continue;
                     }
 
+                    BluePrint bluePrint = holder.bluePrintDao.getBluePrint(d.blueprint_id);
+
                     ec.status = "SUCCESS";
                     ec.states = new QueryDevice();
                     ec.states.online = d.status == DeviceStatus.Online;
 
                     for (Execution execution : command.execution) {
                         if (execution.command.equals("action.devices.commands.OnOff")) {
+                            OnOffWidget widget = bluePrint.getOnOffWidgetByPin(parts[1]);
+
+                            if (widget == null) {
+                                ec.status = "ERROR";
+                                ec.errorCode = "deviceNotInput";
+                                res.payload.commands.add(ec);
+                                continue;
+                            }
+
                             if (execution.params.on == true) {
                                 log.trace("Turning on pin " + parts[1] + " on device " + token);
-                                d.updatePin(parts[1], "0");
+                                d.updatePin(parts[1], widget.offValue);
                                 ec.states.on = true;
-                                user.json.broadCastWriteMessage(c, d.id, parts[1], "0");
+                                user.json.broadCastWriteMessage(c, d.id, parts[1], widget.onValue);
                             } else {
                                 log.trace("Turning off pin " + parts[1] + " on device " + token);
-                                d.updatePin(parts[1], "1");
+                                d.updatePin(parts[1], widget.offValue);
                                 ec.states.on = false;
-                                user.json.broadCastWriteMessage(c, d.id, parts[1], "1");
+                                user.json.broadCastWriteMessage(c, d.id, parts[1], widget.offValue);
                             }
                         }
                     }
