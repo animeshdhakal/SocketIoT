@@ -1,6 +1,6 @@
 package app.socketiot.server.api;
 
-import app.socketiot.server.api.model.GoogleAssistantTokenRes;
+import app.socketiot.server.api.model.GoogleAssistant.GoogleAssistantTokenRes;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.http.BaseHttpHandler;
 import app.socketiot.server.core.http.annotations.POST;

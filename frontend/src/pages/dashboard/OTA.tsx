@@ -49,6 +49,7 @@ const OTA = () => {
       .post<DeviceInterface[]>("/api/device/all", { blueprint_id })
       .then((res) => {
         setDevices(res.data);
+        setBluePrintID(blueprint_id);
       });
   };
 
@@ -90,7 +91,7 @@ const OTA = () => {
     axios.post("/api/ota/begin", {
       devices: checkedDevices,
       firmwarePath: binPath,
-      blueprint_id: blueprintID
+      blueprint_id: blueprintID,
     });
   };
 
@@ -176,9 +177,7 @@ const OTA = () => {
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900 flex items-center">
                           {device.status}
-                          <div
-                            className="w-3 h-3 bg-green-600 ml-3 rounded-full"
-                          ></div>
+                          <div className="w-3 h-3 bg-green-600 ml-3 rounded-full"></div>
                         </div>
                       </td>
                       <td className="px-6 py-4">

@@ -19,11 +19,9 @@ import io.netty.channel.ChannelHandler;
 @Path("/api/widget")
 @ChannelHandler.Sharable
 public class WidgetApiHandler extends JwtHttpHandler {
-    static final ObjectMapper mapper = new ObjectMapper();
-
-    static {
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
+    private static final ObjectMapper mapper = new ObjectMapper().configure(
+            DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+            false);
 
     public WidgetApiHandler(Holder holder) {
         super(holder);

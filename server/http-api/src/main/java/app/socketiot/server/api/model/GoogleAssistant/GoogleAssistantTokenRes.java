@@ -1,4 +1,4 @@
-package app.socketiot.server.api.model;
+package app.socketiot.server.api.model.GoogleAssistant;
 
 public class GoogleAssistantTokenRes {
     public String token_type;

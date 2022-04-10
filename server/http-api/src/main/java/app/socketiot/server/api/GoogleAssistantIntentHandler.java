@@ -53,6 +53,8 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
     }
 
     public HttpRes handleSync(IntentReq intentReq, User user) {
+        log.trace("GoogleAssistant Sync Request");
+
         SyncRes res = new SyncRes();
         res.requestId = intentReq.requestId;
         res.payload = new Payload();
@@ -83,6 +85,8 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
     }
 
     public HttpRes handleQuery(IntentReq intentReq, User user) {
+        log.trace("GoogleAssistant Query Request");
+
         QueryRes res = new QueryRes();
         res.requestId = intentReq.requestId;
         res.payload = new QueryPayload();
@@ -120,6 +124,8 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
     }
 
     public HttpRes handleExecute(Channel c, IntentReq intentReq, User user) {
+        log.trace("GoogleAssistant Execute Request");
+
         ExecuteRes res = new ExecuteRes();
         res.requestId = intentReq.requestId;
         res.payload = new ExecutePayload();
@@ -151,10 +157,12 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
                     for (Execution execution : command.execution) {
                         if (execution.command.equals("action.devices.commands.OnOff")) {
                             if (execution.params.on == true) {
+                                log.trace("Turning on pin " + parts[1] + " on device " + token);
                                 d.updatePin(null, parts[1], "0");
                                 ec.states.on = true;
                                 user.json.broadCastWriteMessage(c, d.id, parts[0], "0");
                             } else {
+                                log.trace("Turning off pin " + parts[1] + " on device " + token);
                                 d.updatePin(null, parts[1], "1");
                                 ec.states.on = false;
                                 user.json.broadCastWriteMessage(c, d.id, parts[0], "1");
