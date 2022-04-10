@@ -2,8 +2,6 @@ package app.socketiot.server.api;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import app.socketiot.server.api.model.GoogleAssistant.Command;
 import app.socketiot.server.api.model.GoogleAssistant.Device;
 import app.socketiot.server.api.model.GoogleAssistant.DeviceInfo;
@@ -25,7 +23,6 @@ import app.socketiot.server.core.http.annotations.POST;
 import app.socketiot.server.core.http.annotations.Path;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
-import app.socketiot.server.core.json.JsonParser;
 import app.socketiot.server.core.json.model.DeviceStatus;
 import app.socketiot.server.core.model.auth.User;
 import app.socketiot.server.core.model.blueprint.BluePrint;
@@ -38,7 +35,6 @@ import io.netty.channel.ChannelHandler;
 @Path("/api/google-assistant")
 public class GoogleAssistantIntentHandler extends JwtHttpHandler {
     private final Holder holder;
-    private static Logger log = LogManager.getLogger(GoogleAssistantIntentHandler.class);
 
     public GoogleAssistantIntentHandler(Holder holder) {
         super(holder);
@@ -105,6 +101,7 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
             short pin = NumberUtil.parsePin(parts[1]);
 
             app.socketiot.server.core.model.device.Device device = holder.deviceDao.getDevice(token);
+            BluePrint bluePrint = holder.bluePrintDao.getBluePrint(device.blueprint_id);
 
             if (device == null || pin == -1) {
                 qdevice.status = "ERROR";
@@ -112,8 +109,10 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
                 continue;
             }
 
+            OnOffWidget widget = bluePrint.getOnOffWidgetByPin(parts[1]);
+
             qdevice.online = device.status == DeviceStatus.Online;
-            qdevice.on = device.pins.get(pin) == "0";
+            qdevice.on = device.pins.get(pin) == widget.onValue;
             qdevice.status = "SUCCESS";
             res.payload.devices.put(gdevice.id, qdevice);
         }
@@ -188,8 +187,6 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
     @POST
     public HttpRes fulfillment(HttpReq req) {
         IntentReq intentreq = req.getContentAs(IntentReq.class);
-
-        log.info("Request: {}", req.getContent());
 
         if (intentreq == null || intentreq.inputs == null) {
             return HttpRes.badRequest("Invalid request");
