@@ -25,6 +25,7 @@ import app.socketiot.server.core.http.annotations.POST;
 import app.socketiot.server.core.http.annotations.Path;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
+import app.socketiot.server.core.json.JsonParser;
 import app.socketiot.server.core.json.model.DeviceStatus;
 import app.socketiot.server.core.model.auth.User;
 import app.socketiot.server.core.model.blueprint.BluePrint;
@@ -82,6 +83,8 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
             }
         }
 
+        log.trace("GoogleAssistant Sync Response {}", JsonParser.toJson(res));
+
         return new HttpRes(res);
     }
 
@@ -120,6 +123,8 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
             qdevice.status = "SUCCESS";
             res.payload.devices.put(gdevice.id, qdevice);
         }
+
+        log.trace("GoogleAssistant Query Response {}", JsonParser.toJson(res));
 
         return new HttpRes(res);
     }
@@ -187,6 +192,8 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
             }
         }
 
+        log.trace("GoogleAssistant Execute Response {}", JsonParser.toJson(res));
+
         return new HttpRes(res);
     }
 
@@ -194,6 +201,8 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
     @POST
     public HttpRes fulfillment(HttpReq req) {
         IntentReq intentreq = req.getContentAs(IntentReq.class);
+
+        log.info("Request: {}", req.getContent());
 
         if (intentreq == null || intentreq.inputs == null) {
             return HttpRes.badRequest("Invalid request");
