@@ -38,7 +38,7 @@ public class PinApiHandler extends BaseHttpHandler {
             return HttpRes.badRequest("Device Not Found");
         }
 
-        if (!userDevice.device.updatePin(req.getCtx(), pin, value)) {
+        if (!userDevice.device.updatePin(pin, value)) {
             return HttpRes.badRequest("Invalid Pin");
         }
 
