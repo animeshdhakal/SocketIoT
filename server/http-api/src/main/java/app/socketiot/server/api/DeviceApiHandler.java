@@ -3,7 +3,6 @@ package app.socketiot.server.api;
 import java.util.concurrent.ConcurrentHashMap;
 import app.socketiot.server.api.model.WidgetReqRes;
 import app.socketiot.server.core.Holder;
-import app.socketiot.server.core.http.JwtHttpHandler;
 import app.socketiot.server.core.http.annotations.POST;
 import app.socketiot.server.core.http.annotations.Path;
 import app.socketiot.server.core.http.handlers.HttpReq;
@@ -90,10 +89,9 @@ public class DeviceApiHandler extends JwtHttpHandler {
         WidgetReqRes widgetreq = req.getContentAs(WidgetReqRes.class);
 
         if (widgetreq != null && widgetreq.blueprint_id != null) {
-            return new HttpRes(
-                    JsonParser.toLimitedJson(holder.deviceDao.getAllDevicesByBlueprint(widgetreq.blueprint_id)));
+            return new HttpRes(holder.deviceDao.getAllDevicesByBlueprint(widgetreq.blueprint_id));
         } else {
-            return new HttpRes(JsonParser.toLimitedJson(req.user.json.devices));
+            return new HttpRes(req.user.json.devices);
         }
 
     }
