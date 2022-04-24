@@ -10,7 +10,6 @@ import app.socketiot.server.core.http.annotations.Path;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
-import app.socketiot.server.core.json.JsonParser;
 import app.socketiot.server.core.model.blueprint.BluePrint;
 import app.socketiot.server.core.model.device.Device;
 import app.socketiot.server.core.model.widgets.Widget;
@@ -80,7 +79,7 @@ public class BluePrintApiHandler extends JwtHttpHandler {
     @Path("/all")
     @POST
     public HttpRes all(HttpReq req) {
-        return new HttpRes(JsonParser.toLimitedJson(req.user.json.blueprints));
+        return new HttpRes(req.user.json.blueprints);
     }
 
     @Path("/get")
