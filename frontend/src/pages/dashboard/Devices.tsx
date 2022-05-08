@@ -12,7 +12,6 @@ export const Devices = () => {
   const [deviceDelete, setDeviceDelete] = useState<string>("");
   const [showAddDeviceModal, setShowAddDeviceModal] = useState<boolean>(false);
   const [alert, setAlert] = useState<string>("");
-  let alerRef = useRef<HTMLDivElement>(null);
 
   const fetchBluePrints = () => {
     axios.post<DeviceInterface[]>("/api/device/all").then((res) => {
@@ -23,7 +22,6 @@ export const Devices = () => {
   useEffect(() => {
     fetchBluePrints();
     wsClient.addEventListener("status", ({ deviceID, status }: any) => {
-      console.log(deviceID, status);
       setDevices((prevState) => {
         let newDevices = [...prevState];
         newDevices.forEach((device) => {
@@ -34,6 +32,7 @@ export const Devices = () => {
         return newDevices;
       });
     });
+
     return () => {
       wsClient.removeEventListener("status");
     };

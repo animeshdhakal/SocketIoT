@@ -13,7 +13,7 @@ import app.socketiot.server.core.http.handlers.StatusMsg;
 import app.socketiot.server.core.json.JsonParser;
 import app.socketiot.server.core.model.blueprint.BluePrint;
 import app.socketiot.server.core.model.device.Device;
-import app.socketiot.server.core.model.widgets.Widget;
+import app.socketiot.server.core.model.widgets.type.Widget;
 import app.socketiot.server.utils.RandomUtil;
 import io.netty.channel.ChannelHandler;
 
@@ -47,7 +47,7 @@ public class BluePrintApiHandler extends JwtHttpHandler {
 
         req.user.isUpdated = true;
 
-        return new HttpRes(new BluePrint(blueprint.id));
+        return HttpRes.json(new BluePrint(blueprint.id));
     }
 
     @Path("/delete")
@@ -102,7 +102,7 @@ public class BluePrintApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Invalid Blueprint");
         }
 
-        return new HttpRes(new WidgetReqRes(bluePrint.widgets, null));
+        return HttpRes.json(new WidgetReqRes(bluePrint.widgets, null));
     }
 
 }

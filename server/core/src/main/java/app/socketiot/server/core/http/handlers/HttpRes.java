@@ -19,10 +19,6 @@ public class HttpRes extends DefaultFullHttpResponse {
         headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json");
     }
 
-    public HttpRes(Object obj) {
-        this(HttpResponseStatus.OK, obj);
-    }
-
     public HttpRes(String content) {
         this(HttpResponseStatus.OK, HttpVersion.HTTP_1_1, content);
     }
@@ -62,6 +58,10 @@ public class HttpRes extends DefaultFullHttpResponse {
 
     public static HttpRes internalServerError(String content) {
         return new HttpRes(HttpResponseStatus.INTERNAL_SERVER_ERROR, content);
+    }
+
+    public static HttpRes json(Object obj) {
+        return new HttpRes(HttpResponseStatus.OK, obj);
     }
 
     public void addRequiredHeaders() {

@@ -66,7 +66,7 @@ public class UserApiHandler extends BaseHttpHandler {
 
         String token = holder.jwtUtil.createToken(dbUser.email, 1 * 12 * 30 * 24 * 60 * 60);
 
-        return new HttpRes(new JwtResponse(token));
+        return HttpRes.json(new JwtResponse(token));
     }
 
     @POST

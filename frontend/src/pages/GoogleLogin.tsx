@@ -2,7 +2,7 @@ import axios, { AxiosError } from "axios";
 import React, { FormEvent, useState } from "react";
 import useQuery from "../components/hooks/useQuery";
 
-const Login = () => {
+const GoogleLogin = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [emailError, setEmailError] = useState<string>("");
@@ -80,8 +80,8 @@ const Login = () => {
         onSubmit={(e) => onLogin(e)}
       >
         <h1 className="text-3xl my-6">SocketIoT</h1>
-        <h1 className="text-center my-5 text-xl">
-          Allow this app to access your account information.
+        <h1 className="text-center my-5 text-md">
+          By signing in, you are authorizing Google to control your devices
         </h1>
 
         {loginError && (
@@ -158,4 +158,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default GoogleLogin;

@@ -51,6 +51,9 @@ public class GoogleAssistantHandler extends BaseHttpHandler {
         if (grant_type.equals("authorization_code")) {
             token = code;
         } else if (grant_type.equals("refresh_token")) {
+            if (!holder.jwtUtil.verifyToken(refresh_token)) {
+                return HttpRes.badRequest("{\"error\": \"invalid_grant\"}");
+            }
             token = refresh_token;
         } else {
             return HttpRes.badRequest("Invalid grant_type");
@@ -68,7 +71,7 @@ public class GoogleAssistantHandler extends BaseHttpHandler {
             return HttpRes.badRequest("Invalid user");
         }
 
-        return new HttpRes(new GoogleAssistantTokenRes("Bearer", token, token, 1 * 12 * 30 * 24 * 60 * 60));
+        return HttpRes.json(new GoogleAssistantTokenRes("Bearer", token, token, 1 * 12 * 30 * 24 * 60 * 60));
     }
 
 }

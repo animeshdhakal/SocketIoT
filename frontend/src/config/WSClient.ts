@@ -5,13 +5,11 @@ class WSClient {
   events: any;
   socket: WebSocket | null;
   token: string;
-  onAuthenticated: () => void;
 
   constructor() {
     this.events = {};
     this.socket = null;
     this.token = "";
-    this.onAuthenticated = () => {};
   }
 
   addEventListener(event: string, action: any) {
@@ -33,7 +31,9 @@ class WSClient {
   }
 
   send(data: ArrayBuffer) {
-    this.socket?.send(data);
+    if (this.connected()) {
+      this.socket?.send(data);
+    }
   }
 
   connected() {
@@ -81,12 +81,13 @@ class WSClient {
       case MsgType.AUTH:
         if (body[0] == "1") {
           console.log("Authenticated");
-          this.onAuthenticated();
+          this.dispatchEvent("authsuccess", {});
           setTimeout(() => {
             this.send(create_message(MsgType.PING));
           }, HEARTBEAT_INTERVAL);
         } else {
           console.log("Authentication Failed");
+          this.dispatchEvent("authfailed", {});
         }
         break;
 

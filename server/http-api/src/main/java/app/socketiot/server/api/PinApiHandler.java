@@ -6,10 +6,9 @@ import app.socketiot.server.core.http.annotations.GET;
 import app.socketiot.server.core.http.annotations.Path;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
-import app.socketiot.server.core.model.HardwareMessage;
-import app.socketiot.server.core.model.MsgType;
 import app.socketiot.server.core.model.device.Device;
 import app.socketiot.server.core.model.device.UserDevice;
+import app.socketiot.server.core.pinstore.PinStore;
 import app.socketiot.server.utils.NumberUtil;
 import io.netty.channel.ChannelHandler;
 
@@ -38,14 +37,16 @@ public class PinApiHandler extends BaseHttpHandler {
             return HttpRes.badRequest("Device Not Found");
         }
 
-        if (!userDevice.device.updatePin(pin, value)) {
+        short spin = Short.valueOf(pin);
+        PinStore store = userDevice.device.pins.get(spin);
+
+        if (store == null) {
             return HttpRes.badRequest("Invalid Pin");
         }
 
-        userDevice.user.json.sendToApps(req.getCtx().channel(),
-                new HardwareMessage(MsgType.WRITE, String.valueOf(userDevice.device.id), pin, value));
-        userDevice.user.json.sendToHardware(req.getCtx().channel(), userDevice.device.id,
-                new HardwareMessage(MsgType.WRITE, pin, value));
+        store.updateValue(value);
+
+        userDevice.user.json.broadCastWriteMessage(null, userDevice.device.id, spin, store);
 
         userDevice.user.isUpdated = true;
 
@@ -68,7 +69,7 @@ public class PinApiHandler extends BaseHttpHandler {
             return HttpRes.badRequest("Device Not Found");
         }
 
-        String value = device.pins.get(NumberUtil.parsePin(pin));
+        String value = device.pins.get(NumberUtil.parsePin(pin)).getValue();
 
         return HttpRes.ok(value);
     }

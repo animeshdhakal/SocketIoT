@@ -2,6 +2,7 @@ package app.socketiot.server.api;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import app.socketiot.server.api.model.GoogleAssistant.Command;
 import app.socketiot.server.api.model.GoogleAssistant.Device;
 import app.socketiot.server.api.model.GoogleAssistant.DeviceInfo;
@@ -26,7 +27,8 @@ import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.json.model.DeviceStatus;
 import app.socketiot.server.core.model.auth.User;
 import app.socketiot.server.core.model.blueprint.BluePrint;
-import app.socketiot.server.core.model.widgets.OnOffWidget;
+import app.socketiot.server.core.model.widgets.type.OnOffWidget;
+import app.socketiot.server.core.pinstore.PinStore;
 import app.socketiot.server.utils.NumberUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
@@ -77,7 +79,7 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
             }
         }
 
-        return new HttpRes(res);
+        return HttpRes.json(res);
     }
 
     public HttpRes handleQuery(IntentReq intentReq, User user) {
@@ -110,13 +112,12 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
             }
 
             OnOffWidget widget = bluePrint.getOnOffWidgetByPin(parts[1]);
-
-            qdevice.online = device.status == DeviceStatus.Online;
-            qdevice.on = device.pins.get(pin) == widget.onValue;
+            qdevice.online = device.status.equals(DeviceStatus.Online);
+            qdevice.on = device.pins.get(pin).getValue().equals(widget.onValue);
             qdevice.status = "SUCCESS";
             res.payload.devices.put(gdevice.id, qdevice);
         }
-        return new HttpRes(res);
+        return HttpRes.json(res);
     }
 
     public HttpRes handleExecute(Channel c, IntentReq intentReq, User user) {
@@ -162,13 +163,18 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
                             }
 
                             if (execution.params.on == true) {
-                                d.updatePin(parts[1], widget.offValue);
+                                short pin = Short.valueOf(parts[1]);
+                                PinStore store = d.pins.get(pin);
+                                store.updateValue(widget.onValue);
+                                store.sendSync(null, d.id, pin);
                                 ec.states.on = true;
-                                user.json.broadCastWriteMessage(c, d.id, parts[1], widget.onValue);
+
                             } else {
-                                d.updatePin(parts[1], widget.offValue);
+                                short pin = Short.valueOf(parts[1]);
+                                PinStore store = d.pins.get(pin);
+                                store.updateValue(widget.offValue);
+                                store.sendSync(null, d.id, pin);
                                 ec.states.on = false;
-                                user.json.broadCastWriteMessage(c, d.id, parts[1], widget.offValue);
                             }
 
                             user.isUpdated = true;
@@ -180,7 +186,7 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
             }
         }
 
-        return new HttpRes(res);
+        return HttpRes.json(res);
     }
 
     @Path("/fulfillment")

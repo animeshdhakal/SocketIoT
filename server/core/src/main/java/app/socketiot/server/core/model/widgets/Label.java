@@ -1,5 +1,7 @@
 package app.socketiot.server.core.model.widgets;
 
-public class Label extends Widget {
+import app.socketiot.server.core.model.widgets.type.SingleValueWidget;
+
+public class Label extends SingleValueWidget {
     public String title;
 }

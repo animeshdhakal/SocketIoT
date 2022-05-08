@@ -2,7 +2,7 @@ package app.socketiot.server.api.model;
 
 import java.util.List;
 
-import app.socketiot.server.core.model.widgets.Widget;
+import app.socketiot.server.core.model.widgets.type.Widget;
 
 public class WidgetReqRes {
     public String blueprint_id;

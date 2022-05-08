@@ -22,7 +22,6 @@ const Device = () => {
       }
     });
     setWidgets(newWidgets);
-    console.log(device.id);
     wsClient.sendWrite(device.id, pin, value);
   };
 
@@ -54,7 +53,7 @@ const Device = () => {
     return () => {
       wsClient.removeEventListener("write");
       wsClient.removeEventListener("sync");
-      wsClient.onAuthenticated = () => {};
+      wsClient.removeEventListener("authsuccess");
     };
   }, []);
 
@@ -78,7 +77,7 @@ const Device = () => {
       if (wsClient.connected()) {
         wsOnOpen();
       } else {
-        wsClient.onAuthenticated = wsOnOpen;
+        wsClient.addEventListener("authsuccess", wsOnOpen);
       }
     }
     if (device.blueprint_id) {

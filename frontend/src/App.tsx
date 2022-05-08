@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import About from "./pages/About";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -13,9 +13,9 @@ import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
 import Device from "./pages/dashboard/Device";
 import { messaging, getToken, vapidKey } from "./firebase";
-import Button from "./components/widgets/Button";
 import OTA from "./pages/dashboard/OTA";
-import ThirdPartyLogin from "./pages/ThirdPartyLogin";
+import GoogleLogin from "./pages/GoogleLogin";
+import { wsClient } from "./config/WSClient";
 
 export const UserContext = React.createContext<AuthContextInterface>(
   {} as AuthContextInterface
@@ -39,6 +39,11 @@ function App() {
       setUser(JSON.parse(localUser));
     }
 
+    wsClient.addEventListener("authfailed", () => {
+      setUser({} as UserInterface);
+      localStorage.clear();
+    });
+
     setLoading(false);
 
     const development: boolean =
@@ -58,6 +63,9 @@ function App() {
             console.log(err);
           });
       });
+    return () => {
+      wsClient.removeEventListener("authfailed");
+    };
   }, []);
 
   if (loading) {
@@ -68,9 +76,10 @@ function App() {
     <UserContext.Provider value={{ user, setUser }}>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/thirdparty/login" element={<ThirdPartyLogin />} />
+          <Route path="/login/google" element={<GoogleLogin />} />
           <Route element={<ProtectedRoute isLoggedIn={Boolean(user.email)} />}>
             <Route path="/dashboard" element={<Dashboard />}>
               <Route path="settings" element={<About />} />

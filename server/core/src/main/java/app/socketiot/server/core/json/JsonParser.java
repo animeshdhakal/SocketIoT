@@ -23,6 +23,7 @@ public class JsonParser {
         try {
             return objWriter.writeValueAsString(obj);
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }

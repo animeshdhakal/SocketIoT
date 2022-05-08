@@ -1,6 +1,7 @@
 package app.socketiot.server.core.dao;
 
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import app.socketiot.server.core.model.auth.User;
@@ -11,7 +12,12 @@ public class UserDao {
     public final ConcurrentMap<String, User> users;
 
     public UserDao(ConcurrentMap<String, User> users) {
-        this.users = users;
+        if (users == null) {
+            this.users = new ConcurrentHashMap<>();
+        } else {
+            this.users = users;
+        }
+
     }
 
     public User getUser(String email) {

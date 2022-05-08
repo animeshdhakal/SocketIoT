@@ -3,8 +3,8 @@ package app.socketiot.server.core.model.blueprint;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonView;
 import app.socketiot.server.core.json.View;
-import app.socketiot.server.core.model.widgets.OnOffWidget;
-import app.socketiot.server.core.model.widgets.Widget;
+import app.socketiot.server.core.model.widgets.type.OnOffWidget;
+import app.socketiot.server.core.model.widgets.type.Widget;
 import app.socketiot.server.utils.NumberUtil;
 
 public class BluePrint {

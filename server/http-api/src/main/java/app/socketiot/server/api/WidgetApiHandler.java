@@ -13,7 +13,11 @@ import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
 import app.socketiot.server.core.model.device.Device;
-import app.socketiot.server.core.model.widgets.Widget;
+import app.socketiot.server.core.model.widgets.type.MultiValueWidget;
+import app.socketiot.server.core.model.widgets.type.SingleValueWidget;
+import app.socketiot.server.core.model.widgets.type.Widget;
+import app.socketiot.server.core.pinstore.MultiValuePinStore;
+import app.socketiot.server.core.pinstore.SingleValuePinStore;
 import io.netty.channel.ChannelHandler;
 
 @Path("/api/widget")
@@ -44,7 +48,11 @@ public class WidgetApiHandler extends JwtHttpHandler {
                         if (device.pins.get(awidget.pin) != null) {
                             device.pins.put(awidget.pin, device.pins.get(awidget.pin));
                         } else {
-                            device.pins.put(awidget.pin, "");
+                            if (awidget instanceof SingleValueWidget) {
+                                device.pins.put(awidget.pin, new SingleValuePinStore(""));
+                            } else if (awidget instanceof MultiValueWidget) {
+                                device.pins.put(awidget.pin, new MultiValuePinStore(""));
+                            }
                         }
                     }
                 }

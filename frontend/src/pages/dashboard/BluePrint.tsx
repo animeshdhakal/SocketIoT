@@ -94,6 +94,7 @@ const BluePrint = () => {
               bounds="parent"
               onStop={(e, d) => onDragEnd(e, d, index)}
               position={{ x: widget.x || 0, y: widget.y || 0 }}
+              key={widget.name + String(index)}
             >
               <div className="inline-block group">
                 <div className="hidden absolute w-full h-7 bg-gray-300 group-hover:flex rounded-b-md justify-end items-center">

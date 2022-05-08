@@ -1,7 +1,10 @@
-package app.socketiot.server.core.model.widgets;
+package app.socketiot.server.core.model.widgets.type;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+import app.socketiot.server.core.model.widgets.Button;
+import app.socketiot.server.core.model.widgets.Label;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({

@@ -9,10 +9,13 @@ import app.socketiot.server.core.http.annotations.Path;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
-import app.socketiot.server.core.json.JsonParser;
 import app.socketiot.server.core.model.blueprint.BluePrint;
 import app.socketiot.server.core.model.device.Device;
-import app.socketiot.server.core.model.widgets.Widget;
+import app.socketiot.server.core.model.widgets.type.MultiValueWidget;
+import app.socketiot.server.core.model.widgets.type.SingleValueWidget;
+import app.socketiot.server.core.model.widgets.type.Widget;
+import app.socketiot.server.core.pinstore.MultiValuePinStore;
+import app.socketiot.server.core.pinstore.SingleValuePinStore;
 import app.socketiot.server.utils.RandomUtil;
 import io.netty.channel.ChannelHandler;
 
@@ -53,7 +56,11 @@ public class DeviceApiHandler extends JwtHttpHandler {
         device.id = dbDevice == null ? 1 : dbDevice.id + 1;
 
         for (Widget widget : bluePrint.widgets) {
-            device.pins.put(widget.pin, "");
+            if (widget instanceof SingleValueWidget) {
+                device.pins.put(widget.pin, new SingleValuePinStore(""));
+            } else if (widget instanceof MultiValueWidget) {
+                device.pins.put(widget.pin, new MultiValuePinStore(""));
+            }
         }
 
         holder.deviceDao.addDevice(req.user, device);
@@ -62,7 +69,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
         Device resDevice = new Device(device.token);
         req.user.isUpdated = true;
 
-        return new HttpRes(resDevice);
+        return HttpRes.json(resDevice);
     }
 
     @POST
@@ -90,10 +97,9 @@ public class DeviceApiHandler extends JwtHttpHandler {
         WidgetReqRes widgetreq = req.getContentAs(WidgetReqRes.class);
 
         if (widgetreq != null && widgetreq.blueprint_id != null) {
-            return new HttpRes(
-                    JsonParser.toLimitedJson(holder.deviceDao.getAllDevicesByBlueprint(widgetreq.blueprint_id)));
+            return HttpRes.json(holder.deviceDao.getAllDevicesByBlueprint(widgetreq.blueprint_id));
         } else {
-            return new HttpRes(JsonParser.toLimitedJson(req.user.json.devices));
+            return HttpRes.json(req.user.json.devices);
         }
 
     }

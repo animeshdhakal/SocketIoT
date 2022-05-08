@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import app.socketiot.server.core.json.View;
 import app.socketiot.server.core.json.model.DeviceStatus;
 import app.socketiot.server.core.model.HardwareInfo;
+import app.socketiot.server.core.pinstore.PinStore;
 import app.socketiot.server.utils.NumberUtil;
 
 public class Device {
@@ -17,7 +18,7 @@ public class Device {
     public volatile String token;
 
     @JsonView(View.Private.class)
-    public ConcurrentMap<Short, String> pins;
+    public ConcurrentMap<Short, PinStore> pins;
 
     @JsonView(View.Private.class)
     public volatile HardwareInfo info;
@@ -29,7 +30,7 @@ public class Device {
 
     public volatile long lastOnline;
 
-    public Device(String name, String blueprint_id, String token, int id, ConcurrentMap<Short, String> pins) {
+    public Device(String name, String blueprint_id, String token, int id, ConcurrentMap<Short, PinStore> pins) {
         this.name = name;
         this.blueprint_id = blueprint_id;
         this.token = token;
@@ -45,9 +46,9 @@ public class Device {
 
     public boolean updatePin(String pinn, String value) {
         short pin = NumberUtil.parsePin(pinn);
-        if (pins.containsKey(pin)) {
-            pins.put(pin, value);
-            return true;
+        PinStore store = pins.get(pin);
+        if (store != null) {
+            store.updateValue(value);
         }
         return false;
     }

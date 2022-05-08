@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import app.socketiot.server.core.model.HardwareMessage;
-import app.socketiot.server.core.model.MsgType;
 import app.socketiot.server.core.model.blueprint.BluePrint;
 import app.socketiot.server.core.model.device.Device;
-import app.socketiot.server.core.model.widgets.Widget;
+import app.socketiot.server.core.model.widgets.type.Widget;
+import app.socketiot.server.core.pinstore.PinStore;
 import app.socketiot.server.core.statebase.HardwareStateBase;
 import io.netty.channel.Channel;
 
@@ -146,9 +146,17 @@ public class UserJson {
         appChannels.remove(channel);
     }
 
-    public void broadCastWriteMessage(Channel c, int deviceId, String pin, String value) {
-        sendToApps(c, new HardwareMessage(MsgType.WRITE, String.valueOf(deviceId), pin, value));
-        sendToHardware(c, deviceId, new HardwareMessage(MsgType.WRITE, pin, value));
+    public void broadCastWriteMessage(Channel c, int deviceid, short pin, PinStore store) {
+        for (Channel channel : hardChannels) {
+            if (channel != c) {
+                store.sendSync(channel, deviceid, pin);
+            }
+        }
+        for (Channel channel : appChannels) {
+            if (channel != c) {
+                store.sendSync(channel, deviceid, pin);
+            }
+        }
     }
 
     public void sendToApps(Channel c, HardwareMessage message) {

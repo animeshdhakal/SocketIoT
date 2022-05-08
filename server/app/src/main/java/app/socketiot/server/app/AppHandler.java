@@ -6,6 +6,10 @@ import app.socketiot.server.core.model.HardwareMessage;
 import app.socketiot.server.core.model.MsgType;
 import app.socketiot.server.core.model.auth.User;
 import app.socketiot.server.core.model.device.Device;
+import app.socketiot.server.core.pinstore.MultiValuePinStore;
+import app.socketiot.server.core.pinstore.PinStore;
+import app.socketiot.server.core.pinstore.SingleValuePinStore;
+import app.socketiot.server.utils.NumberUtil;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -18,6 +22,42 @@ public class AppHandler extends ChannelInboundHandlerAdapter {
         this.user = user;
     }
 
+    public void handleSync(ChannelHandlerContext ctx, int deviceID) {
+        Device device = user.json.getDevice(deviceID);
+        if (device == null) {
+            return;
+        }
+        for (Short key : device.pins.keySet()) {
+            PinStore store = device.pins.get(key);
+            store.sendSync(ctx.channel(), deviceID, key);
+        }
+    }
+
+    public void handleWrite(ChannelHandlerContext ctx, HardwareMessage msg) {
+        if (msg.body.length > 2) {
+            short pin = Short.valueOf(msg.body[0]);
+
+            Device device = user.json.getDevice(pin);
+            if (device == null) {
+                return;
+            }
+
+            PinStore store = device.pins.get(Short.valueOf(msg.body[1]));
+
+            if (store instanceof MultiValuePinStore) {
+                for (int i = 2; i < msg.body.length; i++) {
+                    store.updateValue(msg.body[i]);
+                }
+            } else if (store instanceof SingleValuePinStore) {
+                store.updateValue(msg.body[2]);
+            }
+
+            user.json.broadCastWriteMessage(ctx.channel(), device.id, pin, store);
+
+            user.isUpdated = true;
+        }
+    }
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof HardwareMessage) {
@@ -25,34 +65,11 @@ public class AppHandler extends ChannelInboundHandlerAdapter {
 
             switch (message.type) {
                 case MsgType.WRITE:
-                    if (message.body.length > 2) {
-                        int deviceId = Integer.parseInt(message.body[0]);
-                        Device device = user.json.getDevice(deviceId);
-                        if (device != null) {
-                            device.updatePin(message.body[1], message.body[2]);
-                            user.json.sendToHardware(ctx.channel(), deviceId,
-                                    new HardwareMessage(MsgType.WRITE, message.body[1], message.body[2]));
-                            user.json.sendToApps(ctx.channel(), message);
-                            user.isUpdated = true;
-                        }
-                    }
+                    handleWrite(ctx, message);
                     break;
                 case MsgType.SYNC:
-                    if (message.body.length > 0) {
-                        int deviceId = Integer.parseInt(message.body[0]);
-                        Device device = user.json.getDevice(deviceId);
-                        if (device != null) {
-                            if (device.pins.size() == 0) {
-                                ctx.writeAndFlush(message);
-                            } else {
-                                for (short key : device.pins.keySet()) {
-                                    ctx.writeAndFlush(new HardwareMessage(MsgType.WRITE, message.body[0],
-                                            Integer.toString(key),
-                                            device.pins.get(key)));
-                                }
-                            }
-                        }
-                    }
+                    handleSync(ctx, NumberUtil.parsePin(message.body[0]));
+                    break;
                 case MsgType.PING:
                     break;
             }
