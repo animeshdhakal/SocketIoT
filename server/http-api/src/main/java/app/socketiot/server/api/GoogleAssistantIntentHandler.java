@@ -149,7 +149,7 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
 
                     ec.status = "SUCCESS";
                     ec.states = new QueryDevice();
-                    ec.states.online = d.status == DeviceStatus.Online;
+                    ec.states.online = d.status.equals(DeviceStatus.Online);
 
                     for (Execution execution : command.execution) {
                         if (execution.command.equals("action.devices.commands.OnOff")) {

@@ -54,7 +54,7 @@ public class GoogleAssistantHandler extends BaseHttpHandler {
             if (!holder.jwtUtil.verifyToken(refresh_token)) {
                 return HttpRes.badRequest("{\"error\": \"invalid_grant\"}");
             }
-            token = refresh_token;
+            token = holder.jwtUtil.createToken(holder.jwtUtil.getEmail(refresh_token), 1 * 12 * 30 * 24 * 60 * 60);
         } else {
             return HttpRes.badRequest("Invalid grant_type");
         }

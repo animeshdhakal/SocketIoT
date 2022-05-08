@@ -25,7 +25,7 @@ public class MultiValuePinStore extends PinStore {
 
     @Override
     public void sendSync(Channel channel, int deviceID, short pin) {
-        if (values.size() == 0) {
+        if (values.size() == 0 || channel == null) {
             return;
         }
 

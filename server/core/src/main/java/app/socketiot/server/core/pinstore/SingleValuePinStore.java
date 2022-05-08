@@ -21,6 +21,9 @@ public class SingleValuePinStore extends PinStore {
 
     @Override
     public void sendSync(Channel channel, int deviceID, short pin) {
+        if (channel == null) {
+            return;
+        }
         HardwareStateBase base = channel.pipeline().get(HardwareStateBase.class);
         if (base == null) {
             channel.writeAndFlush(
