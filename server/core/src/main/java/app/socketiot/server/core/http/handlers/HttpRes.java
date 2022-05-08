@@ -4,6 +4,7 @@ import app.socketiot.server.core.json.JsonParser;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.CharsetUtil;
@@ -65,7 +66,9 @@ public class HttpRes extends DefaultFullHttpResponse {
     }
 
     public void addRequiredHeaders() {
-        headers().set(HttpHeaderNames.CONTENT_LENGTH, content().readableBytes());
+        headers()
+            .set(HttpHeaderNames.CONTENT_LENGTH, content().readableBytes())
+            .set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
     }
 
     public void setHeader(String key, String value) {
