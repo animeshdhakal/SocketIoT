@@ -28,8 +28,7 @@ jobs:
           cd frontend/build 
           ls -p | grep -v / | grep -v ^index.html | xargs -I{} mv {} static/ 
           cd ../../ 
-          mv frontend/build/static/* frontend/build 
-          mkdir server/http-api/src/main/resources/static 
+          mv frontend/build/static/* frontend/build  
           mv frontend/build/* server/http-api/src/main/resources/static 
           mvn package
 
