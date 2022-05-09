@@ -16,4 +16,8 @@ public class StatusMsg extends HttpRes {
     public static StatusMsg badRequest(String message) {
         return new StatusMsg(true, message, HttpResponseStatus.BAD_REQUEST);
     }
+
+    public static StatusMsg internalServerError(String message) {
+        return new StatusMsg(true, message, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+    }
 }

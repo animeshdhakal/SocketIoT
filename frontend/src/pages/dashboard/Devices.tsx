@@ -27,6 +27,7 @@ export const Devices = () => {
         newDevices.forEach((device) => {
           if (device.id === parseInt(deviceID)) {
             device.status = status;
+            device.lastOnline = new Date().valueOf().toLocaleString();
           }
         });
         return newDevices;

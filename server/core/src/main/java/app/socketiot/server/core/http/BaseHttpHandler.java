@@ -9,6 +9,7 @@ import app.socketiot.server.core.http.annotations.POST;
 import app.socketiot.server.core.http.annotations.Path;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
+import app.socketiot.server.core.http.handlers.StatusMsg;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -86,6 +87,7 @@ public class BaseHttpHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         ExceptionHandler.handleException(ctx, cause);
+        ctx.writeAndFlush(StatusMsg.internalServerError("Server Error" + cause.getMessage()));
     }
 
 }
