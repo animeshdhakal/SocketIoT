@@ -27,7 +27,6 @@ export const Devices = () => {
         newDevices.forEach((device) => {
           if (device.id === parseInt(deviceID)) {
             device.status = status;
-            device.lastOnline = new Date().valueOf().toLocaleString();
           }
         });
         return newDevices;
@@ -109,7 +108,7 @@ export const Devices = () => {
                         {index + 1}
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">
+                        <div className="text-sm text-gray-900 underline">
                           <Link
                             to="/dashboard/device"
                             state={{
@@ -141,7 +140,9 @@ export const Devices = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900 flex items-center">
-                          {new Date(device.lastOnline).toLocaleString() || "-"}
+                          {device.lastOnline === 0
+                            ? "-"
+                            : new Date(device.lastOnline).toLocaleString()}
                         </div>
                       </td>
                       <td className="px-6 py-4">

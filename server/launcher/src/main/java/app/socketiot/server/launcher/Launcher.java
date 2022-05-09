@@ -22,9 +22,13 @@ public class Launcher {
 
         Security.addProvider(new BouncyCastleProvider());
 
-        String logsFolder = argParser.getArg("-logsFolder");
+        String dataFolder = argParser.getArg("-dataFolder");
 
-        System.setProperty("logsFolder", logsFolder == null ? "./logs" : logsFolder);
+        if (dataFolder == null) {
+            dataFolder = "SocketIoT";
+        }
+
+        System.setProperty("logsFolder", dataFolder.concat("/logs"));
 
         ServerProperties props = new ServerProperties();
 
@@ -34,7 +38,7 @@ public class Launcher {
                 props.getProperty("async.logger.ring.buffer.size", "2048"));
         LoggerUtil.changeLogLevel(logLevel);
 
-        Holder holder = new Holder(argParser, props);
+        Holder holder = new Holder(argParser, props, dataFolder);
 
         BaseServer[] servers = new BaseServer[] {
                 new HttpApiServer(holder),

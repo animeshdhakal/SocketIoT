@@ -3,6 +3,9 @@ package app.socketiot.server.core.http.handlers;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import app.socketiot.server.core.json.JsonParser;
 import app.socketiot.server.core.model.auth.User;
 import io.netty.channel.ChannelHandlerContext;
@@ -64,6 +67,22 @@ public class HttpReq {
         List<String> list = querydecoder.parameters().get(key);
         if (list != null) {
             return list.get(0);
+        }
+        return null;
+    }
+
+    public JsonNode getJsonField(String key) {
+        try {
+            return JsonParser.mapper.readValue(getContent(), ObjectNode.class).get(key);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public String getJsonFieldAsString(String key) {
+        JsonNode node = getJsonField(key);
+        if (node != null && !node.isNull()) {
+            return node.asText();
         }
         return null;
     }

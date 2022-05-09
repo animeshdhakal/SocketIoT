@@ -1,26 +1,28 @@
 package app.socketiot.server.core.cli;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class ArgParser {
-
-    List<String> vals = null;
+    String args[] = null;
 
     public ArgParser(String[] args) {
-        vals = Arrays.asList(args);
+        this.args = args;
     }
 
     public String getArg(String key) {
-        int index = vals.indexOf(key);
-        if (index == -1 && index == vals.size() - 1) {
-            return null;
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals(key)) {
+                return args[i + 1];
+            }
         }
-        return vals.get(index + 1);
+        return null;
     }
 
     public boolean hasArg(String key) {
-        return vals.contains(key);
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals(key)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public int getInt(String key, int defaultValue) {

@@ -9,6 +9,7 @@ import app.socketiot.server.core.cli.ArgParser;
 import app.socketiot.server.core.cli.properties.ServerProperties;
 import app.socketiot.server.core.dao.BluePrintDao;
 import app.socketiot.server.core.dao.DeviceDao;
+import app.socketiot.server.core.dao.TokenDao;
 import app.socketiot.server.core.dao.UserDao;
 import app.socketiot.server.core.db.DB;
 import app.socketiot.server.core.db.dao.UserDBDao;
@@ -44,8 +45,10 @@ public class Holder {
     public final FCMNotification notification;
     public final boolean isUnpacked;
     public final String jarPath;
+    public final String dataFolder;
+    public final TokenDao tokenDao;
 
-    public Holder(ArgParser args, ServerProperties props) {
+    public Holder(ArgParser args, ServerProperties props, String dataFolder) {
         this.args = args;
         this.props = props;
         int workerThreads = props.getIntProperty("server.worker.threads",
@@ -81,6 +84,8 @@ public class Holder {
         this.notification = new FCMNotification(props, httpClient);
         this.jarPath = JarUtil.getJarPath();
         this.isUnpacked = JarUtil.unpackStaticFiles(jarPath, "static");
+        this.dataFolder = dataFolder;
+        this.tokenDao = new TokenDao(dataFolder);
     }
 
     public void close() {
@@ -90,5 +95,6 @@ public class Holder {
         if (workerGroup != null) {
             workerGroup.shutdownGracefully();
         }
+        tokenDao.close();
     }
 }

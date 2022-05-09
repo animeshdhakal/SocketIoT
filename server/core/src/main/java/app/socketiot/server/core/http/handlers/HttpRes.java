@@ -65,10 +65,16 @@ public class HttpRes extends DefaultFullHttpResponse {
         return new HttpRes(HttpResponseStatus.OK, obj);
     }
 
+    public static HttpRes redirect(String uri) {
+        HttpRes res = new HttpRes(HttpResponseStatus.MOVED_PERMANENTLY);
+        res.headers().set(HttpHeaderNames.LOCATION, uri);
+        return res;
+    }
+
     public void addRequiredHeaders() {
         headers()
-            .set(HttpHeaderNames.CONTENT_LENGTH, content().readableBytes())
-            .set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+                .set(HttpHeaderNames.CONTENT_LENGTH, content().readableBytes())
+                .set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
     }
 
     public void setHeader(String key, String value) {

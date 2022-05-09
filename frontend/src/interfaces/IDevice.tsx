@@ -4,6 +4,6 @@ export interface DeviceInterface {
   blueprint_id: string;
   status: string;
   lastIP: string;
-  lastOnline: string;
+  lastOnline: number;
   id: number;
 }

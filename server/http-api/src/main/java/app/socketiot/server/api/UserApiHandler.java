@@ -1,27 +1,48 @@
 package app.socketiot.server.api;
 
 import app.socketiot.server.core.http.BaseHttpHandler;
+import java.util.concurrent.TimeUnit;
 import app.socketiot.server.api.model.JwtResponse;
 import app.socketiot.server.core.Holder;
+import app.socketiot.server.core.PlaceHolders;
+import app.socketiot.server.core.dao.TokenDao;
 import app.socketiot.server.core.dao.UserDao;
+import app.socketiot.server.core.http.annotations.GET;
 import app.socketiot.server.core.http.annotations.POST;
 import app.socketiot.server.core.http.annotations.Path;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
+import app.socketiot.server.core.mail.Mail;
 import app.socketiot.server.core.model.auth.User;
 import app.socketiot.server.core.model.auth.UserJson;
+import app.socketiot.server.core.model.token.VerifyUserToken;
+import app.socketiot.server.utils.FileReadUtil;
+import app.socketiot.server.utils.RandomUtil;
 import app.socketiot.server.utils.Sha256Util;
 import io.netty.channel.ChannelHandler;
 
 @Path("/api/user")
 @ChannelHandler.Sharable
 public class UserApiHandler extends BaseHttpHandler {
-    private UserDao userDao;
+    private final UserDao userDao;
+    private final TokenDao tokenDao;
+    private final Mail mail;
+    private final String verifyUserMailBody;
+    private final String baseUrl;
 
     public UserApiHandler(Holder holder) {
         super(holder);
         this.userDao = holder.userDao;
+        this.tokenDao = holder.tokenDao;
+        this.mail = holder.mail;
+        this.verifyUserMailBody = FileReadUtil.readVerifyUserMailBody();
+        String host = holder.props.getProperty("server.host");
+        if (host == null) {
+            host = "localhost";
+        }
+        String protocol = holder.args.hasArg("-ssl") ? "https" : "http";
+        this.baseUrl = protocol + "://" + host;
     }
 
     @POST
@@ -33,16 +54,46 @@ public class UserApiHandler extends BaseHttpHandler {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        if (userDao.getUser(user.email) != null) {
+        if (userDao.getUser(user.email) != null || tokenDao.ifUserExists(user.email)) {
             return StatusMsg.badRequest("User already exists");
         }
 
         user.password = Sha256Util.createHash(user.password, user.email);
-        user.json = new UserJson();
 
-        userDao.addUser(user);
+        VerifyUserToken tk = new VerifyUserToken(user.email, user.password, TimeUnit.DAYS.toMillis(30));
+        String token = RandomUtil.unique() + RandomUtil.unique();
+        tokenDao.addToken(token, tk);
 
-        return StatusMsg.ok("User Registered Successfully");
+        mail.sendHtml(user.email, "Verify Email",
+                verifyUserMailBody.replace(PlaceHolders.URL, baseUrl + "/api/user/verify?token=" + token));
+
+        return StatusMsg.ok("Email has been sent to verify you account");
+    }
+
+    @GET
+    @Path("/verify")
+    public HttpRes verify(HttpReq req) {
+        String token = req.getQueryParam("token");
+
+        if (token == null) {
+            return HttpRes.badRequest("Incomplete Fields");
+        }
+        VerifyUserToken tk = tokenDao.getVerifyUserToken(token);
+
+        if (tk == null) {
+            return HttpRes.badRequest("Invalid Token");
+        }
+
+        if (tk.isExpired(System.currentTimeMillis())) {
+            tokenDao.removeToken(token);
+            return HttpRes.badRequest("Please Reregister your account");
+        }
+
+        userDao.addUser(new User(tk.email, tk.password, new UserJson()));
+
+        tokenDao.removeToken(token);
+
+        return HttpRes.redirect("/login");
     }
 
     @POST
@@ -55,6 +106,10 @@ public class UserApiHandler extends BaseHttpHandler {
         }
 
         User dbUser = userDao.getUser(user.email);
+
+        if (tokenDao.ifUserExists(user.email)) {
+            return StatusMsg.badRequest("Please Verify Your Account");
+        }
 
         if (dbUser == null) {
             return StatusMsg.badRequest("User does not exist");

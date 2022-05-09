@@ -2,8 +2,8 @@
 
 
 CREATE TABLE IF NOT EXISTS users (
-    sn SERIAL PRIMARY KEY,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    json text
+    email text NOT NULL,
+    password text NOT NULL,
+    json text,
+    PRIMARY KEY (email)
 );

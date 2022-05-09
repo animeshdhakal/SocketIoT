@@ -18,5 +18,4 @@ public class RandomUtil {
         return base64Encoder.encodeToString(bytes);
     }
 
-    
 }

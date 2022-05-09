@@ -87,6 +87,7 @@ public class HardwareHandler extends HardwareStateBase {
             userDevice.user.json.sendToApps(ctx.channel(),
                     new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(userDevice.device.id),
                             DeviceStatus.Offline.toString()));
+            userDevice.user.isUpdated = true;
         }
     }
 
