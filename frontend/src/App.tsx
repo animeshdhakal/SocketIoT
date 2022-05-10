@@ -16,6 +16,7 @@ import { messaging, getToken, vapidKey } from "./firebase";
 import OTA from "./pages/dashboard/OTA";
 import GoogleLogin from "./pages/GoogleLogin";
 import { wsClient } from "./config/WSClient";
+import ResetPassword from "./pages/ResetPassword";
 
 export const UserContext = React.createContext<AuthContextInterface>(
   {} as AuthContextInterface
@@ -78,6 +79,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/reset" element={<ResetPassword />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login/google" element={<GoogleLogin />} />
           <Route element={<ProtectedRoute isLoggedIn={Boolean(user.email)} />}>

@@ -47,12 +47,14 @@ const Register = () => {
         setLoading(true);
         const res = await axios.post("/api/user/register", { email, password });
         setRegisterSuccess(res.data.message);
+        setRegisterError("");
       } catch (e) {
         const error = e as AxiosError;
         if (error.response?.data.message) {
           setRegisterError(error.response.data.message);
         } else {
           setRegisterError("Login Failed");
+          setRegisterSuccess("");
         }
       }
       setLoading(false);

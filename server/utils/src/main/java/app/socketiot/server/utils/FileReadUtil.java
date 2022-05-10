@@ -36,4 +36,8 @@ public class FileReadUtil {
     public static String readVerifyUserMailBody() {
         return readFileAsString("static/verify-user.html");
     }
+
+    public static String readResetPasswordMailBody() {
+        return readFileAsString("static/reset-password.html");
+    }
 }

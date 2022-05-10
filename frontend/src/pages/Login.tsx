@@ -144,6 +144,9 @@ const Login = () => {
         >
           Login
         </button>
+        <Link className="text-blue-800 underline mb-2 text-sm" to="/reset">
+          Forgot Password ?
+        </Link>
         <Link className="text-blue-800 underline mb-6" to="/register">
           Register a Account
         </Link>

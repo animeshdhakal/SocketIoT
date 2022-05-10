@@ -4,6 +4,8 @@ import java.io.Closeable;
 import java.nio.file.Paths;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import app.socketiot.server.core.model.token.ResetToken;
 import app.socketiot.server.core.model.token.TokenBase;
 import app.socketiot.server.core.model.token.VerifyUserToken;
 import app.socketiot.server.utils.SerializationUtil;
@@ -49,9 +51,25 @@ public class TokenDao implements Closeable {
         return null;
     }
 
-    public boolean ifUserExists(String email) {
+    public ResetToken getResetToken(String token) {
+        TokenBase tk = getToken(token);
+        if (tk instanceof ResetToken) {
+            return (ResetToken) tk;
+        }
+        return null;
+    }
+
+    public boolean ifVerifyTokenExists(String email) {
         TokenBase tk = tokens.values().stream().filter(t -> t.email.equals(email)).findFirst().orElse(null);
         if (tk != null && tk instanceof VerifyUserToken) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean ifResetTokenExists(String email) {
+        TokenBase tk = tokens.values().stream().filter(t -> t.email.equals(email)).findFirst().orElse(null);
+        if (tk != null && tk instanceof ResetToken) {
             return true;
         }
         return false;

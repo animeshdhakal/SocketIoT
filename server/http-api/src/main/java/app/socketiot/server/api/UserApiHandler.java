@@ -16,10 +16,12 @@ import app.socketiot.server.core.http.handlers.StatusMsg;
 import app.socketiot.server.core.mail.Mail;
 import app.socketiot.server.core.model.auth.User;
 import app.socketiot.server.core.model.auth.UserJson;
+import app.socketiot.server.core.model.token.ResetToken;
 import app.socketiot.server.core.model.token.VerifyUserToken;
 import app.socketiot.server.utils.FileReadUtil;
 import app.socketiot.server.utils.RandomUtil;
 import app.socketiot.server.utils.Sha256Util;
+import app.socketiot.server.utils.ValidatorUtil;
 import io.netty.channel.ChannelHandler;
 
 @Path("/api/user")
@@ -29,6 +31,7 @@ public class UserApiHandler extends BaseHttpHandler {
     private final TokenDao tokenDao;
     private final Mail mail;
     private final String verifyUserMailBody;
+    private final String resetPasswordMailBody;
     private final String baseUrl;
 
     public UserApiHandler(Holder holder) {
@@ -37,6 +40,8 @@ public class UserApiHandler extends BaseHttpHandler {
         this.tokenDao = holder.tokenDao;
         this.mail = holder.mail;
         this.verifyUserMailBody = FileReadUtil.readVerifyUserMailBody();
+        this.resetPasswordMailBody = FileReadUtil.readResetPasswordMailBody();
+
         String host = holder.props.getProperty("server.host");
         if (host == null) {
             host = "localhost";
@@ -54,7 +59,11 @@ public class UserApiHandler extends BaseHttpHandler {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        if (userDao.getUser(user.email) != null || tokenDao.ifUserExists(user.email)) {
+        if (!ValidatorUtil.validateEmail(user.email)) {
+            return StatusMsg.badRequest("Invalid Email");
+        }
+
+        if (userDao.getUser(user.email) != null || tokenDao.ifVerifyTokenExists(user.email)) {
             return StatusMsg.badRequest("User already exists");
         }
 
@@ -107,7 +116,7 @@ public class UserApiHandler extends BaseHttpHandler {
 
         User dbUser = userDao.getUser(user.email);
 
-        if (tokenDao.ifUserExists(user.email)) {
+        if (tokenDao.ifVerifyTokenExists(user.email)) {
             return StatusMsg.badRequest("Please Verify Your Account");
         }
 
@@ -124,9 +133,70 @@ public class UserApiHandler extends BaseHttpHandler {
         return HttpRes.json(new JwtResponse(token));
     }
 
+    public HttpRes handleResetFirstStep(String email) {
+        if (userDao.getUser(email) == null) {
+            return StatusMsg.badRequest("User does not exist");
+        }
+        if (tokenDao.ifVerifyTokenExists(email)) {
+            return StatusMsg.badRequest("Please Verify Your Account");
+        }
+
+        if (tokenDao.ifResetTokenExists(email)) {
+            tokenDao.cleanTokens();
+            return StatusMsg.badRequest("Please wait before requesting another reset");
+        }
+
+        String token = RandomUtil.unique() + RandomUtil.unique();
+        tokenDao.addToken(token, new ResetToken(email, TimeUnit.HOURS.toMillis(1)));
+
+        mail.sendHtml(email, "Reset Password",
+                resetPasswordMailBody.replace(PlaceHolders.URL, baseUrl + "/reset?token=" + token));
+
+        return StatusMsg.ok("Email has been sent to reset your password");
+    }
+
+    public HttpRes handleResetSecondStep(String token, String password) {
+        ResetToken tk = tokenDao.getResetToken(token);
+
+        if (tk == null) {
+            return StatusMsg.badRequest("Invalid Token");
+        }
+
+        if (tk.isExpired(System.currentTimeMillis())) {
+            tokenDao.removeToken(token);
+            return StatusMsg.badRequest("Token Expired");
+        }
+
+        User user = userDao.getUser(tk.email);
+        if (user == null) {
+            return StatusMsg.badRequest("User does not exist");
+        }
+
+        user.password = Sha256Util.createHash(password, user.email);
+
+        userDao.updateUser(user);
+        tokenDao.removeToken(token);
+
+        // TODO: Invalidate tokens after password change and make the tokens more secure
+
+        return StatusMsg.ok("Password has been reset");
+    }
+
     @POST
-    @Path("/token")
-    public HttpRes gettoken(HttpReq req) {
-        return new HttpRes("token");
+    @Path("/reset")
+    public HttpRes resetPassword(HttpReq req) {
+        String email = req.getJsonFieldAsString("email");
+        String password = req.getJsonFieldAsString("password");
+        String token = req.getJsonFieldAsString("token");
+
+        if (email != null) {
+            return handleResetFirstStep(email);
+        }
+
+        if (token != null && password != null) {
+            return handleResetSecondStep(token, password);
+        }
+
+        return StatusMsg.badRequest("Incomplete Fields");
     }
 }
