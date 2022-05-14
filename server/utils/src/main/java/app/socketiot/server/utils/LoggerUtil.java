@@ -10,4 +10,10 @@ public class LoggerUtil {
         Configurator.setAllLevels(LogManager.getRootLogger().getName(), newLevel);
     }
 
+    public static void init(String logLevel, String bufferSize) {
+        System.setProperty("log4j2.contextSelector", "org.apache.logging.log4j.core.async.AsyncLoggerContextSelector");
+        System.setProperty("AsyncLogger.RingBufferSize", bufferSize);
+        changeLogLevel(logLevel);
+    }
+
 }

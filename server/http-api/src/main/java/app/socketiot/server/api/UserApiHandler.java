@@ -34,6 +34,9 @@ public class UserApiHandler extends BaseHttpHandler {
     private final String resetPasswordMailBody;
     private final String baseUrl;
 
+    long access_token_expiry_time = 1000 * 60; // 1 minute
+    long refresh_token_expiry_time = 1000 * 60 * 60 * 24 * 30 * 12; // 1 Year
+
     public UserApiHandler(Holder holder) {
         super(holder);
         this.userDao = holder.userDao;
@@ -70,7 +73,7 @@ public class UserApiHandler extends BaseHttpHandler {
         user.password = Sha256Util.createHash(user.password, user.email);
 
         VerifyUserToken tk = new VerifyUserToken(user.email, user.password, TimeUnit.DAYS.toMillis(30));
-        String token = RandomUtil.unique() + RandomUtil.unique();
+        String token = RandomUtil.unique(24) + RandomUtil.unique(24);
         tokenDao.addToken(token, tk);
 
         mail.sendHtml(user.email, "Verify Email",
@@ -98,7 +101,7 @@ public class UserApiHandler extends BaseHttpHandler {
             return HttpRes.badRequest("Please Reregister your account");
         }
 
-        userDao.addUser(new User(tk.email, tk.password, new UserJson()));
+        userDao.addUser(new User(tk.email, tk.password, null, new UserJson()));
 
         tokenDao.removeToken(token);
 
@@ -128,9 +131,18 @@ public class UserApiHandler extends BaseHttpHandler {
             return StatusMsg.badRequest("Incorrect Password");
         }
 
-        String token = holder.jwtUtil.createToken(dbUser.email, 1 * 12 * 30 * 24 * 60 * 60);
+        try {
+            if (dbUser.token == null || holder.jwtUtil.isTokenExpired(dbUser.token)) {
+                dbUser.token = holder.jwtUtil.createToken(dbUser.email, refresh_token_expiry_time);
+                dbUser.updated();
+            }
+        } catch (IllegalArgumentException e) {
+            return StatusMsg.badRequest("Invalid Token");
+        }
 
-        return HttpRes.json(new JwtResponse(token));
+        String access_token = holder.jwtUtil.createToken(dbUser.email, access_token_expiry_time);
+
+        return HttpRes.json(new JwtResponse(access_token, dbUser.token, access_token_expiry_time));
     }
 
     public HttpRes handleResetFirstStep(String email) {
@@ -146,7 +158,7 @@ public class UserApiHandler extends BaseHttpHandler {
             return StatusMsg.badRequest("Please wait before requesting another reset");
         }
 
-        String token = RandomUtil.unique() + RandomUtil.unique();
+        String token = RandomUtil.unique(24) + RandomUtil.unique(24);
         tokenDao.addToken(token, new ResetToken(email, TimeUnit.HOURS.toMillis(1)));
 
         mail.sendHtml(email, "Reset Password",
@@ -174,10 +186,10 @@ public class UserApiHandler extends BaseHttpHandler {
 
         user.password = Sha256Util.createHash(password, user.email);
 
+        user.token = holder.jwtUtil.createToken(user.email, refresh_token_expiry_time);
+
         userDao.updateUser(user);
         tokenDao.removeToken(token);
-
-        // TODO: Invalidate tokens after password change and make the tokens more secure
 
         return StatusMsg.ok("Password has been reset");
     }
@@ -199,4 +211,29 @@ public class UserApiHandler extends BaseHttpHandler {
 
         return StatusMsg.badRequest("Incomplete Fields");
     }
+
+    @POST
+    @Path("/refresh")
+    public HttpRes refreshToken(HttpReq req) {
+        String refresh_token = req.getJsonFieldAsString("refresh_token");
+
+        if (refresh_token == null) {
+            return StatusMsg.badRequest("Incomplete Fields");
+        }
+
+        if (!holder.jwtUtil.verifyToken(refresh_token)) {
+            return StatusMsg.badRequest("Invalid Token");
+        }
+
+        String email = holder.jwtUtil.getEmail(refresh_token);
+        User user = userDao.getUser(email);
+
+        if (user == null || !user.token.equals(refresh_token)) {
+            return StatusMsg.badRequest("Invalid Token");
+        }
+
+        return HttpRes.json(new JwtResponse(holder.jwtUtil.createToken(user.email, access_token_expiry_time),
+                user.token, access_token_expiry_time));
+    }
+
 }

@@ -21,7 +21,7 @@ public class JwtHttpHandler extends BaseHttpHandler {
             if (holder.jwtUtil.verifyToken(authtoken)) {
                 String email = holder.jwtUtil.getEmail(authtoken);
                 User user = holder.userDao.getUser(email);
-                if (user != null) {
+                if (user != null && !user.token.equals(authtoken)) {
                     req.setUser(user);
                     super.completeHttp(method, req);
                     return;

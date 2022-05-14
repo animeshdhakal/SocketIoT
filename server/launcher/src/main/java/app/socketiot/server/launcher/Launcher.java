@@ -32,11 +32,8 @@ public class Launcher {
 
         ServerProperties props = new ServerProperties();
 
-        String logLevel = props.getProperty("server.log.level", "info");
-        System.setProperty("log4j2.contextSelector", "org.apache.logging.log4j.core.async.AsyncLoggerContextSelector");
-        System.setProperty("AsyncLogger.RingBufferSize",
+        LoggerUtil.init(props.getProperty("server.log.level", "info"),
                 props.getProperty("async.logger.ring.buffer.size", "2048"));
-        LoggerUtil.changeLogLevel(logLevel);
 
         Holder holder = new Holder(argParser, props, dataFolder);
 

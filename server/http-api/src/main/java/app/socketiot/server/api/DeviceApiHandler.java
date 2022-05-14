@@ -51,7 +51,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Invalid Blueprint");
         }
 
-        device.token = RandomUtil.unique();
+        device.token = RandomUtil.unique(24);
         device.pins = new ConcurrentHashMap<>();
         device.id = dbDevice == null ? 1 : dbDevice.id + 1;
 

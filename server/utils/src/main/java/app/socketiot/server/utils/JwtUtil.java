@@ -13,31 +13,29 @@ public class JwtUtil {
 
     public JwtUtil(String secret) {
         if (secret == null) {
-            secret = RandomUtil.unique();
+            secret = RandomUtil.unique(24);
         }
         key = Keys.hmacShaKeyFor(Sha256Util.createHash(secret, secret).getBytes(StandardCharsets.UTF_8));
     }
 
-    public String createToken(String email, long seconds) {
+    public String createToken(String email, long miliseconds) {
         return Jwts.builder()
                 .setSubject(email)
-                .setExpiration(seconds != 0 ? new Date(System.currentTimeMillis() + seconds * 1000) : null)
+                .setExpiration(new Date(System.currentTimeMillis() + miliseconds))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
-    }
-
-    public String createToken(long seconds) {
-        return createToken(null, seconds);
-    }
-
-    public String createToken() {
-        return createToken(0);
     }
 
     public String getEmail(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build().parseClaimsJws(token).getBody().getSubject();
+    }
+
+    public boolean isTokenExpired(String token) throws IllegalArgumentException {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build().parseClaimsJws(token).getBody().getExpiration().before(new Date());
     }
 
     public boolean verifyToken(String token) {

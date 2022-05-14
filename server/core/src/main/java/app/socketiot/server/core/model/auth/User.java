@@ -7,6 +7,8 @@ public class User {
 
     public String password;
 
+    public String token;
+
     public UserJson json;
 
     @JsonIgnore
@@ -15,10 +17,15 @@ public class User {
     public User() {
     }
 
-    public User(String email, String password, UserJson json) {
+    public User(String email, String password, String token, UserJson json) {
         this.email = email;
         this.password = password;
         this.json = json;
+        this.token = token;
+    }
+
+    public void updated() {
+        isUpdated = true;
     }
 
 }
