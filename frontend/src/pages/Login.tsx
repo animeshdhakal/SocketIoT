@@ -47,9 +47,13 @@ const Login = () => {
         const res = await axios.post("/api/user/login", { email, password });
         localStorage.setItem(
           "user",
-          JSON.stringify({ email, token: res.data.token })
+          JSON.stringify({
+            ...res.data,
+            email,
+            expires_in: res.data.expires_in + Date.now(),
+          })
         );
-        setUser({ email, token: res.data.token });
+        setUser({ email });
       } catch (e) {
         const error = e as AxiosError;
         if (error.response?.data.message) {

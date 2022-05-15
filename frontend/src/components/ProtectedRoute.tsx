@@ -5,7 +5,8 @@ import { wsClient } from "../config/WSClient";
 const ProtectedRoute: React.FC<{ isLoggedIn: boolean }> = ({ isLoggedIn }) => {
   if (isLoggedIn) {
     wsClient.init({
-      token: JSON.parse(localStorage.getItem("user") || "{}").token as any,
+      token: JSON.parse(localStorage.getItem("user") || "{}")
+        .access_token as any,
       uri: window.location.origin.replace("http", "ws") + "/appws",
     });
   }

@@ -17,16 +17,30 @@ import OTA from "./pages/dashboard/OTA";
 import GoogleLogin from "./pages/GoogleLogin";
 import { wsClient } from "./config/WSClient";
 import ResetPassword from "./pages/ResetPassword";
+import axiosInstance from "./config/axiosInstance";
 
 export const UserContext = React.createContext<AuthContextInterface>(
   {} as AuthContextInterface
 );
 
-axios.interceptors.request.use((config) => {
+axios.interceptors.request.use(async (config) => {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  if (user.token && config.headers) {
-    config.headers.Authorization = `Bearer ${user.token}`;
+
+  if (user.expires_in < Date.now()) {
+    const res = await axiosInstance.post("/api/user/refresh", {
+      refresh_token: user.refresh_token,
+    });
+
+    user.access_token = res.data.access_token;
+    user.expires_in = res.data.expires_in + Date.now();
+
+    localStorage.setItem("user", JSON.stringify(user));
   }
+
+  if (user.access_token && config.headers) {
+    config.headers.Authorization = `Bearer ${user.access_token}`;
+  }
+
   return config;
 });
 
@@ -35,17 +49,39 @@ function App() {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const localUser = localStorage.getItem("user");
+    const localUser = JSON.parse(localStorage.getItem("user") || "{}");
+
     if (localUser) {
-      setUser(JSON.parse(localUser));
+      if (localUser.expires_in < Date.now()) {
+        axios
+          .post("/api/user/refresh", { refresh_token: localUser.refresh_token })
+          .then((res) => {
+            localStorage.setItem(
+              "user",
+              JSON.stringify({
+                ...localUser,
+                expires_in: res.data.expires_in + Date.now(),
+                access_token: res.data.access_token,
+              })
+            );
+            setLoading(false);
+          })
+          .catch((err) => {
+            setUser({} as UserInterface);
+            setLoading(false);
+          });
+      }
+      setUser(localUser);
+    }
+
+    if (!localUser || Date.now() < localUser.expires_in) {
+      setLoading(false);
     }
 
     wsClient.addEventListener("authfailed", () => {
       setUser({} as UserInterface);
       localStorage.clear();
     });
-
-    setLoading(false);
 
     const development: boolean =
       !process.env.NODE_ENV || process.env.NODE_ENV === "development";

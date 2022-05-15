@@ -2,7 +2,6 @@ import React from "react";
 
 export interface UserInterface {
   email: string;
-  token: string;
 }
 
 export interface AuthContextInterface {
