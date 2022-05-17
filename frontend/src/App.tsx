@@ -51,30 +51,28 @@ function App() {
   useEffect(() => {
     const localUser = JSON.parse(localStorage.getItem("user") || "{}");
 
-    if (localUser) {
-      if (localUser.expires_in < Date.now()) {
-        axios
-          .post("/api/user/refresh", { refresh_token: localUser.refresh_token })
-          .then((res) => {
-            localStorage.setItem(
-              "user",
-              JSON.stringify({
-                ...localUser,
-                expires_in: res.data.expires_in + Date.now(),
-                access_token: res.data.access_token,
-              })
-            );
-            setLoading(false);
-          })
-          .catch((err) => {
-            setUser({} as UserInterface);
-            setLoading(false);
-          });
-      }
-      setUser(localUser);
+    if (localUser.expires_in < Date.now()) {
+      axios
+        .post("/api/user/refresh", { refresh_token: localUser.refresh_token })
+        .then((res) => {
+          localStorage.setItem(
+            "user",
+            JSON.stringify({
+              ...localUser,
+              expires_in: res.data.expires_in + Date.now(),
+              access_token: res.data.access_token,
+            })
+          );
+          setLoading(false);
+        })
+        .catch((err) => {
+          setUser({} as UserInterface);
+          setLoading(false);
+        });
     }
+    setUser(localUser);
 
-    if (!localUser || Date.now() < localUser.expires_in) {
+    if (!localUser["access_token"] || Date.now() < localUser.expires_in) {
       setLoading(false);
     }
 
