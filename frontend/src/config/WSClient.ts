@@ -82,7 +82,7 @@ class WSClient {
         if (body[0] == "1") {
           console.log("Authenticated");
           this.dispatchEvent("authsuccess", {});
-          setTimeout(() => {
+          setInterval(() => {
             this.send(create_message(MsgType.PING));
           }, HEARTBEAT_INTERVAL);
         } else {

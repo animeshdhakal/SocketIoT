@@ -71,6 +71,7 @@ public class AppHandler extends ChannelInboundHandlerAdapter {
                     handleSync(ctx, NumberUtil.parsePin(message.body[0]));
                     break;
                 case MsgType.PING:
+                    ctx.writeAndFlush(msg);
                     break;
             }
         }
