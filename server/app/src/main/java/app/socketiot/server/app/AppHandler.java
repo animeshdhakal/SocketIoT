@@ -35,21 +35,24 @@ public class AppHandler extends ChannelInboundHandlerAdapter {
 
     public void handleWrite(ChannelHandlerContext ctx, HardwareMessage msg) {
         if (msg.body.length > 2) {
-            short pin = Short.valueOf(msg.body[0]);
+            short deviceID = Short.valueOf(msg.body[0]);
+            short pin = Short.valueOf(msg.body[1]);
+            String value = msg.body[2];
 
-            Device device = user.json.getDevice(pin);
+            Device device = user.json.getDevice(deviceID);
+
             if (device == null) {
                 return;
             }
 
-            PinStore store = device.pins.get(Short.valueOf(msg.body[1]));
+            PinStore store = device.pins.get(pin);
 
             if (store instanceof MultiValuePinStore) {
                 for (int i = 2; i < msg.body.length; i++) {
                     store.updateValue(msg.body[i]);
                 }
             } else if (store instanceof SingleValuePinStore) {
-                store.updateValue(msg.body[2]);
+                store.updateValue(value);
             }
 
             user.json.broadCastWriteMessage(ctx.channel(), device.id, pin, store);
