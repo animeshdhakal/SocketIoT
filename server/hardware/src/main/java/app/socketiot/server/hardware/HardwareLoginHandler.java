@@ -62,11 +62,16 @@ public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
                         device.status = DeviceStatus.Online;
                         device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
 
-                        // Will be Update Later By the user
+                        // Will be Updated Later By the user
                         device.blueprint_id = "";
 
                         user.json.addDevice(device);
                         user.isUpdated = true;
+
+                        user.json.addHardChannel(ctx.channel());
+
+                        ctx.pipeline().replace(HardwareLoginHandler.class, "HardwareHandler",
+                                new HardwareHandler(holder, new UserDevice(user, device)));
 
                         // We are not using the device.id here because end user doesn't know it
                         user.json.sendToApps(ctx.channel(),
