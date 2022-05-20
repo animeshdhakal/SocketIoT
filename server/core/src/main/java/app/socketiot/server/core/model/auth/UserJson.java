@@ -17,6 +17,9 @@ public class UserJson {
     public volatile BluePrint[] blueprints = {};
 
     @JsonIgnore
+    public volatile String provisioningToken;
+
+    @JsonIgnore
     public volatile boolean isUpdated = false;
 
     @JsonIgnore

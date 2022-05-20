@@ -1,6 +1,8 @@
 package app.socketiot.server.api;
 
 import java.util.concurrent.ConcurrentHashMap;
+
+import app.socketiot.server.api.model.ProvisioningResponse;
 import app.socketiot.server.api.model.WidgetReqRes;
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.http.JwtHttpHandler;
@@ -9,6 +11,7 @@ import app.socketiot.server.core.http.annotations.Path;
 import app.socketiot.server.core.http.handlers.HttpReq;
 import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
+import app.socketiot.server.core.model.auth.User;
 import app.socketiot.server.core.model.blueprint.BluePrint;
 import app.socketiot.server.core.model.device.Device;
 import app.socketiot.server.core.model.widgets.type.MultiValueWidget;
@@ -26,16 +29,8 @@ public class DeviceApiHandler extends JwtHttpHandler {
         super(holder);
     }
 
-    @Path("/add")
-    @POST
-    public HttpRes add(HttpReq req) {
-        Device device = req.getContentAs(Device.class);
-
-        if (device == null || device.name == null || device.blueprint_id == null) {
-            return StatusMsg.badRequest("Incomplete Fields");
-        }
-
-        Device dbDevice = req.user.json.getLastDevice();
+    HttpRes addDevice(User user, Device device) {
+        Device dbDevice = user.json.getLastDevice();
 
         if (dbDevice != null && dbDevice.name.equals(device.name)) {
             return StatusMsg.badRequest("Name should be unique");
@@ -51,7 +46,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Invalid Blueprint");
         }
 
-        device.token = RandomUtil.unique(24);
+        device.token = RandomUtil.unique();
         device.pins = new ConcurrentHashMap<>();
         device.id = dbDevice == null ? 1 : dbDevice.id + 1;
 
@@ -63,13 +58,25 @@ public class DeviceApiHandler extends JwtHttpHandler {
             }
         }
 
-        holder.deviceDao.addDevice(req.user, device);
-        req.user.json.addDevice(device);
+        holder.deviceDao.addDevice(user, device);
+        user.json.addDevice(device);
 
         Device resDevice = new Device(device.token);
-        req.user.isUpdated = true;
+        user.isUpdated = true;
 
         return HttpRes.json(resDevice);
+    }
+
+    @Path("/add")
+    @POST
+    public HttpRes add(HttpReq req) {
+        Device device = req.getContentAs(Device.class);
+
+        if (device == null || device.name == null || device.blueprint_id == null) {
+            return StatusMsg.badRequest("Incomplete Fields");
+        }
+
+        return addDevice(req.user, device);
     }
 
     @POST
@@ -89,6 +96,32 @@ public class DeviceApiHandler extends JwtHttpHandler {
         req.user.isUpdated = true;
 
         return StatusMsg.ok("Device Removed Successfully");
+    }
+
+    HttpRes startProvisioning(User user) {
+        user.json.provisioningToken = RandomUtil.unique();
+        return HttpRes.json(new ProvisioningResponse(user.json.provisioningToken));
+    }
+
+    HttpRes endProvisioning(User user, String name, String blueprint_id) {
+        Device device = new Device();
+        device.name = name;
+        device.blueprint_id = blueprint_id;
+
+        return addDevice(user, device);
+    }
+
+    @POST
+    @Path("/provision")
+    public HttpRes provision(HttpReq req) {
+        String name = req.getJsonFieldAsString("name");
+        String blueprint_id = req.getJsonFieldAsString("blueprint_id");
+
+        if (name != null && req.user.json.provisioningToken != null && blueprint_id != null) {
+            return endProvisioning(req.user, name, blueprint_id);
+        } else {
+            return startProvisioning(req.user);
+        }
     }
 
     @POST
