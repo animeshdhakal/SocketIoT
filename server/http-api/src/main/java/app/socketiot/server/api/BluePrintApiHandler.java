@@ -67,6 +67,7 @@ public class BluePrintApiHandler extends JwtHttpHandler {
         List<Device> bluePrintDevices = holder.deviceDao.getAllDevicesByBlueprint(blueprint.id);
 
         for (Device device : bluePrintDevices) {
+            req.user.json.disconnectDevices(device.token);
             holder.deviceDao.removeDevice(device.token);
             holder.userDao.removeDevice(device.token);
         }

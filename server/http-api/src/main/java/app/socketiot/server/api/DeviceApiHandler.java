@@ -98,10 +98,14 @@ public class DeviceApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        if (!req.user.json.removeDevice(device.token)) {
+        Device dbDevice = req.user.json.getDevice(device.token);
+
+        if (dbDevice == null) {
             return StatusMsg.badRequest("Device Not Found");
         }
 
+        req.user.json.disconnectDevices(device.token);
+        req.user.json.removeDevice(device.token);
         holder.deviceDao.removeDevice(device.token);
         req.user.isUpdated = true;
 

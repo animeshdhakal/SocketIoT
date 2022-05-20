@@ -192,4 +192,13 @@ public class UserJson {
         return i;
     }
 
+    public void disconnectDevices(String token) {
+        for (Channel c : hardChannels) {
+            HardwareStateBase state = c.pipeline().get(HardwareStateBase.class);
+            if (state != null && state.getUserDevice().device.token.equals(token)) {
+                c.close();
+            }
+        }
+    }
+
 }
