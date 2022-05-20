@@ -1,9 +1,14 @@
 package app.socketiot.server.hardware;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import app.socketiot.server.core.Holder;
 import app.socketiot.server.core.json.model.DeviceStatus;
 import app.socketiot.server.core.model.HardwareMessage;
 import app.socketiot.server.core.model.MsgType;
+import app.socketiot.server.core.model.auth.User;
+import app.socketiot.server.core.model.device.Device;
 import app.socketiot.server.core.model.device.UserDevice;
 import app.socketiot.server.utils.IPUtil;
 import io.netty.channel.ChannelHandlerContext;
@@ -13,6 +18,7 @@ import io.netty.channel.ChannelHandler;
 @ChannelHandler.Sharable
 public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
     private final Holder holder;
+    private final static Logger log = LogManager.getLogger(HardwareLoginHandler.class);
 
     public HardwareLoginHandler(Holder holder) {
         this.holder = holder;
@@ -39,8 +45,36 @@ public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
                                     DeviceStatus.Online.toString()));
 
                     ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "1"));
-                } else {
-                    ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "0"));
+                }
+
+                else {
+                    User user = holder.userDao.getUserFromProvisioningToken(message.body[0]);
+
+                    if (user != null) {
+
+                        log.debug("Provisioning Device for user {}", user.email);
+
+                        Device device = new Device();
+                        Device dbDevice = user.json.getLastDevice();
+                        device.token = user.json.provisioningToken;
+                        device.id = dbDevice == null ? 1 : dbDevice.id + 1;
+                        device.name = "Device " + device.id;
+                        device.status = DeviceStatus.Online;
+                        device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
+
+                        // Will be Update Later By the user
+                        device.blueprint_id = "";
+
+                        user.json.addDevice(device);
+                        user.isUpdated = true;
+
+                        // We are not using the device.id here because end user doesn't know it
+                        user.json.sendToApps(ctx.channel(),
+                                new HardwareMessage(MsgType.DEVICE_STATUS, "0", DeviceStatus.Online.toString()));
+                        ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "1"));
+                    } else {
+                        ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "0"));
+                    }
                 }
             }
         }

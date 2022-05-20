@@ -73,7 +73,7 @@ public class UserApiHandler extends BaseHttpHandler {
         user.password = Sha256Util.createHash(user.password, user.email);
 
         VerifyUserToken tk = new VerifyUserToken(user.email, user.password, TimeUnit.DAYS.toMillis(30));
-        String token = RandomUtil.unique(24) + RandomUtil.unique(24);
+        String token = RandomUtil.unique() + RandomUtil.unique();
         tokenDao.addToken(token, tk);
 
         mail.sendHtml(user.email, "Verify Email",
@@ -158,7 +158,7 @@ public class UserApiHandler extends BaseHttpHandler {
             return StatusMsg.badRequest("Please wait before requesting another reset");
         }
 
-        String token = RandomUtil.unique(24) + RandomUtil.unique(24);
+        String token = RandomUtil.unique() + RandomUtil.unique();
         tokenDao.addToken(token, new ResetToken(email, TimeUnit.HOURS.toMillis(1)));
 
         mail.sendHtml(email, "Reset Password",

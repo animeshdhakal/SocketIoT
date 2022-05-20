@@ -29,26 +29,18 @@ public class DeviceApiHandler extends JwtHttpHandler {
         super(holder);
     }
 
-    HttpRes addDevice(User user, Device device) {
-        Device dbDevice = user.json.getLastDevice();
-
-        if (dbDevice != null && dbDevice.name.equals(device.name)) {
-            return StatusMsg.badRequest("Name should be unique");
-        }
-
-        BluePrint bluePrint = holder.bluePrintDao.getBluePrint(device.blueprint_id);
+    boolean addPins(Device device, String blueprint_id) {
+        BluePrint bluePrint = holder.bluePrintDao.getBluePrint(blueprint_id);
 
         if (bluePrint == null) {
-            return StatusMsg.badRequest("BluePrint Not Found");
+            return false;
         }
 
         if (bluePrint.widgets == null) {
-            return StatusMsg.badRequest("Invalid Blueprint");
+            return false;
         }
 
-        device.token = RandomUtil.unique();
         device.pins = new ConcurrentHashMap<>();
-        device.id = dbDevice == null ? 1 : dbDevice.id + 1;
 
         for (Widget widget : bluePrint.widgets) {
             if (widget instanceof SingleValueWidget) {
@@ -57,6 +49,22 @@ public class DeviceApiHandler extends JwtHttpHandler {
                 device.pins.put(widget.pin, new MultiValuePinStore(""));
             }
         }
+
+        return true;
+    }
+
+    HttpRes addDevice(User user, Device device) {
+        Device dbDevice = user.json.getLastDevice();
+
+        if (dbDevice != null && dbDevice.name.equals(device.name)) {
+            return StatusMsg.badRequest("Name should be unique");
+        }
+
+        if (!addPins(device, device.blueprint_id)) {
+            return StatusMsg.badRequest("Blueprint not found");
+        }
+
+        device.id = dbDevice == null ? 1 : dbDevice.id + 1;
 
         holder.deviceDao.addDevice(user, device);
         user.json.addDevice(device);
@@ -75,6 +83,8 @@ public class DeviceApiHandler extends JwtHttpHandler {
         if (device == null || device.name == null || device.blueprint_id == null) {
             return StatusMsg.badRequest("Incomplete Fields");
         }
+
+        device.token = RandomUtil.unique();
 
         return addDevice(req.user, device);
     }
@@ -104,11 +114,21 @@ public class DeviceApiHandler extends JwtHttpHandler {
     }
 
     HttpRes endProvisioning(User user, String name, String blueprint_id) {
-        Device device = new Device();
-        device.name = name;
-        device.blueprint_id = blueprint_id;
+        Device device = holder.deviceDao.getDevice(user.json.provisioningToken);
 
-        return addDevice(user, device);
+        if (device == null) {
+            return StatusMsg.badRequest("Device Not Yet Connected !");
+        }
+
+        if (!addPins(device, blueprint_id)) {
+            return StatusMsg.badRequest("Blueprint not found");
+        }
+
+        device.blueprint_id = blueprint_id;
+        device.name = name;
+        user.isUpdated = true;
+
+        return StatusMsg.ok("Device Provisioned Successfully");
     }
 
     @POST

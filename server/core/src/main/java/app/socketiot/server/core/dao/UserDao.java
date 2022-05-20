@@ -3,7 +3,6 @@ package app.socketiot.server.core.dao;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import app.socketiot.server.core.model.auth.User;
 import app.socketiot.server.core.model.device.Device;
 
@@ -39,6 +38,15 @@ public class UserDao {
 
     public void updateUser(User user) {
         user.isUpdated = true;
+    }
+
+    public User getUserFromProvisioningToken(String provisioningToken) {
+        for (User user : users.values()) {
+            if (user.json.provisioningToken.equals(provisioningToken)) {
+                return user;
+            }
+        }
+        return null;
     }
 
     public void removeDevice(String token) {

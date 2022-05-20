@@ -13,7 +13,7 @@ public class JwtUtil {
 
     public JwtUtil(String secret) {
         if (secret == null) {
-            secret = RandomUtil.unique(24);
+            secret = RandomUtil.unique();
         }
         key = Keys.hmacShaKeyFor(Sha256Util.createHash(secret, secret).getBytes(StandardCharsets.UTF_8));
     }
