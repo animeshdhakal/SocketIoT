@@ -8,6 +8,8 @@ import app.socketiot.server.core.json.model.DeviceStatus;
 import app.socketiot.server.core.model.HardwareInfo;
 import app.socketiot.server.core.model.HardwareMessage;
 import app.socketiot.server.core.model.MsgType;
+import app.socketiot.server.core.model.auth.User;
+import app.socketiot.server.core.model.device.Device;
 import app.socketiot.server.core.model.device.UserDevice;
 import app.socketiot.server.core.statebase.HardwareStateBase;
 import app.socketiot.server.hardware.handler.HardwareLogicHandler;
@@ -21,11 +23,13 @@ import io.netty.channel.ChannelHandler;
 @ChannelHandler.Sharable
 public class HardwareHandler extends HardwareStateBase {
     private static final Logger log = LogManager.getLogger(HardwareHandler.class);
-    public final UserDevice userDevice;
+    public final User user;
+    public final Device device;
     private final HardwareLogicHandler hardware;
 
     public HardwareHandler(Holder holder, UserDevice userDevice) {
-        this.userDevice = userDevice;
+        this.user = userDevice.user;
+        this.device = userDevice.device;
         this.hardware = new HardwareLogicHandler(userDevice);
     }
 
@@ -34,7 +38,7 @@ public class HardwareHandler extends HardwareStateBase {
         if (evt instanceof IdleStateEvent) {
             IdleStateEvent event = (IdleStateEvent) evt;
             if (event.state() == IdleState.READER_IDLE) {
-                log.trace("Device Closed Due to InActivity {}", userDevice.device);
+                log.trace("Device Closed Due to InActivity {}", device);
                 ctx.close();
             }
         } else {
@@ -56,7 +60,7 @@ public class HardwareHandler extends HardwareStateBase {
             ctx.pipeline().replace(IdleStateHandler.class, "IdleStateHandler",
                     new IdleStateHandler(NumberUtil.calculateHeartBeat(info.heartbeat), 0, 0));
         }
-        userDevice.device.info = info;
+        device.info = info;
     }
 
     public void process(ChannelHandlerContext ctx, HardwareMessage msg) {
@@ -80,19 +84,19 @@ public class HardwareHandler extends HardwareStateBase {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        userDevice.user.json.removeHardChannel(ctx.channel());
-        if (userDevice.user.json.getHardwareChannelCount(userDevice.device.id) == 0) {
-            userDevice.device.status = DeviceStatus.Offline;
-            userDevice.device.lastOnline = System.currentTimeMillis();
-            userDevice.user.json.sendToApps(ctx.channel(),
-                    new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(userDevice.device.id),
+        user.dash.removeHardChannel(ctx.channel());
+        if (user.dash.getHardwareChannelCount(device.id) == 0) {
+            device.status = DeviceStatus.Offline;
+            device.lastOnline = System.currentTimeMillis();
+            user.dash.sendToApps(ctx.channel(),
+                    new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(device.id),
                             DeviceStatus.Offline.toString()));
-            userDevice.user.isUpdated = true;
+            user.isUpdated = true;
         }
     }
 
     public UserDevice getUserDevice() {
-        return userDevice;
+        return new UserDevice(user, device);
     }
 
     @Override

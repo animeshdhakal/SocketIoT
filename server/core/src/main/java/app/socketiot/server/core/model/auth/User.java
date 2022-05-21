@@ -9,7 +9,7 @@ public class User {
 
     public String token;
 
-    public UserJson json;
+    public Dashboard dash;
 
     @JsonIgnore
     public volatile boolean isUpdated = false;
@@ -17,10 +17,10 @@ public class User {
     public User() {
     }
 
-    public User(String email, String password, String token, UserJson json) {
+    public User(String email, String password, String token, Dashboard dash) {
         this.email = email;
         this.password = password;
-        this.json = json;
+        this.dash = dash;
         this.token = token;
     }
 

@@ -26,7 +26,7 @@ public class AppLoginHandler extends ChannelInboundHandlerAdapter {
                     String email = holder.jwtUtil.getEmail(token);
                     User user = holder.userDao.getUser(email);
                     if (user != null) {
-                        user.json.addAppChannel(ctx.channel());
+                        user.dash.addAppChannel(ctx.channel());
                         ctx.pipeline().replace(this, "AppHandler", new AppHandler(holder, user));
                         ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "1"));
                         return;

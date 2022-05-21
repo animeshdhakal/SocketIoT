@@ -23,7 +23,8 @@ public class AppHandler extends ChannelInboundHandlerAdapter {
     }
 
     public void handleSync(ChannelHandlerContext ctx, int deviceID) {
-        Device device = user.json.getDevice(deviceID);
+        Device device = user.dash.getDevice(deviceID);
+
         if (device == null) {
             return;
         }
@@ -39,7 +40,7 @@ public class AppHandler extends ChannelInboundHandlerAdapter {
             short pin = Short.valueOf(msg.body[1]);
             String value = msg.body[2];
 
-            Device device = user.json.getDevice(deviceID);
+            Device device = user.dash.getDevice(deviceID);
 
             if (device == null) {
                 return;
@@ -55,7 +56,7 @@ public class AppHandler extends ChannelInboundHandlerAdapter {
                 store.updateValue(value);
             }
 
-            user.json.broadCastWriteMessage(ctx.channel(), device.id, pin, store);
+            user.dash.broadCastWriteMessage(ctx.channel(), device.id, pin, store);
 
             user.isUpdated = true;
         }
@@ -83,7 +84,7 @@ public class AppHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        user.json.removeAppChannel(ctx.channel());
+        user.dash.removeAppChannel(ctx.channel());
     }
 
     @Override

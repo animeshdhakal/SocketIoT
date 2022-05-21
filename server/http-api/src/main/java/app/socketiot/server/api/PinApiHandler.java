@@ -46,7 +46,7 @@ public class PinApiHandler extends BaseHttpHandler {
 
         store.updateValue(value);
 
-        userDevice.user.json.broadCastWriteMessage(null, userDevice.device.id, spin, store);
+        userDevice.user.dash.broadCastWriteMessage(null, userDevice.device.id, spin, store);
 
         userDevice.user.isUpdated = true;
 

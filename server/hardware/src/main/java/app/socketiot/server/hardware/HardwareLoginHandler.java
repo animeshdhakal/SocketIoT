@@ -35,12 +35,12 @@ public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
                     userDevice.device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
                     userDevice.device.status = DeviceStatus.Online;
 
-                    userDevice.user.json.addHardChannel(ctx.channel());
+                    userDevice.user.dash.addHardChannel(ctx.channel());
 
                     ctx.pipeline().replace(HardwareLoginHandler.class, "HardwareHandler",
                             new HardwareHandler(holder, userDevice));
 
-                    userDevice.user.json.sendToApps(ctx.channel(),
+                    userDevice.user.dash.sendToApps(ctx.channel(),
                             new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(userDevice.device.id),
                                     DeviceStatus.Online.toString()));
 
@@ -55,8 +55,8 @@ public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
                         log.debug("Provisioning Device for user {}", user.email);
 
                         Device device = new Device();
-                        Device dbDevice = user.json.getLastDevice();
-                        device.token = user.json.provisioningToken;
+                        Device dbDevice = user.dash.getLastDevice();
+                        device.token = user.dash.provisioningToken;
                         device.id = dbDevice == null ? 1 : dbDevice.id + 1;
                         device.name = "Device " + device.id;
                         device.status = DeviceStatus.Online;
@@ -65,16 +65,16 @@ public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
                         // Will be Updated Later By the user
                         device.blueprint_id = "";
 
-                        user.json.addDevice(device);
+                        user.dash.addDevice(device);
                         user.isUpdated = true;
 
-                        user.json.addHardChannel(ctx.channel());
+                        user.dash.addHardChannel(ctx.channel());
 
                         ctx.pipeline().replace(HardwareLoginHandler.class, "HardwareHandler",
                                 new HardwareHandler(holder, new UserDevice(user, device)));
 
                         // We are not using the device.id here because end user doesn't know it
-                        user.json.sendToApps(ctx.channel(),
+                        user.dash.sendToApps(ctx.channel(),
                                 new HardwareMessage(MsgType.DEVICE_STATUS, "0", DeviceStatus.Online.toString()));
                         ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "1"));
                     } else {

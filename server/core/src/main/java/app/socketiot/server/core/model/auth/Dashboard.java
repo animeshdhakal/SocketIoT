@@ -12,7 +12,7 @@ import app.socketiot.server.core.pinstore.PinStore;
 import app.socketiot.server.core.statebase.HardwareStateBase;
 import io.netty.channel.Channel;
 
-public class UserJson {
+public class Dashboard {
     public volatile Device[] devices = {};
     public volatile BluePrint[] blueprints = {};
 
@@ -28,7 +28,7 @@ public class UserJson {
     @JsonIgnore
     public Set<Channel> appChannels = new HashSet<>();
 
-    public UserJson() {
+    public Dashboard() {
     }
 
     public void addDevice(Device device) {

@@ -32,7 +32,7 @@ public class BluePrintApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        BluePrint bluePrint = req.user.json.getLastBlueprint();
+        BluePrint bluePrint = req.user.dash.getLastBlueprint();
 
         if (bluePrint != null && bluePrint.name.equals(blueprint.name)) {
             return StatusMsg.badRequest("Name should be unique");
@@ -42,7 +42,7 @@ public class BluePrintApiHandler extends JwtHttpHandler {
         blueprint.widgets = new ArrayList<Widget>();
 
         holder.bluePrintDao.addBluePrint(blueprint);
-        req.user.json.addBluePrint(blueprint);
+        req.user.dash.addBluePrint(blueprint);
 
         req.user.isUpdated = true;
 
@@ -58,7 +58,7 @@ public class BluePrintApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        if (!req.user.json.removeBlueprint(blueprint.id)) {
+        if (!req.user.dash.removeBlueprint(blueprint.id)) {
             return StatusMsg.badRequest("BluePrint Not Found");
         }
 
@@ -67,7 +67,7 @@ public class BluePrintApiHandler extends JwtHttpHandler {
         List<Device> bluePrintDevices = holder.deviceDao.getAllDevicesByBlueprint(blueprint.id);
 
         for (Device device : bluePrintDevices) {
-            req.user.json.disconnectDevices(device.token);
+            req.user.dash.disconnectDevices(device.token);
             holder.deviceDao.removeDevice(device.token);
             holder.userDao.removeDevice(device.token);
         }
@@ -80,7 +80,7 @@ public class BluePrintApiHandler extends JwtHttpHandler {
     @Path("/all")
     @POST
     public HttpRes all(HttpReq req) {
-        return HttpRes.json(req.user.json.blueprints);
+        return HttpRes.json(req.user.dash.blueprints);
     }
 
     @Path("/get")

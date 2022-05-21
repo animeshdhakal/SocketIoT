@@ -1,6 +1,8 @@
 package app.socketiot.server.hardware.handler;
 
 import app.socketiot.server.core.model.HardwareMessage;
+import app.socketiot.server.core.model.auth.User;
+import app.socketiot.server.core.model.device.Device;
 import app.socketiot.server.core.model.device.UserDevice;
 import app.socketiot.server.core.pinstore.MultiValuePinStore;
 import app.socketiot.server.core.pinstore.PinStore;
@@ -9,10 +11,12 @@ import app.socketiot.server.utils.NumberUtil;
 import io.netty.channel.ChannelHandlerContext;
 
 public class HardwareLogicHandler {
-    public final UserDevice userDevice;
+    public final User user;
+    public final Device device;
 
     public HardwareLogicHandler(UserDevice userDevice) {
-        this.userDevice = userDevice;
+        this.user = userDevice.user;
+        this.device = userDevice.device;
     }
 
     public void handleWrite(ChannelHandlerContext ctx, HardwareMessage msg) {
@@ -20,7 +24,7 @@ public class HardwareLogicHandler {
             return;
 
         short pin = NumberUtil.parsePin(msg.body[0]);
-        PinStore store = userDevice.device.pins.get(pin);
+        PinStore store = device.pins.get(pin);
 
         if (store == null) {
             return;
@@ -34,15 +38,15 @@ public class HardwareLogicHandler {
             store.updateValue(msg.body[1]);
         }
 
-        userDevice.user.json.broadCastWriteMessage(ctx.channel(), userDevice.device.id, pin, store);
+        user.dash.broadCastWriteMessage(ctx.channel(), device.id, pin, store);
 
-        userDevice.user.isUpdated = true;
+        user.isUpdated = true;
     }
 
     public void handleSync(ChannelHandlerContext ctx) {
-        for (short key : userDevice.device.pins.keySet()) {
-            PinStore store = userDevice.device.pins.get(key);
-            store.sendSync(ctx.channel(), userDevice.device.id, key);
+        for (short key : device.pins.keySet()) {
+            PinStore store = device.pins.get(key);
+            store.sendSync(ctx.channel(), device.id, key);
         }
     }
 

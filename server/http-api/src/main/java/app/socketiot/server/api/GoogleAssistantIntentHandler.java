@@ -58,7 +58,7 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
         res.payload = new Payload();
         res.payload.agentUserId = user.email;
 
-        for (app.socketiot.server.core.model.device.Device device : user.json.devices) {
+        for (app.socketiot.server.core.model.device.Device device : user.dash.devices) {
             res.payload.devices = new Device[0];
             BluePrint bluePrint = holder.bluePrintDao.getBluePrint(device.blueprint_id);
             for (int pin : device.pins.keySet()) {
@@ -166,13 +166,13 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
                                 short pin = Short.valueOf(parts[1]);
                                 PinStore store = d.pins.get(pin);
                                 store.updateValue(widget.onValue);
-                                user.json.broadCastWriteMessage(c, d.id, pin, store);
+                                user.dash.broadCastWriteMessage(c, d.id, pin, store);
 
                             } else {
                                 short pin = Short.valueOf(parts[1]);
                                 PinStore store = d.pins.get(pin);
                                 store.updateValue(widget.offValue);
-                                user.json.broadCastWriteMessage(c, d.id, pin, store);
+                                user.dash.broadCastWriteMessage(c, d.id, pin, store);
                             }
 
                             ec.states.on = execution.params.on;

@@ -30,7 +30,7 @@ public class OTAHandler extends JwtHttpHandler {
                 || otaBegin.devices.size() == 0) {
             return StatusMsg.badRequest("Incomplete Fields");
         }
-        if (req.user.json.getBlueprint(otaBegin.blueprint_id) == null) {
+        if (req.user.dash.getBlueprint(otaBegin.blueprint_id) == null) {
             return StatusMsg.badRequest("BluePrint Not Found");
         }
 

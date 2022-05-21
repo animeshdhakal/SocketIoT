@@ -15,7 +15,7 @@ import app.socketiot.server.core.http.handlers.HttpRes;
 import app.socketiot.server.core.http.handlers.StatusMsg;
 import app.socketiot.server.core.mail.Mail;
 import app.socketiot.server.core.model.auth.User;
-import app.socketiot.server.core.model.auth.UserJson;
+import app.socketiot.server.core.model.auth.Dashboard;
 import app.socketiot.server.core.model.token.ResetToken;
 import app.socketiot.server.core.model.token.VerifyUserToken;
 import app.socketiot.server.utils.FileReadUtil;
@@ -101,7 +101,7 @@ public class UserApiHandler extends BaseHttpHandler {
             return HttpRes.badRequest("Please Reregister your account");
         }
 
-        userDao.addUser(new User(tk.email, tk.password, null, new UserJson()));
+        userDao.addUser(new User(tk.email, tk.password, null, new Dashboard()));
 
         tokenDao.removeToken(token);
 

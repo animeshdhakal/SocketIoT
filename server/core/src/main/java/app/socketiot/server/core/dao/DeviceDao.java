@@ -16,7 +16,7 @@ public class DeviceDao {
     public DeviceDao(ConcurrentMap<String, User> users) {
         this.devices = new ConcurrentHashMap<>();
         for (User user : users.values()) {
-            for (Device device : user.json.devices) {
+            for (Device device : user.dash.devices) {
                 devices.put(device.token, new UserDevice(user, device));
             }
         }
@@ -55,7 +55,7 @@ public class DeviceDao {
     public void sendToHardware(int deviceId, HardwareMessage message) {
         for (UserDevice userDevice : devices.values()) {
             if (userDevice.device.id == deviceId) {
-                userDevice.user.json.sendToHardware(null, deviceId, message);
+                userDevice.user.dash.sendToHardware(null, deviceId, message);
             }
         }
     }

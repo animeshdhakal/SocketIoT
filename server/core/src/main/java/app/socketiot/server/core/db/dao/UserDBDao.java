@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 import app.socketiot.server.core.db.DB;
 import app.socketiot.server.core.json.JsonParser;
 import app.socketiot.server.core.model.auth.User;
-import app.socketiot.server.core.model.auth.UserJson;
+import app.socketiot.server.core.model.auth.Dashboard;
 
 public class UserDBDao {
     private final DB db;
@@ -29,7 +29,7 @@ public class UserDBDao {
                 while (rs.next()) {
                     users.put(rs.getString("email"),
                             new User(rs.getString("email"), rs.getString("password"), rs.getString("token"),
-                                    JsonParser.parse(UserJson.class, rs.getString("json"))));
+                                    JsonParser.parse(Dashboard.class, rs.getString("json"))));
                 }
             }
         } catch (Exception e) {
@@ -47,7 +47,7 @@ public class UserDBDao {
                 stmt.setString(1, user.email);
                 stmt.setString(2, user.password);
                 stmt.setString(3, user.token);
-                stmt.setString(4, JsonParser.toJson(user.json));
+                stmt.setString(4, JsonParser.toJson(user.dash));
                 stmt.addBatch();
             }
             stmt.executeBatch();

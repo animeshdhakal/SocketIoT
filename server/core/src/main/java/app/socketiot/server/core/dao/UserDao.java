@@ -42,7 +42,7 @@ public class UserDao {
 
     public User getUserFromProvisioningToken(String provisioningToken) {
         for (User user : users.values()) {
-            if (user.json.provisioningToken.equals(provisioningToken)) {
+            if (user.dash.provisioningToken.equals(provisioningToken)) {
                 return user;
             }
         }
@@ -51,9 +51,9 @@ public class UserDao {
 
     public void removeDevice(String token) {
         for (User user : users.values()) {
-            for (Device device : user.json.devices) {
+            for (Device device : user.dash.devices) {
                 if (device.token.equals(token)) {
-                    user.json.removeDevice(device.token);
+                    user.dash.removeDevice(device.token);
                     return;
                 }
             }
@@ -63,10 +63,10 @@ public class UserDao {
     public ArrayList<User> getAllUsers() {
         ArrayList<User> data = new ArrayList<>();
         for (User user : users.values()) {
-            if (user.isUpdated || user.json.isUpdated) {
+            if (user.isUpdated || user.dash.isUpdated) {
                 data.add(user);
                 user.isUpdated = false;
-                user.json.isUpdated = false;
+                user.dash.isUpdated = false;
             }
         }
         return data;

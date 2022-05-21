@@ -54,7 +54,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
     }
 
     HttpRes addDevice(User user, Device device) {
-        Device dbDevice = user.json.getLastDevice();
+        Device dbDevice = user.dash.getLastDevice();
 
         if (dbDevice != null && dbDevice.name.equals(device.name)) {
             return StatusMsg.badRequest("Name should be unique");
@@ -67,7 +67,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
         device.id = dbDevice == null ? 1 : dbDevice.id + 1;
 
         holder.deviceDao.addDevice(user, device);
-        user.json.addDevice(device);
+        user.dash.addDevice(device);
 
         Device resDevice = new Device(device.token);
         user.isUpdated = true;
@@ -98,14 +98,14 @@ public class DeviceApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Incomplete Fields");
         }
 
-        Device dbDevice = req.user.json.getDevice(device.token);
+        Device dbDevice = req.user.dash.getDevice(device.token);
 
         if (dbDevice == null) {
             return StatusMsg.badRequest("Device Not Found");
         }
 
-        req.user.json.disconnectDevices(device.token);
-        req.user.json.removeDevice(device.token);
+        req.user.dash.disconnectDevices(device.token);
+        req.user.dash.removeDevice(device.token);
         holder.deviceDao.removeDevice(device.token);
         req.user.isUpdated = true;
 
@@ -113,12 +113,12 @@ public class DeviceApiHandler extends JwtHttpHandler {
     }
 
     HttpRes startProvisioning(User user) {
-        user.json.provisioningToken = RandomUtil.unique();
-        return HttpRes.json(new ProvisioningResponse(user.json.provisioningToken));
+        user.dash.provisioningToken = RandomUtil.unique();
+        return HttpRes.json(new ProvisioningResponse(user.dash.provisioningToken));
     }
 
     HttpRes endProvisioning(User user, String name, String blueprint_id) {
-        Device device = holder.deviceDao.getDevice(user.json.provisioningToken);
+        Device device = holder.deviceDao.getDevice(user.dash.provisioningToken);
 
         if (device == null) {
             return StatusMsg.badRequest("Device Not Yet Connected !");
@@ -141,7 +141,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
         String name = req.getJsonFieldAsString("name");
         String blueprint_id = req.getJsonFieldAsString("blueprint_id");
 
-        if (name != null && req.user.json.provisioningToken != null && blueprint_id != null) {
+        if (name != null && req.user.dash.provisioningToken != null && blueprint_id != null) {
             return endProvisioning(req.user, name, blueprint_id);
         } else {
             return startProvisioning(req.user);
@@ -156,7 +156,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
         if (widgetreq != null && widgetreq.blueprint_id != null) {
             return HttpRes.json(holder.deviceDao.getAllDevicesByBlueprint(widgetreq.blueprint_id));
         } else {
-            return HttpRes.json(req.user.json.devices);
+            return HttpRes.json(req.user.dash.devices);
         }
 
     }

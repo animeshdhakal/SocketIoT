@@ -12,7 +12,7 @@ public class BluePrintDao {
     public BluePrintDao(ConcurrentMap<String, User> users) {
         this.bluePrints = new ConcurrentHashMap<>();
         for (User user : users.values()) {
-            for (BluePrint bluePrint : user.json.blueprints) {
+            for (BluePrint bluePrint : user.dash.blueprints) {
                 bluePrints.put(bluePrint.id, bluePrint);
             }
         }

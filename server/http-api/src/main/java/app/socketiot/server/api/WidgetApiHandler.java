@@ -40,7 +40,7 @@ public class WidgetApiHandler extends JwtHttpHandler {
                 return StatusMsg.badRequest("Incomplete Fields");
             }
 
-            if (req.user.json.replaceWidgets(widget.blueprint_id, widget.widgets)) {
+            if (req.user.dash.replaceWidgets(widget.blueprint_id, widget.widgets)) {
                 List<Device> devices = holder.deviceDao.getAllDevicesByBlueprint(widget.blueprint_id);
                 for (Device device : devices) {
                     device.pins = new ConcurrentHashMap<>();
