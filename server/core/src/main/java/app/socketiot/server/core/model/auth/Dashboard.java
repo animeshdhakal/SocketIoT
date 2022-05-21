@@ -174,7 +174,7 @@ public class Dashboard {
         for (Channel channel : hardChannels) {
             if (!channel.equals(c)) {
                 HardwareStateBase state = channel.pipeline().get(HardwareStateBase.class);
-                if (state != null && state.getUserDevice().device.id == deviceID) {
+                if (state != null && state.getDevice().id == deviceID) {
                     channel.writeAndFlush(message);
                 }
             }
@@ -185,7 +185,7 @@ public class Dashboard {
         int i = 0;
         for (Channel channel : hardChannels) {
             HardwareStateBase state = channel.pipeline().get(HardwareStateBase.class);
-            if (state != null && state.getUserDevice().device.id == deviceID) {
+            if (state != null && state.getDevice().id == deviceID) {
                 i++;
             }
         }
@@ -195,7 +195,7 @@ public class Dashboard {
     public void disconnectDevices(String token) {
         for (Channel c : hardChannels) {
             HardwareStateBase state = c.pipeline().get(HardwareStateBase.class);
-            if (state != null && state.getUserDevice().device.token.equals(token)) {
+            if (state != null && state.getDevice().token.equals(token)) {
                 c.close();
             }
         }

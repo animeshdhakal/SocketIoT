@@ -95,8 +95,12 @@ public class HardwareHandler extends HardwareStateBase {
         }
     }
 
-    public UserDevice getUserDevice() {
-        return new UserDevice(user, device);
+    public Device getDevice() {
+        return device;
+    }
+
+    public User getUser() {
+        return user;
     }
 
     @Override
