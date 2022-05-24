@@ -34,8 +34,8 @@ public class UserApiHandler extends BaseHttpHandler {
     private final String resetPasswordMailBody;
     private final String baseUrl;
 
-    public final static long access_token_expiry_time = 1000 * 60; // 1 minute
-    public final static long refresh_token_expiry_time = 1000 * 60 * 60 * 24 * 30 * 12; // 1 Year
+    public final static int access_token_expiry_time = 60; // 1 minute
+    public final static int refresh_token_expiry_time = 60 * 60 * 24 * 30 * 12; // 1 Year
 
     public UserApiHandler(Holder holder) {
         super(holder);

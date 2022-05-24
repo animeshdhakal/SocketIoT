@@ -18,10 +18,10 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(Sha256Util.createHash(secret, secret).getBytes(StandardCharsets.UTF_8));
     }
 
-    public String createToken(String email, long miliseconds) {
+    public String createToken(String email, int seconds) {
         return Jwts.builder()
                 .setSubject(email)
-                .setExpiration(new Date(System.currentTimeMillis() + miliseconds))
+                .setExpiration(new Date(System.currentTimeMillis() + (seconds * 1000)))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
