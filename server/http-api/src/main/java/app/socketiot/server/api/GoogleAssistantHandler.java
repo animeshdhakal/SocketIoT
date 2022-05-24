@@ -48,19 +48,17 @@ public class GoogleAssistantHandler extends BaseHttpHandler {
         }
 
         String token;
+
         if (grant_type.equals("authorization_code")) {
             token = code;
         } else if (grant_type.equals("refresh_token")) {
-            if (!holder.jwtUtil.verifyToken(refresh_token)) {
-                return HttpRes.badRequest("{\"error\": \"invalid_grant\"}");
-            }
-            token = holder.jwtUtil.createToken(holder.jwtUtil.getEmail(refresh_token), 1 * 12 * 30 * 24 * 60 * 60);
+            token = refresh_token;
         } else {
-            return HttpRes.badRequest("Invalid grant_type");
+            return HttpRes.badRequest("{\"error\": \"invalid_grant\"}");
         }
 
         if (!holder.jwtUtil.verifyToken(token)) {
-            return HttpRes.badRequest("Invalid code");
+            return HttpRes.badRequest("{\"error\": \"invalid_grant\"}");
         }
 
         String email = holder.jwtUtil.getEmail(token);
@@ -71,7 +69,16 @@ public class GoogleAssistantHandler extends BaseHttpHandler {
             return HttpRes.badRequest("Invalid user");
         }
 
-        return HttpRes.json(new GoogleAssistantTokenRes("Bearer", token, token, 1 * 12 * 30 * 24 * 60 * 60));
+        if (user.token == null) {
+            user.token = holder.jwtUtil.createToken(email, UserApiHandler.refresh_token_expiry_time);
+            user.updated();
+        }
+
+        String access_token = holder.jwtUtil.createToken(email, UserApiHandler.access_token_expiry_time);
+
+        return HttpRes.json(
+                new GoogleAssistantTokenRes("Bearer", access_token, user.token,
+                        UserApiHandler.access_token_expiry_time));
     }
 
 }

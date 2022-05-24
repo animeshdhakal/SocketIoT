@@ -52,7 +52,7 @@ const GoogleLogin = () => {
       try {
         setLoading(true);
         const res = await axios.post("/api/user/login", { email, password });
-        const token = res.data.token;
+        const token = res.data.refresh_token;
 
         const url = new URL(redirect_uri);
         url.searchParams.append("code", token);
