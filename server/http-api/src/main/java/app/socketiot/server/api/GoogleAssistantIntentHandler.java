@@ -165,18 +165,10 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
                                 continue;
                             }
 
-                            if (execution.params.on == true) {
-                                short pin = Short.valueOf(parts[1]);
-                                PinStore store = d.pins.get(pin);
-                                store.updateValue(widget.onValue);
-                                user.dash.broadCastWriteMessage(c, d.id, pin, store);
-
-                            } else {
-                                short pin = Short.valueOf(parts[1]);
-                                PinStore store = d.pins.get(pin);
-                                store.updateValue(widget.offValue);
-                                user.dash.broadCastWriteMessage(c, d.id, pin, store);
-                            }
+                            short pin = Short.valueOf(parts[1]);
+                            PinStore store = d.pins.get(pin);
+                            store.updateValue(ec.states.on ? widget.onValue : widget.offValue);
+                            user.dash.broadCastWriteMessage(c, d.id, pin, store);
 
                             ec.states.on = execution.params.on;
 
