@@ -1,7 +1,11 @@
 package app.socketiot.server.api;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import app.socketiot.server.api.model.GoogleAssistant.Command;
 import app.socketiot.server.api.model.GoogleAssistant.Device;
@@ -37,6 +41,7 @@ import io.netty.channel.ChannelHandler;
 @Path("/api/google-assistant")
 public class GoogleAssistantIntentHandler extends JwtHttpHandler {
     private final Holder holder;
+    private final static Logger log = LogManager.getLogger(GoogleAssistantIntentHandler.class);
 
     public GoogleAssistantIntentHandler(Holder holder) {
         super(holder);
@@ -191,22 +196,28 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
     @Path("/fulfillment")
     @POST
     public HttpRes fulfillment(HttpReq req) {
+        log.info("Google Assistant Request: {}", req.getContent());
+
         IntentReq intentreq = req.getContentAs(IntentReq.class);
 
         if (intentreq == null || intentreq.inputs == null) {
             return HttpRes.badRequest("Invalid request");
         }
 
+        HttpRes res = HttpRes.ok("");
+
         for (Input intent : intentreq.inputs) {
             if (intent.intent.equals("action.devices.SYNC")) {
-                return handleSync(intentreq, req.user);
+                res = handleSync(intentreq, req.user);
             } else if (intent.intent.equals("action.devices.QUERY")) {
-                return handleQuery(intentreq, req.user);
+                res = handleQuery(intentreq, req.user);
             } else if (intent.intent.equals("action.devices.EXECUTE")) {
-                return handleExecute(req.getCtx().channel(), intentreq, req.user);
+                res = handleExecute(req.getCtx().channel(), intentreq, req.user);
             }
         }
 
-        return HttpRes.ok("");
+        log.info("Google Assistant Response: {}", res.content().toString());
+
+        return res;
     }
 }

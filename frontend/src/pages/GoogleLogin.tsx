@@ -80,7 +80,7 @@ const GoogleLogin = () => {
         onSubmit={(e) => onLogin(e)}
       >
         <h1 className="text-3xl my-6">SocketIoT</h1>
-        <h1 className="text-center my-5 text-md">
+        <h1 className="text-center my-5 mx-5 text-md">
           By signing in, you are authorizing Google to control your devices
         </h1>
 
