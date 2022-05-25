@@ -35,8 +35,8 @@ public class ExceptionHandler {
             } else if (message != null && message.contains("OutOfDirectMemoryError")) {
                 log.error("OutofDirectMemoryError");
             } else {
-                log.error("Unexpected error! Handler class : {}. Name : {}. Reason : {}. Channel : {}.",
-                        ctx.handler().getClass(), ctx.name(), message, ctx.channel());
+                log.error("Unexpected error! Handler class : {}. Name : {}. Channel : {}.",
+                        ctx.handler().getClass(), ctx.name(), ctx.channel(), cause);
             }
 
         }
