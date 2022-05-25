@@ -70,7 +70,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
         user.dash.addDevice(device);
 
         Device resDevice = new Device(device.token);
-        user.isUpdated = true;
+        user.updated();
 
         return HttpRes.json(resDevice);
     }
@@ -107,7 +107,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
         req.user.dash.disconnectDevices(device.token);
         req.user.dash.removeDevice(device.token);
         holder.deviceDao.removeDevice(device.token);
-        req.user.isUpdated = true;
+        req.user.updated();
 
         return StatusMsg.ok("Device Removed Successfully");
     }
@@ -130,7 +130,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
 
         device.blueprint_id = blueprint_id;
         device.name = name;
-        user.isUpdated = true;
+        user.updated();
 
         return StatusMsg.ok("Device Provisioned Successfully");
     }

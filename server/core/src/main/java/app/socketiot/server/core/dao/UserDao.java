@@ -24,8 +24,8 @@ public class UserDao {
     }
 
     public void addUser(User user) {
-        user.isUpdated = true;
         users.put(user.email, user);
+        user.updated();
     }
 
     public void putUser(User user) {
@@ -34,10 +34,6 @@ public class UserDao {
 
     public void removeUser(String email) {
         users.remove(email);
-    }
-
-    public void updateUser(User user) {
-        user.isUpdated = true;
     }
 
     public User getUserFromProvisioningToken(String provisioningToken) {
@@ -63,10 +59,9 @@ public class UserDao {
     public ArrayList<User> getAllUsers() {
         ArrayList<User> data = new ArrayList<>();
         for (User user : users.values()) {
-            if (user.isUpdated || user.dash.isUpdated) {
+            if (user.isUpdated) {
                 data.add(user);
                 user.isUpdated = false;
-                user.dash.isUpdated = false;
             }
         }
         return data;

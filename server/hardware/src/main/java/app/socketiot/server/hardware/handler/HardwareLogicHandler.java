@@ -40,7 +40,7 @@ public class HardwareLogicHandler {
 
         user.dash.broadCastWriteMessage(ctx.channel(), device.id, pin, store);
 
-        user.isUpdated = true;
+        user.updated();
     }
 
     public void handleSync(ChannelHandlerContext ctx) {

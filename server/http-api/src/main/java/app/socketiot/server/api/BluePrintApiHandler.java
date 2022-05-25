@@ -44,7 +44,7 @@ public class BluePrintApiHandler extends JwtHttpHandler {
         holder.bluePrintDao.addBluePrint(blueprint);
         req.user.dash.addBluePrint(blueprint);
 
-        req.user.isUpdated = true;
+        req.user.updated();
 
         return HttpRes.json(new BluePrint(blueprint.id));
     }
@@ -72,7 +72,7 @@ public class BluePrintApiHandler extends JwtHttpHandler {
             holder.userDao.removeDevice(device.token);
         }
 
-        req.user.isUpdated = true;
+        req.user.updated();
 
         return StatusMsg.ok("BluePrint Deleted Successfully");
     }

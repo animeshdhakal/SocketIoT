@@ -28,60 +28,64 @@ public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof HardwareMessage) {
             HardwareMessage message = (HardwareMessage) msg;
-            if (message.body.length > 0) {
-                UserDevice userDevice = holder.deviceDao.getUserDevice(message.body[0]);
 
-                if (userDevice != null) {
-                    userDevice.device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
-                    userDevice.device.status = DeviceStatus.Online;
+            if (message.body.length < 1) {
+                return;
+            }
 
-                    userDevice.user.dash.addHardChannel(ctx.channel());
+            UserDevice userDevice = holder.deviceDao.getUserDevice(message.body[0]);
+
+            if (userDevice != null) {
+                userDevice.device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
+                userDevice.device.status = DeviceStatus.Online;
+
+                userDevice.user.dash.addHardChannel(ctx.channel());
+
+                ctx.pipeline().replace(HardwareLoginHandler.class, "HardwareHandler",
+                        new HardwareHandler(holder, userDevice));
+
+                userDevice.user.dash.sendToApps(ctx.channel(),
+                        new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(userDevice.device.id),
+                                DeviceStatus.Online.toString()));
+
+                ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "1"));
+            }
+
+            else {
+                User user = holder.userDao.getUserFromProvisioningToken(message.body[0]);
+
+                if (user != null) {
+
+                    log.debug("Provisioning Device for user {}", user.email);
+
+                    Device device = new Device();
+                    Device dbDevice = user.dash.getLastDevice();
+                    device.token = user.dash.provisioningToken;
+                    device.id = dbDevice == null ? 1 : dbDevice.id + 1;
+                    device.name = "Device " + device.id;
+                    device.status = DeviceStatus.Online;
+                    device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
+
+                    // Will be Updated Later By the user
+                    device.blueprint_id = "";
+
+                    user.dash.addDevice(device);
+                    user.updated();
+
+                    user.dash.addHardChannel(ctx.channel());
 
                     ctx.pipeline().replace(HardwareLoginHandler.class, "HardwareHandler",
-                            new HardwareHandler(holder, userDevice));
+                            new HardwareHandler(holder, new UserDevice(user, device)));
 
-                    userDevice.user.dash.sendToApps(ctx.channel(),
-                            new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(userDevice.device.id),
-                                    DeviceStatus.Online.toString()));
-
+                    // We are not using the device.id here because end user doesn't know it
+                    user.dash.sendToApps(ctx.channel(),
+                            new HardwareMessage(MsgType.DEVICE_STATUS, "0", DeviceStatus.Online.toString()));
                     ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "1"));
-                }
-
-                else {
-                    User user = holder.userDao.getUserFromProvisioningToken(message.body[0]);
-
-                    if (user != null) {
-
-                        log.debug("Provisioning Device for user {}", user.email);
-
-                        Device device = new Device();
-                        Device dbDevice = user.dash.getLastDevice();
-                        device.token = user.dash.provisioningToken;
-                        device.id = dbDevice == null ? 1 : dbDevice.id + 1;
-                        device.name = "Device " + device.id;
-                        device.status = DeviceStatus.Online;
-                        device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
-
-                        // Will be Updated Later By the user
-                        device.blueprint_id = "";
-
-                        user.dash.addDevice(device);
-                        user.isUpdated = true;
-
-                        user.dash.addHardChannel(ctx.channel());
-
-                        ctx.pipeline().replace(HardwareLoginHandler.class, "HardwareHandler",
-                                new HardwareHandler(holder, new UserDevice(user, device)));
-
-                        // We are not using the device.id here because end user doesn't know it
-                        user.dash.sendToApps(ctx.channel(),
-                                new HardwareMessage(MsgType.DEVICE_STATUS, "0", DeviceStatus.Online.toString()));
-                        ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "1"));
-                    } else {
-                        ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "0"));
-                    }
+                } else {
+                    ctx.writeAndFlush(new HardwareMessage(MsgType.AUTH, "0"));
                 }
             }
+
         }
     }
 }

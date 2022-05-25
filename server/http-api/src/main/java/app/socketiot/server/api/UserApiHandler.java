@@ -188,7 +188,7 @@ public class UserApiHandler extends BaseHttpHandler {
 
         user.token = holder.jwtUtil.createToken(user.email, refresh_token_expiry_time);
 
-        userDao.updateUser(user);
+        user.updated();
         tokenDao.removeToken(token);
 
         return StatusMsg.ok("Password has been reset");

@@ -1,12 +1,9 @@
 package app.socketiot.server.api;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import app.socketiot.server.api.model.GoogleAssistant.Command;
 import app.socketiot.server.api.model.GoogleAssistant.Device;
 import app.socketiot.server.api.model.GoogleAssistant.DeviceInfo;
@@ -181,7 +178,8 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
                             }
 
                             ec.states.on = execution.params.on;
-                            user.isUpdated = true;
+
+                            user.updated();
                         }
                     }
 

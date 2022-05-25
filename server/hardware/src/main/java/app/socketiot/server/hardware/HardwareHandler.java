@@ -55,12 +55,19 @@ public class HardwareHandler extends HardwareStateBase {
 
     public void handleInfo(ChannelHandlerContext ctx, String[] body) {
         HardwareInfo info = new HardwareInfo(body);
-        if (info.heartbeat > 0) {
-            log.trace("Changing Hearbeat for {} with value {}", ctx.channel(), info.heartbeat);
-            ctx.pipeline().replace(IdleStateHandler.class, "IdleStateHandler",
-                    new IdleStateHandler(NumberUtil.calculateHeartBeat(info.heartbeat), 0, 0));
+
+        if (info.heartbeat < 1) {
+            return;
         }
+
+        log.trace("Changing Hearbeat for {} with value {}", ctx.channel(), info.heartbeat);
+
+        ctx.pipeline().replace(IdleStateHandler.class, "IdleStateHandler",
+                new IdleStateHandler(NumberUtil.calculateHeartBeat(info.heartbeat), 0, 0));
+
         device.info = info;
+
+        user.updated();
     }
 
     public void process(ChannelHandlerContext ctx, HardwareMessage msg) {
@@ -85,14 +92,18 @@ public class HardwareHandler extends HardwareStateBase {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         user.dash.removeHardChannel(ctx.channel());
-        if (user.dash.getHardwareChannelCount(device.id) == 0) {
-            device.status = DeviceStatus.Offline;
-            device.lastOnline = System.currentTimeMillis();
-            user.dash.sendToApps(ctx.channel(),
-                    new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(device.id),
-                            DeviceStatus.Offline.toString()));
-            user.isUpdated = true;
+
+        if (user.dash.getHardwareChannelCount(device.id) != 0) {
+            return;
         }
+
+        device.status = DeviceStatus.Offline;
+        device.lastOnline = System.currentTimeMillis();
+        user.dash.sendToApps(ctx.channel(),
+                new HardwareMessage(MsgType.DEVICE_STATUS, String.valueOf(device.id),
+                        DeviceStatus.Offline.toString()));
+
+        user.updated();
     }
 
     public Device getDevice() {

@@ -56,7 +56,9 @@ public class WidgetApiHandler extends JwtHttpHandler {
                         }
                     }
                 }
-                req.user.isUpdated = true;
+
+                req.user.updated();
+
                 return StatusMsg.ok("Widgets Added Successfully");
             } else {
                 return StatusMsg.badRequest("Invalid Blueprint Id");

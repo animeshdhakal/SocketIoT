@@ -28,6 +28,12 @@ public class AppHandler extends ChannelInboundHandlerAdapter {
         if (device == null) {
             return;
         }
+
+        if (device.pins.size() == 0) {
+            ctx.writeAndFlush(new HardwareMessage(MsgType.SYNC, String.valueOf(deviceID)));
+            return;
+        }
+
         for (Short key : device.pins.keySet()) {
             PinStore store = device.pins.get(key);
             store.sendSync(ctx.channel(), deviceID, key);
@@ -35,31 +41,33 @@ public class AppHandler extends ChannelInboundHandlerAdapter {
     }
 
     public void handleWrite(ChannelHandlerContext ctx, HardwareMessage msg) {
-        if (msg.body.length > 2) {
-            short deviceID = Short.valueOf(msg.body[0]);
-            short pin = Short.valueOf(msg.body[1]);
-            String value = msg.body[2];
-
-            Device device = user.dash.getDevice(deviceID);
-
-            if (device == null) {
-                return;
-            }
-
-            PinStore store = device.pins.get(pin);
-
-            if (store instanceof MultiValuePinStore) {
-                for (int i = 2; i < msg.body.length; i++) {
-                    store.updateValue(msg.body[i]);
-                }
-            } else if (store instanceof SingleValuePinStore) {
-                store.updateValue(value);
-            }
-
-            user.dash.broadCastWriteMessage(ctx.channel(), device.id, pin, store);
-
-            user.isUpdated = true;
+        if (msg.body.length < 2) {
+            return;
         }
+
+        short deviceID = Short.valueOf(msg.body[0]);
+        short pin = Short.valueOf(msg.body[1]);
+        String value = msg.body[2];
+
+        Device device = user.dash.getDevice(deviceID);
+
+        if (device == null) {
+            return;
+        }
+
+        PinStore store = device.pins.get(pin);
+
+        if (store instanceof MultiValuePinStore) {
+            for (int i = 2; i < msg.body.length; i++) {
+                store.updateValue(msg.body[i]);
+            }
+        } else if (store instanceof SingleValuePinStore) {
+            store.updateValue(value);
+        }
+
+        user.dash.broadCastWriteMessage(ctx.channel(), device.id, pin, store);
+
+        user.updated();
     }
 
     @Override

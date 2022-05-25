@@ -31,10 +31,14 @@ axios.interceptors.request.use(async (config) => {
       refresh_token: user.refresh_token,
     });
 
-    user.access_token = res.data.access_token;
-    user.expires_in = res.data.expires_in + Date.now();
+    if (res.status === 200) {
+      user.access_token = res.data.access_token;
+      user.expires_in = res.data.expires_in + Date.now();
 
-    localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
   }
 
   if (user.access_token && config.headers) {
