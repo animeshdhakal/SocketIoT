@@ -33,6 +33,7 @@ import app.socketiot.server.core.pinstore.PinStore;
 import app.socketiot.server.utils.NumberUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
+import io.netty.util.CharsetUtil;
 
 @ChannelHandler.Sharable
 @Path("/api/google-assistant")
@@ -194,7 +195,7 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
     @Path("/fulfillment")
     @POST
     public HttpRes fulfillment(HttpReq req) {
-        log.info("Google Assistant Request: {}", req.getContent());
+        log.trace("Google Assistant Request: {}", req.getContent());
 
         IntentReq intentreq = req.getContentAs(IntentReq.class);
 
@@ -214,7 +215,7 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
             }
         }
 
-        log.info("Google Assistant Response: {}", res.content().toString());
+        log.trace("Google Assistant Response: {}", res.content().toString(CharsetUtil.US_ASCII));
 
         return res;
     }
