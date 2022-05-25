@@ -167,7 +167,7 @@ public class GoogleAssistantIntentHandler extends JwtHttpHandler {
 
                             short pin = Short.valueOf(parts[1]);
                             PinStore store = d.pins.get(pin);
-                            store.updateValue(ec.states.on ? widget.onValue : widget.offValue);
+                            store.updateValue(execution.params.on ? widget.onValue : widget.offValue);
                             user.dash.broadCastWriteMessage(c, d.id, pin, store);
 
                             ec.states.on = execution.params.on;
