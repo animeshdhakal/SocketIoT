@@ -54,7 +54,7 @@ public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
             else {
                 User user = holder.userDao.getUserFromProvisioningToken(message.body[0]);
 
-                if (user != null) {
+                if (user != null && !user.dash.isProvisioningDeviceOnline) {
 
                     log.debug("Provisioning Device for user {}", user.email);
 
@@ -66,7 +66,6 @@ public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
                     device.status = DeviceStatus.Online;
                     device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
 
-                    user.dash.provisioningToken = null;
                     user.dash.isProvisioningDeviceOnline = true;
 
                     // Will be Updated Later By the user
