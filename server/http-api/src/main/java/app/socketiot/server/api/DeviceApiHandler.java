@@ -128,10 +128,6 @@ public class DeviceApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Device Not Yet Connected !");
         }
 
-        if (!addPins(device, blueprint_id)) {
-            return StatusMsg.badRequest("Blueprint not found");
-        }
-
         device.blueprint_id = blueprint_id;
         device.name = name;
 
