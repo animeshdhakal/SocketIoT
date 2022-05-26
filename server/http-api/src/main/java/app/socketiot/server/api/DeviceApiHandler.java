@@ -149,7 +149,7 @@ public class DeviceApiHandler extends JwtHttpHandler {
         String name = req.getJsonFieldAsString("name");
         String blueprint_id = req.getJsonFieldAsString("blueprint_id");
 
-        if (name != null && req.user.dash.provisioningToken != null && blueprint_id != null) {
+        if (name != null && blueprint_id != null) {
             return endProvisioning(req.user, name, blueprint_id);
         } else {
             return startProvisioning(req.user);
