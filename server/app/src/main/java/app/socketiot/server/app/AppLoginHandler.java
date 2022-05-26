@@ -45,7 +45,6 @@ public class AppLoginHandler extends ChannelInboundHandlerAdapter {
 
             if (user.dash.isProvisioningDeviceOnline) {
                 ctx.writeAndFlush(new HardwareMessage(MsgType.DEVICE_STATUS, "0", DeviceStatus.Online.toString()));
-                user.dash.isProvisioningDeviceOnline = false;
             }
         }
     }

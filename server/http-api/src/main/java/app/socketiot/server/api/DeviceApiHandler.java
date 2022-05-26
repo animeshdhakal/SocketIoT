@@ -138,6 +138,9 @@ public class DeviceApiHandler extends JwtHttpHandler {
             return StatusMsg.badRequest("Provisioning Failed");
         }
 
+        user.dash.isProvisioningDeviceOnline = false;
+        user.dash.provisioningToken = null;
+
         user.updated();
 
         return StatusMsg.ok("Device Provisioned Successfully");
