@@ -38,7 +38,7 @@ public class UserDao {
 
     public User getUserFromProvisioningToken(String provisioningToken) {
         for (User user : users.values()) {
-            if (user.dash.provisioningToken.equals(provisioningToken)) {
+            if (user.dash.provisioningToken != null && user.dash.provisioningToken.equals(provisioningToken)) {
                 return user;
             }
         }

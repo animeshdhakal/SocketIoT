@@ -118,6 +118,10 @@ public class DeviceApiHandler extends JwtHttpHandler {
     }
 
     HttpRes endProvisioning(User user, String name, String blueprint_id) {
+        if (user.dash.provisioningToken == null) {
+            return StatusMsg.badRequest("Provisioning Token Not Found");
+        }
+
         Device device = holder.deviceDao.getDevice(user.dash.provisioningToken);
 
         if (device == null) {
@@ -130,6 +134,14 @@ public class DeviceApiHandler extends JwtHttpHandler {
 
         device.blueprint_id = blueprint_id;
         device.name = name;
+
+        if (!addPins(device, blueprint_id)) {
+            holder.deviceDao.removeDevice(device.token);
+            user.dash.disconnectDevices(device.token);
+            user.dash.removeDevice(device.token);
+            return StatusMsg.badRequest("Provisioning Failed");
+        }
+
         user.updated();
 
         return StatusMsg.ok("Device Provisioned Successfully");

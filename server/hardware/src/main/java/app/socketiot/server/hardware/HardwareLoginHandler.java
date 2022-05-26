@@ -29,7 +29,7 @@ public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof HardwareMessage) {
             HardwareMessage message = (HardwareMessage) msg;
 
-            if (message.body.length < 1) {
+            if (message.body.length < 1 || message.body[0] == null) {
                 return;
             }
 
@@ -65,14 +65,16 @@ public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
                     device.name = "Device " + device.id;
                     device.status = DeviceStatus.Online;
                     device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
+                    user.dash.provisioningToken = null;
 
                     // Will be Updated Later By the user
                     device.blueprint_id = "";
 
+                    holder.deviceDao.addDevice(user, device);
                     user.dash.addDevice(device);
-                    user.updated();
-
                     user.dash.addHardChannel(ctx.channel());
+
+                    user.updated();
 
                     ctx.pipeline().replace(HardwareLoginHandler.class, "HardwareHandler",
                             new HardwareHandler(holder, new UserDevice(user, device)));
