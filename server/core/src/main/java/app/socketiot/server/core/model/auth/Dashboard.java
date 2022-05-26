@@ -20,6 +20,9 @@ public class Dashboard {
     public volatile String provisioningToken;
 
     @JsonIgnore
+    public volatile boolean isProvisioningDeviceOnline = false;
+
+    @JsonIgnore
     public Set<Channel> hardChannels = new HashSet<>();
 
     @JsonIgnore

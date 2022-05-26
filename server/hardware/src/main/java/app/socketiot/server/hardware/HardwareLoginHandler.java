@@ -65,7 +65,9 @@ public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
                     device.name = "Device " + device.id;
                     device.status = DeviceStatus.Online;
                     device.lastIP = IPUtil.getIP(ctx.channel().remoteAddress());
+
                     user.dash.provisioningToken = null;
+                    user.dash.isProvisioningDeviceOnline = true;
 
                     // Will be Updated Later By the user
                     device.blueprint_id = "";
