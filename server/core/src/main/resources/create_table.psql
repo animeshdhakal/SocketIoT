@@ -1,0 +1,10 @@
+-- DROP TABLE IF EXISTS users;
+
+
+CREATE TABLE IF NOT EXISTS users (
+    email text NOT NULL,
+    password text NOT NULL,
+    json text,
+    last_modified timestamp,
+    PRIMARY KEY (email)
+);

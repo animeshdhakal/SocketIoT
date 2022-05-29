@@ -1,6 +1,7 @@
+version := $(shell grep -oPm1 "(?<=<version>)[^<]+" "pom.xml")
 
 run: build
-	java -jar server/launcher/target/server-1.0.jar
+	java -jar server/launcher/target/server-$(version).jar
 
 build:
 	mvn package

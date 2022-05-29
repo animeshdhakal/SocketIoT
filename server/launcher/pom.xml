@@ -51,26 +51,15 @@
     </plugins>
   </build>
 
-
   <dependencies>
     <dependency>
       <groupId>app.socketiot.server</groupId>
-      <artifactId>core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>app.socketiot.server</groupId>
-      <artifactId>http-api</artifactId>
+      <artifactId>app</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>app.socketiot.server</groupId>
       <artifactId>hardware</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>app.socketiot.server</groupId>
-      <artifactId>app</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
     <Appenders>
-        <File name="log" fileName="${sys:logsFolder}/server.log" append="false">
+        <File name="log" fileName="${sys:df}/logs/server.log" append="false">
             <PatternLayout>
                 <pattern>[%d{ISO8601} %-5level] %logger{36} - %msg%n</pattern>
             </PatternLayout>
@@ -9,15 +9,8 @@
     </Appenders>
     <Loggers>
         <Logger name="com.zaxxer.hikari" level="OFF" additivity="false"/>
-
-        <Logger name="io.netty" level="INFO" additivity="false" />
-
-        <Logger name="org.shredzone.acme4j" level="INFO" additivity="false" />
-
-        <Logger name="org.jose4j" level="INFO" additivity="false" />
-
-         <Logger name="org.asynchttpclient" level="OFF" additivity="false" />
-
+        <Logger name="io.netty" level="INFO" additivity="false"/>
+        <Logger name="org.asynchttpclient" level="OFF" additivity="false"/>
         <Root level="info">
             <AppenderRef ref="log"/>
         </Root>

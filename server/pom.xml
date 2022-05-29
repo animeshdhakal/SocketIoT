@@ -27,15 +27,15 @@
         
   
   
-  <packaging>pom</packaging>
-        
-  
-  
   <groupId>app.socketiot.server</groupId>
         
   
   
   <artifactId>server</artifactId>
+        
+  
+  
+  <packaging>pom</packaging>
         
   
   
@@ -51,18 +51,14 @@
                 
     
     
-    <module>http-api</module>
-                
-    
-    
-    <module>utils</module>
+    <module>app</module>
               
     
     
-    <module>hardware</module>
+    <module>utils</module>
           
     
-    <module>app</module>
+    <module>hardware</module>
       
   </modules>
       
