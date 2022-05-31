@@ -12,10 +12,20 @@ public class MsgType {
     // For App Only
     public static final short FAILED = 60;
     public static final short REGISTER = 61;
+
+    // Device
     public static final short ADD_DEVICE = 62;
     public static final short REMOVE_DEVICE = 63;
     public static final short GET_DEVICE = 64;
     public static final short UPDATE_DEVICE = 65;
     public static final short GET_DEVICES_LIST = 66;
+
+    // BluePrint
+    public static final short CREATE_BLUEPRINT = 67;
+    public static final short GET_BLUEPRINT = 68;
+    public static final short UPDATE_BLUEPRINT = 69;
+    public static final short DELETE_BLUEPRINT = 70;
+    public static final short GET_BLUEPRINTS_LIST = 71;
+    public static final short ADD_WIDGETS_BLUEPRINT = 72;
 
 }

@@ -1,5 +1,6 @@
-package app.socketiot.server.servers;
+package app.socketiot.server.http.core;
 
+import app.socketiot.server.core.model.json.JsonParser;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -12,6 +13,11 @@ public class HttpRes extends DefaultFullHttpResponse {
     public HttpRes(HttpResponseStatus status, HttpVersion version, String content) {
         super(version, status, Unpooled.copiedBuffer(content, CharsetUtil.UTF_8));
         addRequiredHeaders();
+    }
+
+    public HttpRes(HttpResponseStatus status, Object obj) {
+        this(status, HttpVersion.HTTP_1_1, JsonParser.toProtectedJson(obj));
+        headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json");
     }
 
     public HttpRes(String content) {
@@ -53,6 +59,10 @@ public class HttpRes extends DefaultFullHttpResponse {
 
     public static HttpRes internalServerError(String content) {
         return new HttpRes(HttpResponseStatus.INTERNAL_SERVER_ERROR, content);
+    }
+
+    public static HttpRes json(Object obj) {
+        return new HttpRes(HttpResponseStatus.OK, obj);
     }
 
     public static HttpRes redirect(String uri) {

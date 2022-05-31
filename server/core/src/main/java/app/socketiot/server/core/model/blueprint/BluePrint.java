@@ -14,4 +14,11 @@ public class BluePrint {
         this.id = id;
         this.widgets = widgets;
     }
+
+    public boolean isInvalid() {
+        return name == null || name.length() > 40;
+    }
+
+    public BluePrint() {
+    }
 }

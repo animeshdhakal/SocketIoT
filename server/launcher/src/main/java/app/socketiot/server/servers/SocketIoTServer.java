@@ -1,8 +1,14 @@
 package app.socketiot.server.servers;
 
 import app.socketiot.server.AppLoginHandler;
+import app.socketiot.server.AppStateHandler;
 import app.socketiot.server.Holder;
 import app.socketiot.server.hardware.HardwareLoginHandler;
+import app.socketiot.server.hardware.HardwareStateHandler;
+import app.socketiot.server.http.core.handlers.FileUploadHandler;
+import app.socketiot.server.http.core.handlers.ReactHandler;
+import app.socketiot.server.http.core.handlers.StaticFileHandler;
+import app.socketiot.server.http.handlers.TestHttpHandler;
 import app.socketiot.server.internal.codec.MessageDecoder;
 import app.socketiot.server.internal.codec.MessageEncoder;
 import app.socketiot.server.internal.codec.WSMessageDecoder;
@@ -17,7 +23,9 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.HttpServerKeepAliveHandler;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 
 public class SocketIoTServer extends ServerBase {
@@ -33,6 +41,14 @@ public class SocketIoTServer extends ServerBase {
         int hardwareHeartbeat = NumberUtil.calcHeartBeat(holder.defaults.hardwareIdleTimeout);
 
         var appLoginHandler = new AppLoginHandler(holder);
+        var appStateHandler = new AppStateHandler();
+
+        var hardwareLoginHandler = new HardwareLoginHandler(holder);
+        var harwareStateHandler = new HardwareStateHandler();
+
+        var staticFileHandler = new StaticFileHandler(holder.isUnpacked, holder.jarPath, "/static");
+        var reactHandler = new ReactHandler(holder.isUnpacked, holder.jarPath, "/static/index.html");
+        var fileUploadHandler = new FileUploadHandler(holder.jarPath, "/api/upload", "/static");
 
         ProtocolMerger protocolMerger = new ProtocolMerger() {
             @Override
@@ -52,19 +68,24 @@ public class SocketIoTServer extends ServerBase {
 
             public void initHttpPipeline(ChannelHandlerContext ctx) {
                 ChannelPipeline pipeline = ctx.pipeline();
-                pipeline.addLast(new TestHttpServer());
+                pipeline.addLast(new TestHttpHandler());
+                pipeline.addLast(staticFileHandler);
+                pipeline.addLast(fileUploadHandler);
+                pipeline.addLast(reactHandler);
                 pipeline.remove(this);
             }
 
             public void initAppWSPipeline(ChannelHandlerContext ctx) {
                 ChannelPipeline pipeline = ctx.pipeline();
                 pipeline.addFirst(new IdleStateHandler(holder.defaults.appIdleTimeout, 0, 0));
+                pipeline.addLast(appStateHandler);
                 pipeline.addLast(new WebSocketServerProtocolHandler(appWSPath, null, true));
                 pipeline.addLast(new WSMessageDecoder());
                 pipeline.addLast(new MessageDecoder(holder.defaults.quotaLimit));
                 pipeline.addLast(new WSMessageEncoder());
                 pipeline.addLast(new MessageEncoder());
                 pipeline.addLast(appLoginHandler);
+                pipeline.remove(ChunkedWriteHandler.class);
                 pipeline.remove(this);
 
             }
@@ -72,12 +93,14 @@ public class SocketIoTServer extends ServerBase {
             public void initHardwareWSPipeline(ChannelHandlerContext ctx) {
                 ChannelPipeline pipeline = ctx.pipeline();
                 pipeline.addFirst(new IdleStateHandler(hardwareHeartbeat, 0, 0));
+                pipeline.addLast(harwareStateHandler);
                 pipeline.addLast(new WebSocketServerProtocolHandler(appWSPath, null, true));
                 pipeline.addLast(new WSMessageDecoder());
                 pipeline.addLast(new MessageDecoder(holder.defaults.quotaLimit));
                 pipeline.addLast(new WSMessageEncoder());
                 pipeline.addLast(new MessageEncoder());
-                pipeline.addLast(new HardwareLoginHandler());
+                pipeline.addLast(hardwareLoginHandler);
+                pipeline.remove(ChunkedWriteHandler.class);
                 pipeline.remove(this);
             }
 
@@ -92,7 +115,9 @@ public class SocketIoTServer extends ServerBase {
                     @Override
                     public ChannelPipeline buildHttpPipeline(ChannelPipeline pipeline) {
                         pipeline.addLast(new HttpServerCodec());
+                        pipeline.addLast(new HttpServerKeepAliveHandler());
                         pipeline.addLast(new HttpObjectAggregator(512 * 1024, true));
+                        pipeline.addLast(new ChunkedWriteHandler());
                         pipeline.addLast(protocolMerger);
                         return pipeline;
                     }
@@ -100,9 +125,10 @@ public class SocketIoTServer extends ServerBase {
                     @Override
                     public ChannelPipeline buildHardwarePipeline(ChannelPipeline pipeline) {
                         pipeline.addFirst(new IdleStateHandler(hardwareHeartbeat, 0, 0));
+                        pipeline.addLast(harwareStateHandler);
                         pipeline.addLast(new MessageDecoder(holder.defaults.quotaLimit));
                         pipeline.addLast(new MessageEncoder());
-                        pipeline.addLast(new HardwareLoginHandler());
+                        pipeline.addLast(hardwareLoginHandler);
                         return pipeline;
                     }
                 });

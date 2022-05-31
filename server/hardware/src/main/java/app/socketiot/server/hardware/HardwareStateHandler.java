@@ -1,14 +1,12 @@
-package app.socketiot.server;
+package app.socketiot.server.hardware;
 
-import io.netty.channel.ChannelHandler;
+import app.socketiot.server.core.model.enums.DeviceStatus;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 
-@ChannelHandler.Sharable
-public class AppStateHandler extends ChannelInboundHandlerAdapter {
-
+public class HardwareStateHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof IdleStateEvent) {
@@ -23,10 +21,10 @@ public class AppStateHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        AppHandler appHandler = ctx.pipeline().get(AppHandler.class);
-        if (appHandler != null) {
-            appHandler.user.dash.removeAppChannel(ctx.channel());
+        HardwareHandler hardwareHandler = ctx.pipeline().get(HardwareHandler.class);
+        if (hardwareHandler != null) {
+            hardwareHandler.userDevice.device.status = DeviceStatus.Offline;
+            hardwareHandler.userDevice.user.lastModified = System.currentTimeMillis();
         }
     }
-
 }

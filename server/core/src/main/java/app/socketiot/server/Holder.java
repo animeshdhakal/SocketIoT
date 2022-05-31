@@ -4,9 +4,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import app.socketiot.server.cli.ArgParser;
 import app.socketiot.server.cli.properties.ServerProperties;
+import app.socketiot.server.core.dao.BluePrintDao;
+import app.socketiot.server.core.dao.DeviceDao;
 import app.socketiot.server.core.dao.UserDao;
 import app.socketiot.server.db.DB;
 import app.socketiot.server.db.dao.UserDBDao;
+import app.socketiot.utils.JarUtil;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
@@ -25,7 +28,11 @@ public class Holder {
     public final DB db;
     public final UserDBDao userDBDao;
     public final UserDao userDao;
+    public final DeviceDao deviceDao;
+    public final BluePrintDao bluePrintDao;
     public final Defaults defaults;
+    public final boolean isUnpacked;
+    public final String jarPath;
 
     public Holder(ArgParser argParser, ServerProperties props) {
         this.argParser = argParser;
@@ -46,7 +53,10 @@ public class Holder {
         this.db = new DB(props);
         this.userDBDao = new UserDBDao(db);
         this.userDao = new UserDao(userDBDao.getAllUsers());
-
+        this.deviceDao = new DeviceDao(userDao.getAllUsers());
+        this.bluePrintDao = new BluePrintDao(userDao.getAllUsers());
+        this.jarPath = JarUtil.getJarPath();
+        this.isUnpacked = JarUtil.unpackStaticFiles(jarPath, "static");
     }
 
     public void close() {

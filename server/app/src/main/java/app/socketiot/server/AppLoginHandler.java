@@ -42,7 +42,8 @@ public class AppLoginHandler extends ChannelInboundHandlerAdapter {
         }
 
         if (user.password.equals(password)) {
-            ctx.pipeline().replace(this, "AppHandler", new AppHandler(user));
+            user.dash.addAppChannel(ctx.channel());
+            ctx.pipeline().replace(this, "AppHandler", new AppHandler(holder, user));
             ctx.writeAndFlush(new InternalMessage(MsgType.AUTH, "User logged in Successfully"));
         } else {
             ctx.writeAndFlush(new InternalMessage(MsgType.FAILED, "Invalid Email or Password"));
