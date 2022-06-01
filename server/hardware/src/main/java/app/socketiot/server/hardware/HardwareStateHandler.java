@@ -1,6 +1,7 @@
 package app.socketiot.server.hardware;
 
 import app.socketiot.server.core.model.enums.DeviceStatus;
+import app.socketiot.server.core.model.statebase.HardwareStateBase;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
@@ -21,10 +22,11 @@ public class HardwareStateHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        HardwareHandler hardwareHandler = ctx.pipeline().get(HardwareHandler.class);
-        if (hardwareHandler != null) {
-            hardwareHandler.userDevice.device.status = DeviceStatus.Offline;
-            hardwareHandler.userDevice.user.lastModified = System.currentTimeMillis();
+        HardwareStateBase stateBase = ctx.pipeline().get(HardwareStateBase.class);
+        if (stateBase != null) {
+            // TODO: Update Status of Device to the App
+            stateBase.getDevice().status = DeviceStatus.Offline;
+            stateBase.getUser().lastModified = System.currentTimeMillis();
         }
     }
 }

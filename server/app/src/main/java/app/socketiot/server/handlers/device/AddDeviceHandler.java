@@ -49,7 +49,7 @@ public class AddDeviceHandler {
         device.pinStorage = new ConcurrentHashMap<>();
 
         for (Widget widget : bluePrint.widgets) {
-            device.pinStorage.put(widget.pin, new SingleValuePinStorage(""));
+            device.pinStorage.put(widget.pin, new SingleValuePinStorage(null));
         }
 
         user.dash.addDevice(device);

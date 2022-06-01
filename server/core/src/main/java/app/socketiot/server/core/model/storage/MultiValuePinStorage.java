@@ -1,5 +1,7 @@
 package app.socketiot.server.core.model.storage;
 
+import java.util.Collection;
+
 import app.socketiot.server.core.model.structure.LimitedQueue;
 
 public class MultiValuePinStorage extends PinStorage {
@@ -15,4 +17,8 @@ public class MultiValuePinStorage extends PinStorage {
         this.values.add(value);
     }
 
+    @Override
+    public Collection<String> getValues() {
+        return this.values;
+    }
 }

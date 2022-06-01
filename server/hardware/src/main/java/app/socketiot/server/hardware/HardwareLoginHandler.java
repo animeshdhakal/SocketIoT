@@ -45,6 +45,8 @@ public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
 
         userDevice.user.lastModified = System.currentTimeMillis();
 
+        // TODO: Send Status of Device to App
+
         ctx.pipeline().replace(this, "HardwareHandler", new HardwareHandler(userDevice));
 
         ctx.writeAndFlush(new InternalMessage(MsgType.AUTH, "1"));

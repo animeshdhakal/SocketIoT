@@ -49,7 +49,7 @@ public class AddWidgetsBluePrintHandler {
                 if (device.pinStorage.get(widget.pin) != null) {
                     pinStorages.put(widget.pin, device.pinStorage.get(widget.pin));
                 } else {
-                    pinStorages.put(widget.pin, new SingleValuePinStorage(""));
+                    pinStorages.put(widget.pin, new SingleValuePinStorage(null));
                 }
             }
         }

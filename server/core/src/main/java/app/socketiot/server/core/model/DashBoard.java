@@ -2,11 +2,11 @@ package app.socketiot.server.core.model;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import app.socketiot.server.core.model.blueprint.BluePrint;
 import app.socketiot.server.core.model.device.Device;
+import app.socketiot.server.core.model.enums.MsgType;
+import app.socketiot.server.core.model.message.InternalMessage;
 import app.socketiot.utils.ArrayUtil;
 import io.netty.channel.Channel;
 
@@ -36,6 +36,12 @@ public class DashBoard {
 
     public void removeHardChannel(Channel channel) {
         hardChannels.remove(channel);
+    }
+
+    public void broadCastMessage(Channel channel, int deviceID, String pin, String... values) {
+        StringBuilder sb = new StringBuilder();
+        
+        
     }
 
     public Device getLastDevice() {

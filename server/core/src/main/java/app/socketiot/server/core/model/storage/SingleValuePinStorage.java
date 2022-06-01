@@ -1,5 +1,8 @@
 package app.socketiot.server.core.model.storage;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public class SingleValuePinStorage extends PinStorage {
@@ -11,6 +14,14 @@ public class SingleValuePinStorage extends PinStorage {
 
     public void updateValue(String value) {
         this.value = value;
+    }
+
+    @Override
+    public Collection<String> getValues() {
+        if (value == null) {
+            return Collections.emptyList();
+        }
+        return Collections.singletonList(value);
     }
 
     @Override
