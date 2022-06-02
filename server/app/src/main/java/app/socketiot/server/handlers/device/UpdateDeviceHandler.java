@@ -10,6 +10,11 @@ import io.netty.channel.ChannelHandlerContext;
 
 public class UpdateDeviceHandler {
     public static void handleMessage(ChannelHandlerContext ctx, User user, InternalMessage message) {
+        if (message.body.length < 1) {
+            ctx.writeAndFlush(new InternalMessage(MsgType.FAILED, "Invalid Command"));
+            return;
+        }
+
         String deviceJson = message.body[0];
 
         if (deviceJson == null || deviceJson.isEmpty()) {

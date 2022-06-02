@@ -5,13 +5,12 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import app.socketiot.server.core.model.blueprint.BluePrint;
 import app.socketiot.server.core.model.device.Device;
-import app.socketiot.server.core.model.enums.MsgType;
 import app.socketiot.server.core.model.message.InternalMessage;
+import app.socketiot.server.core.model.statebase.HardwareStateBase;
 import app.socketiot.utils.ArrayUtil;
 import io.netty.channel.Channel;
 
 public class DashBoard {
-
     public volatile Device[] devices = {};
 
     public volatile BluePrint[] bluePrints = {};
@@ -38,10 +37,21 @@ public class DashBoard {
         hardChannels.remove(channel);
     }
 
-    public void broadCastMessage(Channel channel, int deviceID, String pin, String... values) {
-        StringBuilder sb = new StringBuilder();
-        
-        
+    public void sendToApps(Channel channel, InternalMessage message) {
+        for (Channel appChannel : appChannels) {
+            if (appChannel != channel) {
+                appChannel.writeAndFlush(message);
+            }
+        }
+    }
+
+    public void sendToHardwares(Channel channel, int deviceID, InternalMessage message) {
+        for (Channel hardChannel : hardChannels) {
+            HardwareStateBase state = channel.pipeline().get(HardwareStateBase.class);
+            if (hardChannel != channel && state != null && state.getDevice().id == deviceID) {
+                hardChannel.writeAndFlush(message);
+            }
+        }
     }
 
     public Device getLastDevice() {
@@ -54,6 +64,15 @@ public class DashBoard {
     public Device getDeviceByToken(String token) {
         for (Device device : devices) {
             if (device.token.equals(token)) {
+                return device;
+            }
+        }
+        return null;
+    }
+
+    public Device getDeviceByID(int id) {
+        for (Device device : devices) {
+            if (device.id == id) {
                 return device;
             }
         }

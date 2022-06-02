@@ -1,9 +1,9 @@
 package app.socketiot.server.core.dao;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
-
 import app.socketiot.server.core.model.auth.User;
 import app.socketiot.server.core.model.device.Device;
 import app.socketiot.server.core.model.device.UserDevice;
@@ -12,6 +12,7 @@ public class DeviceDao {
     private ConcurrentMap<String, UserDevice> devices;
 
     public DeviceDao(ConcurrentMap<String, User> users) {
+        devices = new ConcurrentHashMap<>();
         for (User user : users.values()) {
             for (Device device : user.dash.devices) {
                 devices.put(device.token, new UserDevice(user, device));
@@ -20,8 +21,13 @@ public class DeviceDao {
     }
 
     public List<Device> getAllDevicesByBluePrintID(String bluePrintID) {
-        return devices.values().stream().filter(userDevice -> userDevice.device.bluePrintID.equals(bluePrintID))
-                .map(userDevice -> userDevice.device).collect(Collectors.toList());
+        List<Device> bluePrintDevices = new ArrayList<>();
+        for (UserDevice userDevice : devices.values()) {
+            if (userDevice.device.bluePrintID.equals(bluePrintID)) {
+                bluePrintDevices.add(userDevice.device);
+            }
+        }
+        return bluePrintDevices;
     }
 
     public UserDevice getUserDeviceByToken(String token) {

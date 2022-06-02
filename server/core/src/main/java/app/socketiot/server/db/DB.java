@@ -48,6 +48,10 @@ public class DB {
         log.info("Connected to DB");
     }
 
+    public boolean isConnected() {
+        return ds != null;
+    }
+
     public Connection getConnection() throws Exception {
         return ds.getConnection();
     }

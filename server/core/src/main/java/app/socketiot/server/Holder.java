@@ -20,18 +20,33 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 public class Holder {
     public static final Logger log = LogManager.getLogger(Holder.class);
+
     public final ArgParser argParser;
+
     public final ServerProperties props;
+
     public final EventLoopGroup bossGroup;
+
     public final EventLoopGroup workerGroup;
+
     public final Class<? extends ServerChannel> channelClass;
+
     public final DB db;
+
     public final UserDBDao userDBDao;
+
     public final UserDao userDao;
+
     public final DeviceDao deviceDao;
+
     public final BluePrintDao bluePrintDao;
+
     public final Defaults defaults;
+
+    public final SslCtxHolder sslCtxHolder;
+
     public final boolean isUnpacked;
+
     public final String jarPath;
 
     public Holder(ArgParser argParser, ServerProperties props) {
@@ -55,6 +70,7 @@ public class Holder {
         this.userDao = new UserDao(userDBDao.getAllUsers());
         this.deviceDao = new DeviceDao(userDao.getAllUsers());
         this.bluePrintDao = new BluePrintDao(userDao.getAllUsers());
+        this.sslCtxHolder = new SslCtxHolder(props, argParser.hasArg("-ssl"));
         this.jarPath = JarUtil.getJarPath();
         this.isUnpacked = JarUtil.unpackStaticFiles(jarPath, "static");
     }

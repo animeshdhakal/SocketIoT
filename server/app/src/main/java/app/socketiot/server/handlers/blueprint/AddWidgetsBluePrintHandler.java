@@ -2,7 +2,6 @@ package app.socketiot.server.handlers.blueprint;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-
 import app.socketiot.server.core.dao.DeviceDao;
 import app.socketiot.server.core.model.auth.User;
 import app.socketiot.server.core.model.blueprint.BluePrint;
@@ -18,6 +17,11 @@ import io.netty.channel.ChannelHandlerContext;
 public class AddWidgetsBluePrintHandler {
     public static void handleMessage(DeviceDao deviceDao, ChannelHandlerContext ctx, User user,
             InternalMessage message) {
+        if (message.body.length < 1) {
+            ctx.writeAndFlush(new InternalMessage(MsgType.FAILED, "Invalid Command"));
+            return;
+        }
+
         String bluePrintJson = message.body[0];
 
         if (bluePrintJson == null || bluePrintJson.isEmpty()) {
@@ -49,13 +53,13 @@ public class AddWidgetsBluePrintHandler {
                 if (device.pinStorage.get(widget.pin) != null) {
                     pinStorages.put(widget.pin, device.pinStorage.get(widget.pin));
                 } else {
-                    pinStorages.put(widget.pin, new SingleValuePinStorage(null));
+                    pinStorages.put(widget.pin, new SingleValuePinStorage(""));
                 }
             }
         }
 
         user.lastModified = System.currentTimeMillis();
 
-        ctx.writeAndFlush(new InternalMessage(MsgType.ADD_WIDGETS_BLUEPRINT, JsonParser.toPrivateJson(dbBluePrint)));
+        ctx.writeAndFlush(new InternalMessage(MsgType.ADD_WIDGETS_BLUEPRINT, JsonParser.toProtectedJson(dbBluePrint)));
     }
 }

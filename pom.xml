@@ -24,7 +24,8 @@
     <postgresql.version>42.3.6</postgresql.version>
     <HikariCP.version>5.0.1</HikariCP.version>
     <jackson-databind.version>2.13.3</jackson-databind.version>
-
+    <bouncycastle.version>1.70</bouncycastle.version>
+    <acme4j.version>2.13</acme4j.version>
   </properties>
 
   <dependencies>
@@ -54,7 +55,11 @@
       <artifactId>disruptor</artifactId>
       <version>${disruptor.version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcpg-jdk15on</artifactId>
+      <version>${bouncycastle.version}</version>
+    </dependency>
   </dependencies>
 
   <modules>

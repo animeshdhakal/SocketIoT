@@ -17,13 +17,13 @@ public class HardwareLoginHandler extends ChannelInboundHandlerAdapter {
     }
 
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        InternalMessage message = (InternalMessage) msg;
+        InternalMessage internalMessage = (InternalMessage) msg;
 
-        if (message.type != MsgType.AUTH) {
+        if (internalMessage.type != MsgType.AUTH) {
             return;
         }
 
-        String token = message.body[0];
+        String token = internalMessage.body[0];
 
         if (token == null || token.isEmpty()) {
             ctx.writeAndFlush(new InternalMessage(MsgType.AUTH, "0"));

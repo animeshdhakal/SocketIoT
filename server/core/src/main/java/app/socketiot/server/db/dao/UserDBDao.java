@@ -24,20 +24,22 @@ public class UserDBDao {
 
     public ConcurrentMap<String, User> getAllUsers() {
         ConcurrentMap<String, User> users = new ConcurrentHashMap<>();
-        try (Connection connection = db.getConnection()) {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM users");
-            ResultSet rs = statement.executeQuery();
+        if (db.isConnected()) {
+            try (Connection connection = db.getConnection()) {
+                PreparedStatement statement = connection.prepareStatement("SELECT * FROM users");
+                ResultSet rs = statement.executeQuery();
 
-            while (rs.next()) {
-                Timestamp lastModified = rs.getTimestamp("last_modified");
-                User user = new User(rs.getString("email"), rs.getString("password"),
-                        lastModified == null ? 0 : lastModified.getTime(),
-                        JsonParser.parsePrivateJson(rs.getString("json"), DashBoard.class));
-                users.put(user.email, user);
+                while (rs.next()) {
+                    Timestamp lastModified = rs.getTimestamp("last_modified");
+                    User user = new User(rs.getString("email"), rs.getString("password"),
+                            lastModified == null ? 0 : lastModified.getTime(),
+                            JsonParser.parsePrivateJson(rs.getString("json"), DashBoard.class));
+                    users.put(user.email, user);
+                }
+
+            } catch (Exception e) {
+                log.error("Unexpected Error Occured while getting all users from DB", e);
             }
-
-        } catch (Exception e) {
-            log.error("Unexpected Error Occured while getting all users from DB", e);
         }
         return users;
     }

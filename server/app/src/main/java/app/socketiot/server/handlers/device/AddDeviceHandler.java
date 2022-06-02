@@ -19,6 +19,12 @@ public class AddDeviceHandler {
 
     public static void handleMessage(Holder holder, ChannelHandlerContext ctx, User user,
             InternalMessage message) {
+
+        if (message.body.length < 1) {
+            ctx.writeAndFlush(new InternalMessage(MsgType.FAILED, "Invalid Command"));
+            return;
+        }
+
         String deviceJson = message.body[0];
 
         if (deviceJson == null || deviceJson.isEmpty()) {
@@ -49,7 +55,7 @@ public class AddDeviceHandler {
         device.pinStorage = new ConcurrentHashMap<>();
 
         for (Widget widget : bluePrint.widgets) {
-            device.pinStorage.put(widget.pin, new SingleValuePinStorage(null));
+            device.pinStorage.put(widget.pin, new SingleValuePinStorage(""));
         }
 
         user.dash.addDevice(device);
@@ -57,6 +63,6 @@ public class AddDeviceHandler {
 
         user.lastModified = System.currentTimeMillis();
 
-        ctx.writeAndFlush(new InternalMessage(MsgType.ADD_DEVICE, JsonParser.toPrivateJson(device)));
+        ctx.writeAndFlush(new InternalMessage(MsgType.ADD_DEVICE, JsonParser.toProtectedJson(device)));
     }
 }

@@ -3,6 +3,7 @@ package app.socketiot.server;
 import app.socketiot.server.core.model.DashBoard;
 import app.socketiot.server.core.model.auth.User;
 import app.socketiot.server.core.model.enums.MsgType;
+import app.socketiot.server.core.model.json.JsonParser;
 import app.socketiot.server.core.model.message.InternalMessage;
 import app.socketiot.utils.Sha256Util;
 import app.socketiot.utils.ValidatorUtil;
@@ -41,10 +42,10 @@ public class AppLoginHandler extends ChannelInboundHandlerAdapter {
             return;
         }
 
-        if (user.password.equals(password)) {
+        if (user.password.equals(password) || user.password.equals(Sha256Util.createHash(password, email))) {
             user.dash.addAppChannel(ctx.channel());
             ctx.pipeline().replace(this, "AppHandler", new AppHandler(holder, user));
-            ctx.writeAndFlush(new InternalMessage(MsgType.AUTH, "User logged in Successfully"));
+            ctx.writeAndFlush(new InternalMessage(MsgType.AUTH, JsonParser.toPrivateJson(user)));
         } else {
             ctx.writeAndFlush(new InternalMessage(MsgType.FAILED, "Invalid Email or Password"));
         }

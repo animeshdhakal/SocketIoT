@@ -6,6 +6,7 @@ import app.socketiot.server.Holder;
 import app.socketiot.server.hardware.HardwareLoginHandler;
 import app.socketiot.server.hardware.HardwareStateHandler;
 import app.socketiot.server.http.core.handlers.FileUploadHandler;
+import app.socketiot.server.http.core.handlers.LetsEncryptHandler;
 import app.socketiot.server.http.core.handlers.ReactHandler;
 import app.socketiot.server.http.core.handlers.StaticFileHandler;
 import app.socketiot.server.http.handlers.TestHttpHandler;
@@ -49,6 +50,9 @@ public class SocketIoTServer extends ServerBase {
         var staticFileHandler = new StaticFileHandler(holder.isUnpacked, holder.jarPath, "/static");
         var reactHandler = new ReactHandler(holder.isUnpacked, holder.jarPath, "/static/index.html");
         var fileUploadHandler = new FileUploadHandler(holder.jarPath, "/api/upload", "/static");
+        var letsEncryptHandler = new LetsEncryptHandler(holder.sslCtxHolder.acmeClient);
+
+        var sslCtx = holder.sslCtxHolder.getSslCtx();
 
         ProtocolMerger protocolMerger = new ProtocolMerger() {
             @Override
@@ -71,6 +75,7 @@ public class SocketIoTServer extends ServerBase {
                 pipeline.addLast(new TestHttpHandler());
                 pipeline.addLast(staticFileHandler);
                 pipeline.addLast(fileUploadHandler);
+                pipeline.addLast(letsEncryptHandler);
                 pipeline.addLast(reactHandler);
                 pipeline.remove(this);
             }
@@ -111,6 +116,11 @@ public class SocketIoTServer extends ServerBase {
             @Override
             protected void initChannel(SocketChannel channel) throws Exception {
                 ChannelPipeline pipeline = channel.pipeline();
+
+                if (sslCtx != null) {
+                    pipeline.addLast(sslCtx.newHandler(channel.alloc()));
+                }
+
                 pipeline.addLast(new ProtocolDetector() {
                     @Override
                     public ChannelPipeline buildHttpPipeline(ChannelPipeline pipeline) {

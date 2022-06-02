@@ -11,6 +11,12 @@ import io.netty.channel.ChannelHandlerContext;
 public class DeleteBluePrintHandler {
     public static void handleMessage(BluePrintDao bluePrintDao, ChannelHandlerContext ctx, User user,
             InternalMessage message) {
+
+        if (message.body.length < 1) {
+            ctx.writeAndFlush(new InternalMessage(MsgType.FAILED, "Invalid Command"));
+            return;
+        }
+
         String bluePrintJson = message.body[0];
 
         if (bluePrintJson == null || bluePrintJson.isEmpty()) {

@@ -4,6 +4,8 @@ import app.socketiot.server.core.model.auth.User;
 import app.socketiot.server.core.model.enums.MsgType;
 import app.socketiot.server.core.model.message.InternalMessage;
 import app.socketiot.server.exceptions.ExceptionHandler;
+import app.socketiot.server.handlers.SyncHandler;
+import app.socketiot.server.handlers.WriteHandler;
 import app.socketiot.server.handlers.blueprint.AddWidgetsBluePrintHandler;
 import app.socketiot.server.handlers.blueprint.CreateBluePrintHandler;
 import app.socketiot.server.handlers.blueprint.DeleteBluePrintHandler;
@@ -32,6 +34,14 @@ public class AppHandler extends ChannelInboundHandlerAdapter {
         InternalMessage message = (InternalMessage) msg;
 
         switch (message.type) {
+            case MsgType.WRITE:
+                WriteHandler.handleMessage(ctx, user, message);
+                break;
+            case MsgType.SYNC:
+                SyncHandler.handleMessage(ctx, user, message);
+                break;
+            case MsgType.PING:
+                break;
             case MsgType.ADD_DEVICE:
                 AddDeviceHandler.handleMessage(holder, ctx, user, message);
                 break;
