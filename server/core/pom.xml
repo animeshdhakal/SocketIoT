@@ -56,6 +56,10 @@
       <artifactId>acme4j-utils</artifactId>
       <version>${acme4j.version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>jakarta.mail</artifactId>
+      <version>${jakarta.mail.version}</version>
+    </dependency>
   </dependencies>
 </project>

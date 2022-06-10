@@ -24,7 +24,9 @@ public class DBWorker implements Runnable, Closeable {
                 usersList.add(user);
             }
         }
-        holder.userDBDao.saveAllUsers(usersList);
+        if (usersList.size() > 0) {
+            holder.userDBDao.saveAllUsers(usersList);
+        }
         lastRan = now;
     }
 

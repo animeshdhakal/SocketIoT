@@ -1,5 +1,6 @@
 package app.socketiot.server;
 
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import app.socketiot.server.cli.ArgParser;
@@ -9,6 +10,7 @@ import app.socketiot.server.core.dao.DeviceDao;
 import app.socketiot.server.core.dao.UserDao;
 import app.socketiot.server.db.DB;
 import app.socketiot.server.db.dao.UserDBDao;
+import app.socketiot.server.mail.Mail;
 import app.socketiot.utils.JarUtil;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
@@ -45,6 +47,10 @@ public class Holder {
 
     public final SslCtxHolder sslCtxHolder;
 
+    public final BlockingIOHandler blockingIOHandler;
+
+    public final Mail mail;
+
     public final boolean isUnpacked;
 
     public final String jarPath;
@@ -67,15 +73,24 @@ public class Holder {
 
         this.db = new DB(props);
         this.userDBDao = new UserDBDao(db);
-        this.userDao = new UserDao(userDBDao.getAllUsers());
+
+        if (db.isConnected()) {
+            this.userDao = new UserDao(userDBDao.getAllUsers());
+        } else {
+            this.userDao = new UserDao(new ConcurrentHashMap<>());
+        }
+
         this.deviceDao = new DeviceDao(userDao.getAllUsers());
         this.bluePrintDao = new BluePrintDao(userDao.getAllUsers());
         this.sslCtxHolder = new SslCtxHolder(props, argParser.hasArg("-ssl"));
+        this.blockingIOHandler = new BlockingIOHandler(props.getIntProperty("server.blocking.io.threads", 4));
+        this.mail = new Mail(props, blockingIOHandler);
         this.jarPath = JarUtil.getJarPath();
         this.isUnpacked = JarUtil.unpackStaticFiles(jarPath, "static");
     }
 
     public void close() {
+        db.close();
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
     }

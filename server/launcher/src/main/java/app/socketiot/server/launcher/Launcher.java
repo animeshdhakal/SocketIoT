@@ -2,20 +2,13 @@ package app.socketiot.server.launcher;
 
 import java.net.BindException;
 import java.security.Security;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import app.socketiot.server.Holder;
 import app.socketiot.server.cli.ArgParser;
 import app.socketiot.server.cli.properties.ServerProperties;
 import app.socketiot.server.servers.ServerBase;
 import app.socketiot.server.servers.SocketIoTServer;
 import app.socketiot.server.utils.LoggerUtil;
-import app.socketiot.server.workers.CertificateWorker;
-import app.socketiot.server.workers.DBWorker;
 
 public class Launcher {
 
@@ -46,13 +39,7 @@ public class Launcher {
             }
         }
 
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
-        scheduler.scheduleAtFixedRate(new DBWorker(holder), holder.defaults.dbSaveInterval,
-                holder.defaults.dbSaveInterval, TimeUnit.MILLISECONDS);
-        scheduler.scheduleAtFixedRate(new CertificateWorker(holder.sslCtxHolder), 1, 1, TimeUnit.DAYS);
-
-        Runtime.getRuntime().addShutdownHook(new Thread(new ExitLauncher(servers, holder, scheduler)));
+        WorkerLauncher.launch(holder, servers);
 
         System.out.println("Server Started");
     }

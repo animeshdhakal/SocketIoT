@@ -1,5 +1,6 @@
 package app.socketiot.server.db;
 
+import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.Statement;
 import com.zaxxer.hikari.HikariConfig;
@@ -8,7 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import app.socketiot.server.cli.properties.ServerProperties;
 
-public class DB {
+public class DB implements Closeable {
     public static final Logger log = LogManager.getLogger(DB.class);
     private HikariDataSource ds;
 
@@ -54,5 +55,12 @@ public class DB {
 
     public Connection getConnection() throws Exception {
         return ds.getConnection();
+    }
+
+    @Override
+    public void close() {
+        if (isConnected()) {
+            ds.close();
+        }
     }
 }

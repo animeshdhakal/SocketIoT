@@ -26,6 +26,7 @@
     <jackson-databind.version>2.13.3</jackson-databind.version>
     <bouncycastle.version>1.70</bouncycastle.version>
     <acme4j.version>2.13</acme4j.version>
+    <jakarta.mail.version>2.0.1</jakarta.mail.version>
   </properties>
 
   <dependencies>
